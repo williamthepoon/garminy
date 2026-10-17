@@ -57,7 +57,7 @@
 - [x] 8.1 Verify a full-carousel run in the fenix7 simulator with all 8 cards enabled: correct order and rotation, and no errors in the console for 10 minutes
 - [x] 8.2 Verify memory on fenix7 by checking peak memory in the simulator's memory view (stays well below the 768 KB limit while cycling every card)
 - [x] 8.3 Write `README.md` (what it is, card list, settings, build command, sideload via OpenMTP to `GARMIN/APPS`, open from the glance, use a power-only charger); verify the documented build command runs as written
-- [ ] 8.4 Sideload to the real Fenix 7, run it on the desk overnight, and verify the next morning that it is still rotating with a correct clock
+- [x] 8.4 Sideload to the real Fenix 7, run it on the desk overnight, and verify the next morning that it is still rotating with a correct clock (2026-10-17: the user accepted this without the overnight run; it will be checked live after deployment)
 
 ## Workflow follow-up
 

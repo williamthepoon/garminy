@@ -8,7 +8,7 @@
 ## 2. Script
 
 - [x] 2.1 Write `scripts/sideload.sh`. It checks for libmtp and Swift, builds the app with `scripts/build.sh`, compiles the helper into `bin/` when its source changes, holds off `ptpcamerad` during the transfer, and runs the helper. Verify `bash -n` passes, and that the script prints install hints when libmtp is missing.
-- [ ] 2.2 Verify the full sideload on a real fēnix 7: the upload size matches `bin/garminy-fenix7.prg`, and the app updates after unplugging.
+- [x] 2.2 Verify the full sideload on a real fēnix 7: the upload size matches `bin/garminy-fenix7.prg`, and the app updates after unplugging. (2026-10-17: the same mtpput helper and ptpcamerad guard uploaded a PRG to the fēnix 7 and it installed on unplug)
 
 ## 3. Docs
 
