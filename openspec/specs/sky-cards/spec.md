@@ -35,11 +35,15 @@ The Daylight card SHALL handle locations where the sun does not rise or set on t
 - **THEN** the card reads "No sunrise today"
 
 ### Requirement: Unknown location
-When no location has ever been available, the Daylight card SHALL say so instead of guessing.
+The Daylight card SHALL use, in order, the device's last known location, the location of Garmin weather, and the last location sent by the Mac companion. When none of these has ever been available, the card SHALL say so instead of guessing.
 
 #### Scenario: No location fix
-- **WHEN** the device has no last known location and weather data has no location either
-- **THEN** the card reads "Location unknown — sync weather or get a GPS fix"
+- **WHEN** the device has no last known location, Garmin weather has no location, and no companion location was received
+- **THEN** the card reads "Location unknown - get a GPS fix or run the Mac companion"
+
+#### Scenario: Phone-less watch with companion
+- **WHEN** the watch has no GPS fix and no Garmin weather, and the Mac sent its location in Montreal
+- **THEN** the card shows sunrise and sunset for Montreal
 
 ### Requirement: Moon phase
 The Moon phase card SHALL draw the moon's current illuminated shape for the northern-hemisphere view. It SHALL show the phase name, the illumination percentage, and the date of the next full moon. The next full moon SHALL be accurate to within one day.

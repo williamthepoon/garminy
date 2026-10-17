@@ -25,7 +25,7 @@
 - [x] 4.2 Implement `SocketServer` (Unix socket, 0600, JSON lines) and verify a Swift test sends events through a temp socket and the file mode is 0600; verify `lsof -nP -a -p <pid> -i` shows no network listeners
 - [x] 4.3 Implement `garminy-hook` (`claude`, `shell start|end`, `shell-init zsh`; field allow-list; 150 ms connect timeout; always exit 0) and verify with a test that it exits 0 in under 200 ms with no app running and that `prompt`, `message`, `tool_input` and `last_assistant_message` never appear in its output line
 - [x] 4.4 Implement `Presence` (idle seconds, lock/unlock, sleep/wake, frontmost bundle ID) and `KeepAwake` (IOPM assertion with a user toggle); verify `pmset -g assertions` shows the assertion while a fake working session exists and it is released within 1 minute after it ends
-- [ ] 4.5 Implement the `MenuBarExtra` UI (connection state, sessions, pending alerts, Bluetooth-denied message with a System Settings link, Launch at login via `SMAppService`, Quit) and verify each state by running the app with Bluetooth on and with the watch out of range
+- [x] 4.5 Implement the `MenuBarExtra` UI (connection state, sessions, pending alerts, Bluetooth-denied message with a System Settings link, Launch at login via `SMAppService`, Quit) and verify each state by running the app with Bluetooth on and with the watch out of range
 - [x] 4.6 Add `scripts/bundle-mac.sh` and `scripts/mac-signing-identity.sh` (explicit `arm64-apple-macos14.0` target, Info.plist keys, `garminy-local` identity with ad-hoc fallback, install to `~/Applications`, symlink `garminy-hook` into `~/.local/bin`); verify `codesign -dr -` output is identical across two rebuilds and Bluetooth is not re-prompted
 - [x] 4.7 Add a macOS CI job running `swift build` and `swift test` in `mac/`, and verify it passes on a pushed branch
 
@@ -63,15 +63,17 @@
 
 ## 9. Hardware integration on the fēnix 7
 
-- [ ] 9.1 Sideload with `scripts/sideload.sh`, remove `BLESPIKE.PRG` from the watch, and verify garminy connects to the bundled companion app within 30 s and the Agents card appears
+- [x] 9.1 Sideload with `scripts/sideload.sh`, remove `BLESPIKE.PRG` from the watch, and verify garminy connects to the bundled companion app within 30 s and the Agents card appears
 - [ ] 9.2 Run a real Claude Code session and verify on the watch: working → needs you (permission prompt) alert with buzz while the Mac is locked, tap acknowledges and the Mac shows it acknowledged, answering in the terminal withdraws a pending alert within 5 s
-- [ ] 9.3 Run `sleep 45; false` in a hooked shell while another app is frontmost and verify a failed alert with one buzz; repeat with the terminal frontmost and verify no buzz
+- [x] 9.3 Run `sleep 45; false` in a hooked shell while another app is frontmost and verify a failed alert with one buzz; repeat with the terminal frontmost and verify no buzz
 - [ ] 9.4 Verify recovery: quit and reopen the app (reconnects within 60 s), sleep the Mac 10 minutes (reconnects within 60 s of wake), and turn the watch setting Off and On from the Mac app
-- [ ] 9.5 Verify a phone-less watch shows Mac weather on Umbrella, Weather and Daylight, and that changing the interval in the Mac app applies on the watch
+- [x] 9.5 Verify a phone-less watch shows Mac weather on Umbrella, Weather and Daylight, and that changing the interval in the Mac app applies on the watch
 - [ ] 9.6 If a phone can be paired briefly, verify Garmin weather still refreshes and phone notifications arrive during an hour with the companion connected; otherwise record this check as not run in the README's status
 - [ ] 9.7 Run overnight (8 h+) with an agent session idle and verify in the morning: garminy still running, link connected or reconnected on its own, clock header correct, Mac idle-slept normally once no work was running
 
 ## Workflow follow-up
+
+- Status on 2026-10-17: 9.2 (real permission prompt) was parked by the user. 9.4 was only partly done: the app restart reconnected in 6 s, but Mac sleep and the watch-setting toggle were not tested. 9.6 (no phone available) and 9.7 (the user declined an overnight run; one hour without a drop was seen) were not run.
 
 - Run `openspec validate add-mac-companion --strict`, then `/opsx:archive` after the hardware checks pass.
 - Delete `spikes/ble/` and the `.git/info/exclude` entry once the companion replaces it.

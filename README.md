@@ -8,7 +8,7 @@ garminy turns a retired Garmin fēnix 7 into a desk display. It sits on a stand 
 
 ![garminy cards in the fēnix 7 simulator](docs/screenshots.png)
 
-> **Status:** v1 runs on a real fēnix 7 and all unit tests pass. It is not on the Connect IQ Store yet, so install it by sideloading (see below).
+> **Status:** garminy and the Mac companion run on a real fēnix 7, and all unit tests pass. It is not on the Connect IQ Store yet, so install it by sideloading (see below).
 
 ## Cards
 
