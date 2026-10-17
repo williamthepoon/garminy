@@ -42,7 +42,7 @@
 - [x] 6.2 Add the Claude Code plugin (`claude-plugin/.claude-plugin/plugin.json`, `claude-plugin/hooks/hooks.json`, root `.claude-plugin/marketplace.json`; all hooks async) and verify on this Mac that after installing it the existing `cc-status` hook still fires and the companion log shows SessionStart/UserPromptSubmit/Stop for a test session
 - [x] 6.3 Implement `AgentsCard.mc` (up to 3 rows most urgent first, state colour/word, time in state, hidden count, "No agents running", "Mac offline", only after `everConnected`) and the header status dot; verify in a simulator preview build by screenshotting 0, 3 and 6 sessions and the offline state, then remove the preview hook
 - [x] 6.4 Verify privacy end to end: capture every frame the Mac sends during a real session that edits a file and runs a command (debug log of encoded frames) and confirm none contains prompt, message, tool input or file text
-- [ ] 6.5 Document plugin install and uninstall in the README and verify the documented commands work as written
+- [x] 6.5 Document plugin install and uninstall in the README and verify the documented commands work as written
 
 ## 7. Long commands (command-alerts)
 
