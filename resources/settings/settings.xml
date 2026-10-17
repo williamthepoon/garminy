@@ -1,0 +1,192 @@
+<settings>
+    <setting propertyKey="@Properties.cardFortune" title="@Strings.cardFortuneTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    <setting propertyKey="@Properties.cardQuote" title="@Strings.cardQuoteTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    <setting propertyKey="@Properties.cardUmbrella" title="@Strings.cardUmbrellaTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    <setting propertyKey="@Properties.cardWeather" title="@Strings.cardWeatherTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    <setting propertyKey="@Properties.cardDaylight" title="@Strings.cardDaylightTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    <setting propertyKey="@Properties.cardMoon" title="@Strings.cardMoonTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    <setting propertyKey="@Properties.cardWorld" title="@Strings.cardWorldTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    <setting propertyKey="@Properties.cardOnThisDay" title="@Strings.cardOnThisDayTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    <setting propertyKey="@Properties.interval" title="@Strings.intervalTitle">
+        <settingConfig type="list">
+            <listEntry value="5">@Strings.sec5</listEntry>
+            <listEntry value="10">@Strings.sec10</listEntry>
+            <listEntry value="20">@Strings.sec20</listEntry>
+            <listEntry value="30">@Strings.sec30</listEntry>
+            <listEntry value="60">@Strings.sec60</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.city1" title="@Strings.city1Title">
+        <settingConfig type="list">
+            <listEntry value="-1">@Strings.cityNone</listEntry>
+            <listEntry value="0">@Strings.c0</listEntry>
+            <listEntry value="1">@Strings.c1</listEntry>
+            <listEntry value="2">@Strings.c2</listEntry>
+            <listEntry value="3">@Strings.c3</listEntry>
+            <listEntry value="4">@Strings.c4</listEntry>
+            <listEntry value="5">@Strings.c5</listEntry>
+            <listEntry value="6">@Strings.c6</listEntry>
+            <listEntry value="7">@Strings.c7</listEntry>
+            <listEntry value="8">@Strings.c8</listEntry>
+            <listEntry value="9">@Strings.c9</listEntry>
+            <listEntry value="10">@Strings.c10</listEntry>
+            <listEntry value="11">@Strings.c11</listEntry>
+            <listEntry value="12">@Strings.c12</listEntry>
+            <listEntry value="13">@Strings.c13</listEntry>
+            <listEntry value="14">@Strings.c14</listEntry>
+            <listEntry value="15">@Strings.c15</listEntry>
+            <listEntry value="16">@Strings.c16</listEntry>
+            <listEntry value="17">@Strings.c17</listEntry>
+            <listEntry value="18">@Strings.c18</listEntry>
+            <listEntry value="19">@Strings.c19</listEntry>
+            <listEntry value="20">@Strings.c20</listEntry>
+            <listEntry value="21">@Strings.c21</listEntry>
+            <listEntry value="22">@Strings.c22</listEntry>
+            <listEntry value="23">@Strings.c23</listEntry>
+            <listEntry value="24">@Strings.c24</listEntry>
+            <listEntry value="25">@Strings.c25</listEntry>
+            <listEntry value="26">@Strings.c26</listEntry>
+            <listEntry value="27">@Strings.c27</listEntry>
+            <listEntry value="28">@Strings.c28</listEntry>
+            <listEntry value="29">@Strings.c29</listEntry>
+            <listEntry value="30">@Strings.c30</listEntry>
+            <listEntry value="31">@Strings.c31</listEntry>
+            <listEntry value="32">@Strings.c32</listEntry>
+            <listEntry value="33">@Strings.c33</listEntry>
+            <listEntry value="34">@Strings.c34</listEntry>
+            <listEntry value="35">@Strings.c35</listEntry>
+            <listEntry value="36">@Strings.c36</listEntry>
+            <listEntry value="37">@Strings.c37</listEntry>
+            <listEntry value="38">@Strings.c38</listEntry>
+            <listEntry value="39">@Strings.c39</listEntry>
+            <listEntry value="40">@Strings.c40</listEntry>
+            <listEntry value="41">@Strings.c41</listEntry>
+            <listEntry value="42">@Strings.c42</listEntry>
+            <listEntry value="43">@Strings.c43</listEntry>
+            <listEntry value="44">@Strings.c44</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.city2" title="@Strings.city2Title">
+        <settingConfig type="list">
+            <listEntry value="-1">@Strings.cityNone</listEntry>
+            <listEntry value="0">@Strings.c0</listEntry>
+            <listEntry value="1">@Strings.c1</listEntry>
+            <listEntry value="2">@Strings.c2</listEntry>
+            <listEntry value="3">@Strings.c3</listEntry>
+            <listEntry value="4">@Strings.c4</listEntry>
+            <listEntry value="5">@Strings.c5</listEntry>
+            <listEntry value="6">@Strings.c6</listEntry>
+            <listEntry value="7">@Strings.c7</listEntry>
+            <listEntry value="8">@Strings.c8</listEntry>
+            <listEntry value="9">@Strings.c9</listEntry>
+            <listEntry value="10">@Strings.c10</listEntry>
+            <listEntry value="11">@Strings.c11</listEntry>
+            <listEntry value="12">@Strings.c12</listEntry>
+            <listEntry value="13">@Strings.c13</listEntry>
+            <listEntry value="14">@Strings.c14</listEntry>
+            <listEntry value="15">@Strings.c15</listEntry>
+            <listEntry value="16">@Strings.c16</listEntry>
+            <listEntry value="17">@Strings.c17</listEntry>
+            <listEntry value="18">@Strings.c18</listEntry>
+            <listEntry value="19">@Strings.c19</listEntry>
+            <listEntry value="20">@Strings.c20</listEntry>
+            <listEntry value="21">@Strings.c21</listEntry>
+            <listEntry value="22">@Strings.c22</listEntry>
+            <listEntry value="23">@Strings.c23</listEntry>
+            <listEntry value="24">@Strings.c24</listEntry>
+            <listEntry value="25">@Strings.c25</listEntry>
+            <listEntry value="26">@Strings.c26</listEntry>
+            <listEntry value="27">@Strings.c27</listEntry>
+            <listEntry value="28">@Strings.c28</listEntry>
+            <listEntry value="29">@Strings.c29</listEntry>
+            <listEntry value="30">@Strings.c30</listEntry>
+            <listEntry value="31">@Strings.c31</listEntry>
+            <listEntry value="32">@Strings.c32</listEntry>
+            <listEntry value="33">@Strings.c33</listEntry>
+            <listEntry value="34">@Strings.c34</listEntry>
+            <listEntry value="35">@Strings.c35</listEntry>
+            <listEntry value="36">@Strings.c36</listEntry>
+            <listEntry value="37">@Strings.c37</listEntry>
+            <listEntry value="38">@Strings.c38</listEntry>
+            <listEntry value="39">@Strings.c39</listEntry>
+            <listEntry value="40">@Strings.c40</listEntry>
+            <listEntry value="41">@Strings.c41</listEntry>
+            <listEntry value="42">@Strings.c42</listEntry>
+            <listEntry value="43">@Strings.c43</listEntry>
+            <listEntry value="44">@Strings.c44</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.city3" title="@Strings.city3Title">
+        <settingConfig type="list">
+            <listEntry value="-1">@Strings.cityNone</listEntry>
+            <listEntry value="0">@Strings.c0</listEntry>
+            <listEntry value="1">@Strings.c1</listEntry>
+            <listEntry value="2">@Strings.c2</listEntry>
+            <listEntry value="3">@Strings.c3</listEntry>
+            <listEntry value="4">@Strings.c4</listEntry>
+            <listEntry value="5">@Strings.c5</listEntry>
+            <listEntry value="6">@Strings.c6</listEntry>
+            <listEntry value="7">@Strings.c7</listEntry>
+            <listEntry value="8">@Strings.c8</listEntry>
+            <listEntry value="9">@Strings.c9</listEntry>
+            <listEntry value="10">@Strings.c10</listEntry>
+            <listEntry value="11">@Strings.c11</listEntry>
+            <listEntry value="12">@Strings.c12</listEntry>
+            <listEntry value="13">@Strings.c13</listEntry>
+            <listEntry value="14">@Strings.c14</listEntry>
+            <listEntry value="15">@Strings.c15</listEntry>
+            <listEntry value="16">@Strings.c16</listEntry>
+            <listEntry value="17">@Strings.c17</listEntry>
+            <listEntry value="18">@Strings.c18</listEntry>
+            <listEntry value="19">@Strings.c19</listEntry>
+            <listEntry value="20">@Strings.c20</listEntry>
+            <listEntry value="21">@Strings.c21</listEntry>
+            <listEntry value="22">@Strings.c22</listEntry>
+            <listEntry value="23">@Strings.c23</listEntry>
+            <listEntry value="24">@Strings.c24</listEntry>
+            <listEntry value="25">@Strings.c25</listEntry>
+            <listEntry value="26">@Strings.c26</listEntry>
+            <listEntry value="27">@Strings.c27</listEntry>
+            <listEntry value="28">@Strings.c28</listEntry>
+            <listEntry value="29">@Strings.c29</listEntry>
+            <listEntry value="30">@Strings.c30</listEntry>
+            <listEntry value="31">@Strings.c31</listEntry>
+            <listEntry value="32">@Strings.c32</listEntry>
+            <listEntry value="33">@Strings.c33</listEntry>
+            <listEntry value="34">@Strings.c34</listEntry>
+            <listEntry value="35">@Strings.c35</listEntry>
+            <listEntry value="36">@Strings.c36</listEntry>
+            <listEntry value="37">@Strings.c37</listEntry>
+            <listEntry value="38">@Strings.c38</listEntry>
+            <listEntry value="39">@Strings.c39</listEntry>
+            <listEntry value="40">@Strings.c40</listEntry>
+            <listEntry value="41">@Strings.c41</listEntry>
+            <listEntry value="42">@Strings.c42</listEntry>
+            <listEntry value="43">@Strings.c43</listEntry>
+            <listEntry value="44">@Strings.c44</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.units" title="@Strings.unitsTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.unitsDevice</listEntry>
+            <listEntry value="1">@Strings.unitsC</listEntry>
+            <listEntry value="2">@Strings.unitsF</listEntry>
+        </settingConfig>
+    </setting>
+</settings>

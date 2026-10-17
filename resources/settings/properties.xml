@@ -1,0 +1,15 @@
+<properties>
+    <property id="cardFortune" type="boolean">true</property>
+    <property id="cardQuote" type="boolean">true</property>
+    <property id="cardUmbrella" type="boolean">true</property>
+    <property id="cardWeather" type="boolean">true</property>
+    <property id="cardDaylight" type="boolean">true</property>
+    <property id="cardMoon" type="boolean">true</property>
+    <property id="cardWorld" type="boolean">true</property>
+    <property id="cardOnThisDay" type="boolean">true</property>
+    <property id="interval" type="number">10</property>
+    <property id="city1" type="number">0</property>
+    <property id="city2" type="number">33</property>
+    <property id="city3" type="number">9</property>
+    <property id="units" type="number">0</property>
+</properties>

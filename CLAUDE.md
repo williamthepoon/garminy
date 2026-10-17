@@ -1,0 +1,42 @@
+# garminy
+
+Open-source Garmin Connect IQ app **garminy** that turns a retired watch into a 24/7 desk display. It rotates full-screen info cards. The primary test device is a Fenix 7 47mm with a broken START button, sitting on a stand and never worn. The app must work for anyone with a fēnix 7: no personal data, no API keys, no hosted backend. **Only `fenix7` is supported**, by the user's decision on 2026-10-17; don't add devices unless asked.
+
+## Spec-driven development: OpenSpec (required)
+
+All feature work goes through [OpenSpec](https://openspec.dev/) (CLI `@fission-ai/openspec`, v1.14.x, schema `spec-driven`). Don't write feature code without an approved change.
+
+- `openspec/specs/<capability>/spec.md` is the source of truth for current behaviour.
+- `openspec/changes/<change-name>/` holds in-flight work: `proposal.md` (why/what), `specs/` (delta specs), `design.md` (how), `tasks.md` (checklist).
+- `openspec/changes/archive/` holds completed changes.
+- `openspec/config.yaml` holds the project context and rules that every artifact must follow.
+
+Workflow, using the slash commands in `.claude/commands/opsx/` and the skills in `.claude/skills/openspec-*`:
+1. `/opsx:explore`: investigate before committing to a change (optional).
+2. `/opsx:propose "<idea>"`: create the change and all artifacts. Planning only; stop for user review.
+3. `/opsx:apply`: implement `tasks.md`, ticking tasks off as they are done. Only start after the user asks.
+4. `/opsx:archive`: once the work is verified, archive the change and merge its deltas into `openspec/specs/`.
+
+Rules:
+- Every requirement needs at least one `#### Scenario:` with WHEN/THEN.
+- Run `openspec validate <change> --strict` before presenting a proposal and before archiving.
+- If behaviour changes during implementation, update the change's spec deltas and tasks first, then the code.
+- Useful commands: `openspec list`, `openspec list --specs`, `openspec show <item>`, `openspec status --change <name>`.
+
+## Platform constraints (verified during research)
+
+- Connect IQ, Monkey C, Fenix 7 = API 5.2. The display is 260x260 round MIP with 64 colours, and the backlight is off by default.
+- **START (KEY_ENTER) cannot be relied on.** Inputs are touch (tap/swipe), UP, DOWN, BACK. LIGHT belongs to the system.
+- Ship as a device app with a glance. Users open it via the glance; widgets time out, device apps don't.
+- Weather comes from `Toybox.Weather` (via the phone's Garmin Connect). Avoid `makeWebRequest` unless a spec requires it.
+- Bundled content (fortunes, quotes, on-this-day) lives in resources. Keep it within device-app memory limits; the background service limit is about 64 KB.
+- Layouts scale from `dc` size (see `source/Layout.mc`). The only build target is `fenix7`.
+
+## Build and install
+
+Toolchain (installed 2026-10-17): Homebrew `openjdk@21` and Connect IQ SDK 9.2.0 in `~/Library/Application Support/Garmin/ConnectIQ/Sdks/` (the active SDK is set in `current-sdk.cfg`). Both are on PATH via `~/.zshrc`. Device definitions (e.g. `fenix7`) come from `/Applications/SdkManager.app` and need a Garmin login. The developer key is at `~/.garmin/developer_key.der`, outside the repo.
+
+- Build: `scripts/build.sh`. This regenerates `resources/jsonData/` from `content/*.json`, so edit content in `content/`, never in the generated files.
+- Unit tests: `scripts/test.sh`. It launches the simulator if needed. Tests are `(:test)` functions in `tests/`; put helpers inside the `(:test) module T`, because top-level `(:test)` functions run as tests.
+
+To sideload: build a `.prg` for `fenix7` with the developer key, copy it to `GARMIN/APPS` using OpenMTP, and use a power-only charger when running it on a desk. Never commit the developer key.

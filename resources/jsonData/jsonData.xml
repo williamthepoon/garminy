@@ -1,0 +1,20 @@
+<jsonDataResources>
+    <jsonData id="fortunes0" filename="fortunes0.json" />
+    <jsonData id="fortunes1" filename="fortunes1.json" />
+    <jsonData id="fortunes2" filename="fortunes2.json" />
+    <jsonData id="quotes0" filename="quotes0.json" />
+    <jsonData id="quotes1" filename="quotes1.json" />
+    <jsonData id="quotes2" filename="quotes2.json" />
+    <jsonData id="otd01" filename="otd01.json" />
+    <jsonData id="otd02" filename="otd02.json" />
+    <jsonData id="otd03" filename="otd03.json" />
+    <jsonData id="otd04" filename="otd04.json" />
+    <jsonData id="otd05" filename="otd05.json" />
+    <jsonData id="otd06" filename="otd06.json" />
+    <jsonData id="otd07" filename="otd07.json" />
+    <jsonData id="otd08" filename="otd08.json" />
+    <jsonData id="otd09" filename="otd09.json" />
+    <jsonData id="otd10" filename="otd10.json" />
+    <jsonData id="otd11" filename="otd11.json" />
+    <jsonData id="otd12" filename="otd12.json" />
+</jsonDataResources>

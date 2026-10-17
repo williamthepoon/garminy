@@ -1,0 +1,268 @@
+import Toybox.Graphics;
+import Toybox.Lang;
+import Toybox.System;
+import Toybox.Time;
+import Toybox.Time.Gregorian;
+import Toybox.Timer;
+import Toybox.WatchUi;
+
+// Owns the enabled cards, rotation, pinning and the guarded exit.
+// A single 1 s timer drives everything; the screen is redrawn only when
+// something visible changes.
+class CarouselView extends WatchUi.View {
+    const HOLD_TO_EXIT_MS = 1000;
+    const HINT_MS = 2000;
+
+    var _cards as Array<Card> = [] as Array<Card>;
+    var _idx as Number = 0;
+    var _elapsed as Number = 0;      // seconds the current card has been shown
+    var _interval as Number = 10;
+    var _pinned as Boolean = false;
+    var _timer as Timer.Timer?;
+    var _lastMinute as Number = -1;
+    var _hintUntil as Number = 0;
+    var _escDownAt as Number? = null;
+    var _layout as Layout?;
+
+    function initialize() {
+        View.initialize();
+        reload();
+    }
+
+    // Rebuild from settings, keeping the current card if it is still enabled.
+    function reload() as Void {
+        var currentId = _cards.size() > 0 ? _cards[_idx].id() : null;
+        var ids = Settings.enabledIds();
+        var cards = [] as Array<Card>;
+        var newIdx = 0;
+        for (var i = 0; i < ids.size(); i++) {
+            var c = makeCard(ids[i]);
+            if (c != null) {
+                if (currentId != null && ids[i].equals(currentId)) {
+                    newIdx = cards.size();
+                }
+                cards.add(c);
+            }
+        }
+        _cards = cards;
+        _idx = newIdx;
+        _interval = Settings.interval();
+        _elapsed = 0;
+        _pinned = false;
+        refreshCurrent();
+        WatchUi.requestUpdate();
+    }
+
+    function onShow() as Void {
+        if (_timer == null) {
+            _timer = new Timer.Timer();
+        }
+        (_timer as Timer.Timer).start(method(:onTick), 1000, true);
+        refreshCurrent();
+    }
+
+    function onHide() as Void {
+        if (_timer != null) {
+            (_timer as Timer.Timer).stop();
+        }
+    }
+
+    function onTick() as Void {
+        var dirty = false;
+
+        if (_escDownAt != null && System.getTimer() - (_escDownAt as Number) >= HOLD_TO_EXIT_MS) {
+            System.exit();
+        }
+
+        if (_hintUntil != 0 && System.getTimer() >= _hintUntil) {
+            _hintUntil = 0;
+            dirty = true;
+        }
+
+        var minute = System.getClockTime().min;
+        if (minute != _lastMinute) {
+            _lastMinute = minute;
+            refreshCurrent();
+            dirty = true;
+        }
+
+        if (!_pinned && _cards.size() > 1) {
+            _elapsed += 1;
+            if (_elapsed >= _interval) {
+                show(_idx + 1);
+                return;
+            }
+        }
+
+        if (dirty) {
+            WatchUi.requestUpdate();
+        }
+    }
+
+    function show(idx as Number) as Void {
+        var n = _cards.size();
+        if (n == 0) {
+            return;
+        }
+        _idx = ((idx % n) + n) % n;
+        _elapsed = 0;
+        refreshCurrent();
+        WatchUi.requestUpdate();
+    }
+
+    function next() as Void {
+        _pinned = false;
+        show(_idx + 1);
+    }
+
+    function prev() as Void {
+        _pinned = false;
+        show(_idx - 1);
+    }
+
+    function togglePin() as Void {
+        if (_cards.size() == 0) {
+            return;
+        }
+        _pinned = !_pinned;
+        _elapsed = 0;
+        WatchUi.requestUpdate();
+    }
+
+    function escDown() as Void {
+        _escDownAt = System.getTimer();
+    }
+
+    function escUp() as Void {
+        var down = _escDownAt;
+        _escDownAt = null;
+        if (down != null && System.getTimer() - down >= HOLD_TO_EXIT_MS) {
+            System.exit();
+        }
+        _hintUntil = System.getTimer() + HINT_MS;
+        WatchUi.requestUpdate();
+    }
+
+    function refreshCurrent() as Void {
+        if (_cards.size() > 0) {
+            _cards[_idx].refresh();
+        }
+    }
+
+    function onUpdate(dc as Graphics.Dc) as Void {
+        if (_layout == null) {
+            _layout = new Layout(dc.getWidth(), dc.getHeight());
+        }
+        var l = _layout as Layout;
+        dc.setColor(Ui.FG, Ui.BG);
+        dc.clear();
+
+        drawHeader(dc, l);
+
+        if (_cards.size() == 0) {
+            drawMessage(dc, l, "Enable cards in Garmin Connect");
+        } else {
+            _cards[_idx].draw(dc, l);
+            drawDots(dc, l);
+        }
+
+        if (_hintUntil != 0) {
+            drawHint(dc, l);
+        }
+    }
+
+    function drawHeader(dc as Graphics.Dc, l as Layout) as Void {
+        var t = System.getClockTime();
+        var text = Ui.formatHm(t.hour, t.min);
+        dc.setColor(Ui.FG, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(l.cx, l.headerY, Graphics.FONT_SMALL, text,
+            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        if (_pinned) {
+            var tw = dc.getTextWidthInPixels(text, Graphics.FONT_SMALL);
+            dc.setColor(Ui.ACCENT, Graphics.COLOR_TRANSPARENT);
+            dc.fillCircle(l.cx + tw / 2 + 10, l.headerY, 4);
+        }
+    }
+
+    // One dot per card; the current card's dot is filled.
+    function drawDots(dc as Graphics.Dc, l as Layout) as Void {
+        var n = _cards.size();
+        if (n < 2) {
+            return;
+        }
+        var gap = 10;
+        var x0 = l.cx - (n - 1) * gap / 2;
+        for (var i = 0; i < n; i++) {
+            if (i == _idx) {
+                dc.setColor(_pinned ? Ui.ACCENT : Ui.FG, Graphics.COLOR_TRANSPARENT);
+                dc.fillCircle(x0 + i * gap, l.dotsY, 3);
+            } else {
+                dc.setColor(Ui.FAINT, Graphics.COLOR_TRANSPARENT);
+                dc.fillCircle(x0 + i * gap, l.dotsY, 2);
+            }
+        }
+    }
+
+    function drawHint(dc as Graphics.Dc, l as Layout) as Void {
+        var bh = 30;
+        var y = l.cy - bh / 2;
+        dc.setColor(Ui.FAINT, Graphics.COLOR_TRANSPARENT);
+        dc.fillRoundedRectangle(l.boxX, y, l.boxW, bh, 8);
+        dc.setColor(Ui.FG, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(l.cx, l.cy, Graphics.FONT_XTINY, "Hold BACK to exit",
+            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+    }
+}
+
+class CarouselDelegate extends WatchUi.BehaviorDelegate {
+    var _view as CarouselView;
+
+    function initialize(view as CarouselView) {
+        BehaviorDelegate.initialize();
+        _view = view;
+    }
+
+    // DOWN button or swipe up.
+    function onNextPage() as Boolean {
+        _view.next();
+        return true;
+    }
+
+    // UP button or swipe down.
+    function onPreviousPage() as Boolean {
+        _view.prev();
+        return true;
+    }
+
+    function onTap(evt as WatchUi.ClickEvent) as Boolean {
+        _view.togglePin();
+        return true;
+    }
+
+    // START on devices where it works; harmless when it doesn't.
+    function onSelect() as Boolean {
+        _view.togglePin();
+        return true;
+    }
+
+    // Swallow the default exit; exiting is handled by holding BACK.
+    function onBack() as Boolean {
+        return true;
+    }
+
+    function onKeyPressed(evt as WatchUi.KeyEvent) as Boolean {
+        if (evt.getKey() == WatchUi.KEY_ESC) {
+            _view.escDown();
+            return true;
+        }
+        return false;
+    }
+
+    function onKeyReleased(evt as WatchUi.KeyEvent) as Boolean {
+        if (evt.getKey() == WatchUi.KEY_ESC) {
+            _view.escUp();
+            return true;
+        }
+        return false;
+    }
+}

@@ -1,0 +1,46 @@
+schema: spec-driven
+
+context: |
+  Garmin Connect IQ device app (Monkey C) that rotates full-screen info cards on a retired watch used as a desk display.
+  Open source (MIT) and published to the Connect IQ Store: no personal data, no API keys, no hosted backend.
+  Do not depend on the START button. Inputs are touch, UP, DOWN and BACK only.
+  Target device: fenix7 only (260x260 round MIP, 64 colours, API 5.2). Do not add other devices unless the user asks.
+
+rules:
+  proposal:
+    - State what is out of scope
+  specs:
+    - Every requirement has at least one WHEN/THEN scenario
+  tasks:
+    - Include a simulator verification task for each card
+
+# Project context (optional)
+# Add only constraints that should guide OpenSpec artifacts and workflows.
+# Include constraints an agent cannot infer by reading the code.
+# Keep general project documentation and discoverable codebase facts out.
+# Example:
+#   context: |
+#     Designs and tasks must cover Windows, macOS, and Linux
+#     Write all artifacts in Spanish
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
