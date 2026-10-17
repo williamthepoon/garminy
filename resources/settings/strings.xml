@@ -71,4 +71,6 @@
     <string id="c42">Auckland</string>
     <string id="c43">Honolulu</string>
     <string id="c44">Anchorage</string>
+    <string id="companionTitle">Mac companion</string>
+    <string id="cardAgentsTitle">Agents (needs the Mac companion)</string>
 </strings>

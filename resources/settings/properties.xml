@@ -1,4 +1,5 @@
 <properties>
+    <property id="cardAgents" type="boolean">true</property>
     <property id="cardFortune" type="boolean">true</property>
     <property id="cardQuote" type="boolean">true</property>
     <property id="cardUmbrella" type="boolean">true</property>
@@ -13,4 +14,5 @@
     <property id="city3" type="number">9</property>
     <property id="units" type="number">0</property>
     <property id="backlight" type="number">0</property>
+    <property id="companion" type="boolean">true</property>
 </properties>

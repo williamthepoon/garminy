@@ -40,6 +40,10 @@ module Umbrella {
     // [verdict, chance, peakTime or -1], or null when there is no weather data.
     function read() as Array<Number>? {
         var now = Time.now().value();
+        var w = WeatherSource.mac();
+        if (w != null) {
+            return fromMac(w, now);
+        }
         var hourly = Weather.getHourlyForecast();
         if (hourly != null) {
             var times = [] as Array<Number>;
@@ -62,5 +66,19 @@ module Umbrella {
             return [verdict(c), c, -1];
         }
         return null;
+    }
+
+    // Hourly chances from the Mac start at "base" and are one hour apart; 255 = unknown.
+    function fromMac(w as Dictionary, now as Number) as Array<Number>? {
+        var base = w["base"] as Number;
+        var raw = w["chances"] as Array;
+        var times = [] as Array<Number>;
+        var chances = [] as Array<Number?>;
+        for (var i = 0; i < raw.size(); i++) {
+            times.add(base + i * 3600);
+            chances.add(raw[i] == 255 ? null : raw[i] as Number?);
+        }
+        var p = peak(times, chances, now);
+        return p == null ? null : [verdict(p[0]), p[0], p[1]];
     }
 }

@@ -25,3 +25,12 @@ jobs:
           node-version: "22"
       - name: Validate OpenSpec specs and changes
         run: npx --yes @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive
+
+  mac-companion:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: swift build --package-path mac
+      - name: Test
+        run: swift test --package-path mac

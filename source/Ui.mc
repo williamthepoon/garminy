@@ -13,6 +13,8 @@ module Ui {
     const ACCENT = 0xFFAA00;
     const BLUE = 0x55AAFF;
     const YELLOW = 0xFFFF55;
+    const GREEN = 0x55FF55;
+    const RED = 0xFF5555;
 
     const TEXT_FONTS = [Graphics.FONT_MEDIUM, Graphics.FONT_SMALL, Graphics.FONT_TINY, Graphics.FONT_XTINY];
 

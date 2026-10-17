@@ -1,0 +1,63 @@
+import GarminyCore
+import SwiftUI
+
+/// Every garminy watch setting, plus where the weather comes from. Changes go to the watch over Bluetooth.
+struct SettingsView: View {
+    @ObservedObject var model: AppModel
+    @ObservedObject var weather: WeatherService
+
+    var body: some View {
+        Form {
+            Section("Weather for the watch") {
+                Text("Uses this Mac's location.")
+                Text(weather.status).font(.caption).foregroundStyle(.secondary)
+                if weather.locationUndecided {
+                    Button("Allow location") { weather.requestAccess() }
+                }
+                if weather.locationDenied {
+                    Button("Open Location Services settings") { weather.openLocationSettings() }
+                }
+            }
+
+            Section("Cards") {
+                ForEach(SettingsModel.cardNames.indices, id: \.self) { i in
+                    Toggle(SettingsModel.cardNames[i], isOn: Binding(get: { model.settings.card(i) },
+                                                                    set: { model.setCard(i, $0) }))
+                }
+            }
+
+            Section("Watch") {
+                Picker("Seconds per card", selection: Binding(get: { model.settings.value.interval },
+                                                              set: { v in model.editSettings { $0.interval = v } })) {
+                    ForEach(SettingsModel.intervals, id: \.self) { Text("\($0)").tag($0) }
+                }
+                ForEach(0..<3, id: \.self) { slot in
+                    Picker("World clock city \(slot + 1)", selection: Binding(
+                        get: { Int(model.settings.value.cities[slot]) },
+                        set: { v in model.editSettings { $0.cities[slot] = Int8(v) } })) {
+                        Text("None").tag(-1)
+                        ForEach(SettingsModel.cities.indices, id: \.self) { Text(SettingsModel.cities[$0]).tag($0) }
+                    }
+                }
+                Picker("Temperature units", selection: Binding(get: { model.settings.value.units },
+                                                               set: { v in model.editSettings { $0.units = v } })) {
+                    Text("Follow device").tag(UInt8(0)); Text("°C").tag(UInt8(1)); Text("°F").tag(UInt8(2))
+                }
+                Picker("Backlight", selection: Binding(get: { model.settings.value.backlight },
+                                                       set: { v in model.editSettings { $0.backlight = v } })) {
+                    Text("Off").tag(UInt8(0)); Text("Low").tag(UInt8(1)); Text("Medium").tag(UInt8(2)); Text("High").tag(UInt8(3))
+                }
+                Toggle("Mac companion on the watch", isOn: Binding(get: { model.settings.value.companion },
+                                                                  set: { v in model.editSettings { $0.companion = v } }))
+            }
+
+            Section("About") {
+                Text("garminy Companion \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "") · MIT licence")
+                Link("Weather data by Open-Meteo.com (CC BY 4.0)", destination: URL(string: "https://open-meteo.com/")!)
+                Text("Changes reach the watch over Bluetooth the next time it connects.").font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .formStyle(.grouped)
+        .frame(width: 420, height: 640)
+    }
+}

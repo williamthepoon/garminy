@@ -1,0 +1,11 @@
+{
+  "name": "garminy",
+  "displayName": "garminy desk watch",
+  "version": "1.0.0",
+  "description": "Shows Claude Code session status on a fēnix 7 desk display through the garminy Mac companion. Sends only session IDs, folder names, event names and tool names to the local companion.",
+  "author": { "name": "Will Poon" },
+  "homepage": "https://github.com/williamthepoon/garminy",
+  "repository": "https://github.com/williamthepoon/garminy",
+  "license": "MIT",
+  "keywords": ["garmin", "status", "notifications"]
+}
