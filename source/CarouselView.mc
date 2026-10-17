@@ -25,9 +25,14 @@ class CarouselView extends WatchUi.View {
     var _escDownAt as Number? = null;
     var _layout as Layout?;
     var _backlight as Float = 0.0;
+    var _companion as Companion;
+    var _link as Link;
 
-    function initialize() {
+    function initialize(companion as Companion, link as Link) {
         View.initialize();
+        _companion = companion;
+        _link = link;
+        _companion.onSettings = method(:applyRemoteSettings);
         reload();
     }
 
@@ -38,7 +43,7 @@ class CarouselView extends WatchUi.View {
         var cards = [] as Array<Card>;
         var newIdx = 0;
         for (var i = 0; i < ids.size(); i++) {
-            var c = makeCard(ids[i]);
+            var c = ids[i].equals("agents") ? showAgents() ? new AgentsCard(_companion) : null : makeCard(ids[i]);
             if (c != null) {
                 if (currentId != null && ids[i].equals(currentId)) {
                     newIdx = cards.size();
@@ -56,8 +61,32 @@ class CarouselView extends WatchUi.View {
         _backlight = level;
         _elapsed = 0;
         _pinned = false;
+        if (Settings.companion()) {
+            _link.start();
+        } else if (_link.state != Link.OFF) {
+            _link.stop();
+        }
         refreshCurrent();
         WatchUi.requestUpdate();
+    }
+
+    // SETTINGS from the Mac: save if newer, then rebuild.
+    function applyRemoteSettings(d as Dictionary) as Void {
+        if (Settings.applyRemote(d)) {
+            reload();
+        }
+    }
+
+    // A change from Garmin Connect: stamp it and tell the Mac.
+    function settingsChangedLocally() as Void {
+        Settings.markChanged(_companion.macOffset);
+        reload();
+        _companion.sendSettings();
+    }
+
+    // The Agents card appears once a Mac companion has connected at least once.
+    function showAgents() as Boolean {
+        return Settings.companion() && _companion.everConnected;
     }
 
     function onShow() as Void {
@@ -76,6 +105,12 @@ class CarouselView extends WatchUi.View {
 
     function onTick() as Void {
         var dirty = false;
+        _link.tick();
+        if (showAgents() && Settings.agentsEnabled() && (_cards.size() == 0 || !_cards[0].id().equals("agents"))) {
+            reload();
+            return;
+        }
+        var alerting = _companion.current() != null;
 
         if (_escDownAt != null && System.getTimer() - (_escDownAt as Number) >= HOLD_TO_EXIT_MS) {
             System.exit();
@@ -98,7 +133,7 @@ class CarouselView extends WatchUi.View {
             dirty = true;
         }
 
-        if (!_pinned && _cards.size() > 1) {
+        if (!_pinned && !alerting && _cards.size() > 1) {
             _elapsed += 1;
             if (_elapsed >= _interval) {
                 show(_idx + 1);
@@ -141,6 +176,16 @@ class CarouselView extends WatchUi.View {
     function prev() as Void {
         _pinned = false;
         show(_idx - 1);
+    }
+
+    // Tap: acknowledge a showing alert, otherwise pin or unpin.
+    function tap() as Void {
+        if (_companion.current() != null) {
+            _companion.acknowledge();
+            _elapsed = 0;
+            return;
+        }
+        togglePin();
     }
 
     function togglePin() as Void {
@@ -189,6 +234,8 @@ class CarouselView extends WatchUi.View {
             drawDots(dc, l);
         }
 
+        AlertOverlay.draw(dc, l, _companion);
+
         if (_hintUntil != 0) {
             drawHint(dc, l);
         }
@@ -200,11 +247,28 @@ class CarouselView extends WatchUi.View {
         dc.setColor(Ui.FG, Graphics.COLOR_TRANSPARENT);
         dc.drawText(l.cx, l.headerY, Graphics.FONT_SMALL, text,
             Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        var tw = dc.getTextWidthInPixels(text, Graphics.FONT_SMALL);
         if (_pinned) {
-            var tw = dc.getTextWidthInPixels(text, Graphics.FONT_SMALL);
             dc.setColor(Ui.ACCENT, Graphics.COLOR_TRANSPARENT);
             dc.fillCircle(l.cx + tw / 2 + 10, l.headerY, 4);
         }
+        var dot = statusDotColor();
+        if (dot != null) {
+            dc.setColor(dot, Graphics.COLOR_TRANSPARENT);
+            dc.fillCircle(l.cx - tw / 2 - 10, l.headerY, 4);
+        }
+    }
+
+    // Companion status: grey while the link is down, else the most urgent session's colour.
+    function statusDotColor() as Number? {
+        if (!Settings.companion() || !_companion.everConnected) {
+            return null;
+        }
+        if (!_companion.connected) {
+            return Ui.FAINT;
+        }
+        var s = _companion.topState();
+        return s == null ? null : Look.stateColor(s);
     }
 
     // One dot per card; the current card's dot is filled.
@@ -258,13 +322,13 @@ class CarouselDelegate extends WatchUi.BehaviorDelegate {
     }
 
     function onTap(evt as WatchUi.ClickEvent) as Boolean {
-        _view.togglePin();
+        _view.tap();
         return true;
     }
 
     // START on devices where it works; harmless when it doesn't.
     function onSelect() as Boolean {
-        _view.togglePin();
+        _view.tap();
         return true;
     }
 

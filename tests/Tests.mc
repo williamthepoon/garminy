@@ -353,6 +353,13 @@ function testAllBundledTextFitsTheScreen(logger as Test.Logger) as Boolean {
 
 (:test)
 module TS {
+    // A carousel with the companion link switched off, so tests never touch Bluetooth.
+    function view() as CarouselView {
+        Application.Properties.setValue("companion", false);
+        var c = new Companion();
+        return new CarouselView(c, new Link(c));
+    }
+
     function setAll(on as Boolean) as Void {
         for (var i = 0; i < Settings.CARD_KEYS.size(); i++) {
             Application.Properties.setValue(Settings.CARD_KEYS[i], on);
@@ -381,7 +388,7 @@ module TS {
 (:test)
 function testCarouselDefaultOrderAndInterval(logger as Test.Logger) as Boolean {
     TS.reset();
-    var v = new CarouselView();
+    var v = TS.view();
     var ok = T.check(logger, "fixed order: " + TS.ids(v),
         TS.ids(v).equals("fortune,quote,umbrella,weather,daylight,moon,world,onthisday"));
     ok = T.check(logger, "default interval 10", v._interval == 10) && ok;
@@ -392,7 +399,7 @@ function testCarouselDefaultOrderAndInterval(logger as Test.Logger) as Boolean {
 (:test)
 function testCarouselRotationNavigationAndPin(logger as Test.Logger) as Boolean {
     TS.reset();
-    var v = new CarouselView();
+    var v = TS.view();
     for (var i = 0; i < 10; i++) {
         v.onTick();
     }
@@ -418,7 +425,7 @@ function testCarouselRotationNavigationAndPin(logger as Test.Logger) as Boolean 
 (:test)
 function testSettingsLiveReload(logger as Test.Logger) as Boolean {
     TS.reset();
-    var v = new CarouselView();
+    var v = TS.view();
     v.show(6);  // world clock
     Application.Properties.setValue("cardMoon", false);
     Application.Properties.setValue("interval", 30);
@@ -438,7 +445,7 @@ function testSettingsLiveReload(logger as Test.Logger) as Boolean {
 function testAllCardsDisabledIsEmpty(logger as Test.Logger) as Boolean {
     TS.reset();
     TS.setAll(false);
-    var v = new CarouselView();
+    var v = TS.view();
     var ok = T.check(logger, "no cards", v._cards.size() == 0);
     v.onTick();
     v.next();
@@ -507,7 +514,7 @@ function testBacklightSetting(logger as Test.Logger) as Boolean {
     Application.Properties.setValue("backlight", 9);
     ok = T.check(logger, "out of range is off", Settings.backlightLevel() == 0.0) && ok;
     Application.Properties.setValue("backlight", 2);
-    var v = new CarouselView();
+    var v = TS.view();
     ok = T.check(logger, "view holds medium", v._backlight == 0.6) && ok;
     v.onTick();
     Application.Properties.setValue("backlight", 0);

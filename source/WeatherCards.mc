@@ -4,7 +4,7 @@ import Toybox.Time;
 import Toybox.Time.Gregorian;
 import Toybox.Weather;
 
-const NO_WEATHER = "No weather - pair phone with Garmin Connect";
+const NO_WEATHER = "No weather - pair a phone or run the Mac companion";
 const STALE_SECS = 3 * 3600;
 
 // "Updated 5h ago" when the observation is older than 3 hours, else null.
@@ -16,11 +16,7 @@ function staleNote(observed as Number?, now as Number) as String? {
 }
 
 function observationTime() as Number? {
-    var cc = Weather.getCurrentConditions();
-    if (cc != null && cc.observationTime != null) {
-        return (cc.observationTime as Time.Moment).value();
-    }
-    return null;
+    return WeatherSource.observed();
 }
 
 function drawStale(dc as Graphics.Dc, l as Layout, note as String?) as Void {
@@ -89,6 +85,18 @@ class WeatherCard extends Card {
     }
 
     function refresh() as Void {
+        var w = WeatherSource.mac();
+        if (w != null) {
+            // The Mac sends [high, low, condition]; the card uses [condition, high, low].
+            var d = w["today"] as Array;
+            var t = w["tomorrow"] as Array;
+            _today = [d[2], d[0], d[1]];
+            _tomorrow = [t[2], t[0], t[1]];
+            _current = w["temp"] as Numeric?;
+            _has = true;
+            _stale = staleNote(w["observed"] as Number, Time.now().value());
+            return;
+        }
         var cc = Weather.getCurrentConditions();
         _has = cc != null;
         _today = null;

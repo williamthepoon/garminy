@@ -1,4 +1,10 @@
 <settings>
+    <setting propertyKey="@Properties.companion" title="@Strings.companionTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    <setting propertyKey="@Properties.cardAgents" title="@Strings.cardAgentsTitle">
+        <settingConfig type="boolean" />
+    </setting>
     <setting propertyKey="@Properties.cardFortune" title="@Strings.cardFortuneTitle">
         <settingConfig type="boolean" />
     </setting>

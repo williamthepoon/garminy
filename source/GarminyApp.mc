@@ -11,7 +11,8 @@ class GarminyApp extends Application.AppBase {
     }
 
     function getInitialView() as [WatchUi.Views] or [WatchUi.Views, WatchUi.InputDelegates] {
-        var view = new CarouselView();
+        var companion = new Companion();
+        var view = new CarouselView(companion, new Link(companion));
         _view = view;
         return [view, new CarouselDelegate(view)];
     }
@@ -22,7 +23,7 @@ class GarminyApp extends Application.AppBase {
 
     function onSettingsChanged() as Void {
         if (_view != null) {
-            (_view as CarouselView).reload();
+            (_view as CarouselView).settingsChangedLocally();
         }
     }
 }

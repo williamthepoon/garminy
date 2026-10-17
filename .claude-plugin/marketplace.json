@@ -1,0 +1,13 @@
+{
+  "name": "garminy",
+  "owner": {
+    "name": "Will Poon"
+  },
+  "plugins": [
+    {
+      "name": "garminy",
+      "source": "./claude-plugin",
+      "description": "Claude Code status on a fēnix 7 desk display (needs the garminy Mac companion)."
+    }
+  ]
+}

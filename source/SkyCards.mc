@@ -64,7 +64,13 @@ module LocationSource {
             }
             return live;
         }
-        return fromStorage();
+        return choose([fromStorage(), fromMac()]);
+    }
+
+    // Last location sent by the Mac companion.
+    function fromMac() as Array<Double>? {
+        var m = MacWeather.location();
+        return m == null ? null : valid(m);
     }
 }
 
@@ -102,7 +108,7 @@ class DaylightCard extends Card {
     function draw(dc as Graphics.Dc, l as Layout) as Void {
         drawTitle(dc, l, "DAYLIGHT");
         if (_status == -1) {
-            drawMessage(dc, l, "Location unknown - sync weather or get a GPS fix");
+            drawMessage(dc, l, "Location unknown - get a GPS fix or run the Mac companion");
             return;
         }
         if (_status == SunCalc.SUN_UP_ALL_DAY) {
