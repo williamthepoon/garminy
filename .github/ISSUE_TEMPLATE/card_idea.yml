@@ -1,0 +1,18 @@
+name: Card idea
+description: Suggest a new card or a change to an existing one
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The card
+      description: What does it show, and why is it useful on a desk?
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: Where does the data come from?
+      description: garminy uses no API keys or servers. Data must come from the watch, be calculated, be bundled, or come from Garmin's built-in weather.
+    validations:
+      required: true

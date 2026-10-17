@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate bundled content
+        run: python3 scripts/build_content.py
+      - name: Generated resources are up to date
+        run: git diff --exit-code -- resources/jsonData
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate OpenSpec specs and changes
+        run: npx --yes @fission-ai/openspec@1.14.3 validate --all --strict --no-interactive

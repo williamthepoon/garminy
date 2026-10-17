@@ -1,0 +1,36 @@
+name: Bug report
+description: Something on the watch looks or behaves wrong
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Include a photo or simulator screenshot if possible.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: input
+    id: card
+    attributes:
+      label: Which card?
+      placeholder: e.g. Umbrella?, World clock
+  - type: input
+    id: firmware
+    attributes:
+      label: Watch firmware version
+      description: Settings → System → About
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where did you see it?
+      options:
+        - Real fēnix 7
+        - Connect IQ simulator
+    validations:
+      required: true

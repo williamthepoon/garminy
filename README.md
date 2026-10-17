@@ -1,6 +1,16 @@
 # garminy
 
-garminy turns a retired Garmin fēnix 7 into a desk display. It sits on a stand on the charger and rotates through glanceable cards:
+[![CI](https://github.com/williamthepoon/garminy/actions/workflows/ci.yml/badge.svg)](https://github.com/williamthepoon/garminy/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Device: fēnix 7](https://img.shields.io/badge/device-f%C4%93nix%207-orange)
+
+garminy turns a retired Garmin fēnix 7 into a desk display. It sits on a stand on the charger and rotates through glanceable cards.
+
+![garminy cards in the fēnix 7 simulator](docs/screenshots.png)
+
+> **Status:** v1 works in the Connect IQ simulator and all unit tests pass. It has not yet been tested on a real watch, and it is not on the Connect IQ Store yet; install it by sideloading (see below).
+
+## Cards
 
 | Card | Shows |
 |---|---|
@@ -72,9 +82,11 @@ Edit text content in `content/*.json`. The build checks it (maximum 90 character
 - **Disable Sleep Mode or schedule it around your desk hours** (System → Sleep Mode) so the watch keeps showing cards.
 - **Protect the battery from being held at 100% for months.** A smart plug on a schedule can keep it roughly between 40% and 80%.
 
-## Development
+## Contributing
 
-The project uses [OpenSpec](https://openspec.dev/) for spec-driven development. Specs are in `openspec/specs/`, and in-progress changes are in `openspec/changes/`. See `CLAUDE.md` for the workflow.
+Issues and PRs are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first. In short: fēnix 7 only, no API keys or servers, and never rely on the START button.
+
+The project uses [OpenSpec](https://openspec.dev/) for spec-driven development. Specs are in `openspec/specs/`, and in-progress changes are in `openspec/changes/`. Release notes are in [CHANGELOG.md](CHANGELOG.md).
 
 ## Licence
 
