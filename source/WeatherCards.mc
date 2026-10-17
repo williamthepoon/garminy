@@ -62,7 +62,8 @@ class UmbrellaCard extends Card {
 
         var detail = d[1].toString() + "%";
         if (d[2] >= 0) {
-            detail += " at " + Ui.formatMoment(new Time.Moment(d[2]));
+            // The forecast hour may already have started: say "now" rather than a past time.
+            detail += d[2] <= Time.now().value() ? " now" : " at " + Ui.formatMoment(new Time.Moment(d[2]));
         }
         dc.setColor(Ui.DIM, Graphics.COLOR_TRANSPARENT);
         dc.drawText(l.cx, l.cy + l.h / 9, Graphics.FONT_SMALL, detail,
