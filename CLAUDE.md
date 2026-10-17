@@ -42,8 +42,16 @@ Toolchain (installed 2026-10-17): Homebrew `openjdk@21` and Connect IQ SDK 9.2.0
 - Sideload: `scripts/sideload.sh` (macOS, needs `brew install libmtp`). It replaces `GARMIN/Apps/GARMINY.PRG` through the Swift libmtp helper in `scripts/mtp/`. macOS's `ptpcamerad` grabs the watch, so the script keeps killing it during the transfer, and the stock `mtp-sendfile` fails on this watch ("could not get storage id"). The watch installs on unplug and keeps its settings.
 - Never commit or lose `~/.garmin/developer_key.der`. Store updates must be signed with the same key.
 
+Mac companion (`mac/`, SwiftPM, Swift 6, macOS 14+):
+- **Build and install:** `scripts/bundle-mac.sh` builds the app, signs it with the `garminy-local` identity (created once by `scripts/mac-signing-identity.sh`, already in the login keychain), installs `~/Applications/garminy Companion.app`, links `~/.local/bin/garminy-hook`, and relaunches it.
+- **Tests:** `swift test --package-path mac`. The log is `~/Library/Logs/garminy-companion.log`. `defaults write com.github.williamthepoon.garminy.companion debugFrames -bool true` logs every BLE frame.
+- **Signing:** use the stable identity, because ad-hoc signatures make macOS re-prompt for Bluetooth after every rebuild. The hardened runtime needs the `com.apple.security.personal-information.location` entitlement and the `NSLocationAlwaysAndWhenInUseUsageDescription` key, or Location requests fail silently. The Location prompt shows only while the app is frontmost.
+- **Wire protocol:** frames are at most 20 bytes, and only one GATT request can be in flight. iOS and Connect IQ cut oversize notifications silently. Layouts and shared test vectors are in `mac/Tests/vectors.md`. `source/companion/Proto.mc` and `mac/Sources/GarminyCore/Wire.swift` must stay in sync.
+- **Claude Code exports `CLAUDECODE`,** so the zsh snippet ignores commands run from Claude's own shell. Unset it when testing the snippet.
+- **Monkey C reserves the word `hidden`.**
+
 Simulator verification notes:
 - `scripts/test.sh` leaves the simulator with no app loaded. Relaunch with `monkeydo bin/garminy-fenix7.prg fenix7`.
 - Tests write to `Application.Properties`, and the simulator keeps those values, overriding `properties.xml` defaults. Use File → Reset All App Data before checking defaults.
-- To check visual states (rain, polar day, °F, moon shapes), make a temporary preview build that injects the data, screenshot it, then restore the sources. Don't commit preview hooks.
+- To check visual states (rain, polar day, °F, moon shapes, alerts), make a temporary preview build that injects the data, screenshot it, then restore the sources. Don't commit preview hooks. When other windows cover the simulator, capture it by window ID with `screencapture -l <id>`, getting the ID from `CGWindowListCopyWindowInfo`.
 - Settings → Glance Launch Mode must be "Normal", or the app opens as a glance preview.
