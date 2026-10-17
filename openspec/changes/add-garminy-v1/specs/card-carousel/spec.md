@@ -77,11 +77,26 @@ A short BACK press SHALL NOT exit the app. Instead it SHALL briefly show a "Hold
 - **THEN** the app exits
 
 ### Requirement: Runs indefinitely on a desk
-While open, the app SHALL keep running without a timeout and without user input, and SHALL NOT keep the backlight on.
+While open, the app SHALL keep running without a timeout and without user input. It SHALL NOT hold the backlight on unless the Backlight setting asks for it.
 
 #### Scenario: Left unattended overnight
 - **WHEN** the app has been open for 12 hours with no input while charging
 - **THEN** it is still running, still rotating cards, and the clock is correct
+
+### Requirement: Keep backlight on
+While the app is open and the Backlight setting is Low, Medium or High, the app SHALL hold the display backlight on at that brightness, overriding the device's backlight timeout. When the setting is Off, the app SHALL leave the backlight to the device.
+
+#### Scenario: Backlight on Medium
+- **WHEN** the Backlight setting is Medium and the app has been open for 10 minutes with no input
+- **THEN** the backlight is still lit at medium brightness
+
+#### Scenario: Backlight Off
+- **WHEN** the Backlight setting is Off
+- **THEN** the backlight turns off after the device's normal timeout
+
+#### Scenario: Turned off while lit
+- **WHEN** the user changes the Backlight setting from High to Off while the app is open
+- **THEN** the backlight turns off within one rotation interval
 
 ### Requirement: No cards enabled
 When the user has disabled every card, the carousel SHALL show a message explaining how to enable cards in the Garmin Connect app.

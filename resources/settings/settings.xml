@@ -189,4 +189,12 @@
             <listEntry value="2">@Strings.unitsF</listEntry>
         </settingConfig>
     </setting>
+    <setting propertyKey="@Properties.backlight" title="@Strings.backlightTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.blOff</listEntry>
+            <listEntry value="1">@Strings.blLow</listEntry>
+            <listEntry value="2">@Strings.blMedium</listEntry>
+            <listEntry value="3">@Strings.blHigh</listEntry>
+        </settingConfig>
+    </setting>
 </settings>

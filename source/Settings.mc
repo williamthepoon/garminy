@@ -62,6 +62,14 @@ module Settings {
         return System.getDeviceSettings().temperatureUnits == System.UNIT_STATUTE;
     }
 
+    const BACKLIGHT_LEVELS = [0.0, 0.3, 0.6, 1.0];
+
+    // Brightness to hold the backlight at; 0.0 means leave it to the device.
+    function backlightLevel() as Float {
+        var v = get("backlight", 0);
+        return (v instanceof Number && v >= 0 && v < BACKLIGHT_LEVELS.size()) ? BACKLIGHT_LEVELS[v] as Float : 0.0;
+    }
+
     // Weather temperatures arrive in Celsius.
     function formatTemp(celsius as Numeric?) as String {
         if (celsius == null) {

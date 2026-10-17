@@ -42,6 +42,13 @@ Users SHALL be able to choose Celsius, Fahrenheit, or "Follow device". The defau
 - **WHEN** "Follow device" is selected and the watch is set to metric units
 - **THEN** temperatures are shown in °C
 
+### Requirement: Backlight setting
+Users SHALL be able to choose a Backlight setting of Off, Low, Medium or High. The default SHALL be Off.
+
+#### Scenario: Default install
+- **WHEN** settings have never been changed
+- **THEN** the Backlight setting is Off
+
 ### Requirement: Settings apply live
 Changed settings SHALL take effect while the app is running, without a restart.
 

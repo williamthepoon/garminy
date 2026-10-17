@@ -374,6 +374,7 @@ module TS {
         Application.Properties.setValue("city2", TimeZones.SINGAPORE);
         Application.Properties.setValue("city3", TimeZones.MONTREAL);
         Application.Properties.setValue("units", Settings.UNITS_DEVICE);
+        Application.Properties.setValue("backlight", 0);
     }
 }
 
@@ -491,5 +492,27 @@ function testDailyCardsChangeWithTheDate(logger as Test.Logger) as Boolean {
     var qa = q._text;
     q.load(d + 1);
     ok = T.check(logger, "quote differs tomorrow", !q._text.equals(qa)) && ok;
+    return ok;
+}
+
+(:test)
+function testBacklightSetting(logger as Test.Logger) as Boolean {
+    TS.reset();
+    var ok = T.check(logger, "default off", Settings.backlightLevel() == 0.0);
+    var expected = [0.0, 0.3, 0.6, 1.0];
+    for (var i = 0; i < 4; i++) {
+        Application.Properties.setValue("backlight", i);
+        ok = T.check(logger, "level " + i, Settings.backlightLevel() == expected[i]) && ok;
+    }
+    Application.Properties.setValue("backlight", 9);
+    ok = T.check(logger, "out of range is off", Settings.backlightLevel() == 0.0) && ok;
+    Application.Properties.setValue("backlight", 2);
+    var v = new CarouselView();
+    ok = T.check(logger, "view holds medium", v._backlight == 0.6) && ok;
+    v.onTick();
+    Application.Properties.setValue("backlight", 0);
+    v.reload();
+    ok = T.check(logger, "switching off releases it", v._backlight == 0.0) && ok;
+    TS.reset();
     return ok;
 }

@@ -1,3 +1,4 @@
+import Toybox.Attention;
 import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.System;
@@ -23,6 +24,7 @@ class CarouselView extends WatchUi.View {
     var _hintUntil as Number = 0;
     var _escDownAt as Number? = null;
     var _layout as Layout?;
+    var _backlight as Float = 0.0;
 
     function initialize() {
         View.initialize();
@@ -47,6 +49,11 @@ class CarouselView extends WatchUi.View {
         _cards = cards;
         _idx = newIdx;
         _interval = Settings.interval();
+        var level = Settings.backlightLevel();
+        if (level == 0.0 && _backlight > 0.0) {
+            setBacklight(false);
+        }
+        _backlight = level;
         _elapsed = 0;
         _pinned = false;
         refreshCurrent();
@@ -74,6 +81,11 @@ class CarouselView extends WatchUi.View {
             System.exit();
         }
 
+        // Repeated calls hold the backlight on past the device timeout.
+        if (_backlight > 0.0) {
+            setBacklight(_backlight);
+        }
+
         if (_hintUntil != 0 && System.getTimer() >= _hintUntil) {
             _hintUntil = 0;
             dirty = true;
@@ -96,6 +108,17 @@ class CarouselView extends WatchUi.View {
 
         if (dirty) {
             WatchUi.requestUpdate();
+        }
+    }
+
+    function setBacklight(setting as Boolean or Float) as Void {
+        if (Attention has :backlight) {
+            try {
+                Attention.backlight(setting);
+            } catch (e) {
+                // AMOLED devices refuse long backlight holds; give up quietly.
+                _backlight = 0.0;
+            }
         }
     }
 

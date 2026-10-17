@@ -12,4 +12,5 @@
     <property id="city2" type="number">33</property>
     <property id="city3" type="number">9</property>
     <property id="units" type="number">0</property>
+    <property id="backlight" type="number">0</property>
 </properties>

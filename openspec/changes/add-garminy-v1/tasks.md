@@ -20,6 +20,8 @@
 - [ ] 3.1 Add `properties.xml` and `settings.xml` (8 card toggles, interval 5/10/20/30/60 with a 10 default, city1–3 with "None", units C/F/Follow device); verify the defaults in the simulator's App Settings editor
 - [x] 3.2 Implement a settings reader and `onSettingsChanged()` live rebuild that keeps the current card when it is still enabled; verify that changing the interval and disabling a card in the simulator take effect without a restart
 
+- [x] 3.3 Add the Backlight setting (Off/Low/Medium/High, default Off) and hold the backlight on from the carousel timer; verify a unit test covers the level mapping and the Off transition, and verify in the simulator that the backlight stays on at Medium with no input
+
 ## 4. Daily content (daily-content)
 
 - [x] 4.1 Implement daily selection (`daysSinceEpoch mod N`) plus chunked resource loading; verify unit tests confirm same-day stability, that consecutive days differ, and the full cycle before repeat

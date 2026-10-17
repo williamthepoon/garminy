@@ -124,6 +124,13 @@ This is a greenfield repo; it contains only OpenSpec, `CLAUDE.md` and the toolch
   - DST transitions;
   - content-length limits.
 
+### D15. Backlight hold
+- A `backlight` setting (0 = Off, 1 = Low, 2 = Medium, 3 = High) maps to brightness 0.3, 0.6 or 1.0.
+- While it is above Off, the existing 1 s timer calls `Attention.backlight(level)` on every tick. Garmin documents that repeated calls hold the display on; one second is shorter than any device backlight timeout.
+- Switching to Off calls `Attention.backlight(false)` once, after which the device's own timeout applies again.
+- Calls are wrapped in `try`, because AMOLED devices throw `BacklightOnTooLongException`. The fēnix 7 is MIP and does not.
+- The default is Off, so a watch taken off the charger doesn't drain unexpectedly.
+
 ## Risks / Trade-offs
 
 - [The fenix7 device files are not yet installed, because only vivoactive devices were downloaded] → Install `fenix7` with SDK Manager before running the build tasks.
@@ -132,6 +139,7 @@ This is a greenfield repo; it contains only OpenSpec, `CLAUDE.md` and the toolch
 - [Weather data is only as fresh as the phone's syncs] → Show a staleness note (spec) rather than hiding the data.
 - [Bundled historical facts may contain errors] → Keep entries short and well known, and add a task to spot-check a sample against sources.
 - [Memory use grows as content is added] → Use chunked resources (D6), and check peak memory in the fenix7 simulator.
+- [A held backlight drains the battery quickly off the charger] → Default Off; the README says to use it only on a charger.
 - [The touchscreen can be disabled in system settings] → Buttons cover all actions except pinning; this is documented.
 
 ## Open Questions

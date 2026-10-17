@@ -46,6 +46,7 @@ In the Garmin Connect app on your phone, go to **Devices → fēnix 7 → Activi
 - Seconds per card: 5, 10, 20, 30 or 60
 - World clock cities 1–3, chosen from 45 cities, or None
 - Temperature units: follow device, °C or °F
+- Backlight: Off, Low, Medium or High. Holds the light on while garminy is open. Use it only on a charger.
 
 ## Build
 
@@ -80,6 +81,7 @@ Edit text content in `content/*.json`. The build checks it (maximum 90 character
 - **Use a power-only charger** (a wall adapter), not a computer port. When the watch is connected to a computer, it switches to USB mode and stops apps.
 - **Leave garminy open.** Going back to the watch face can close it. Reopen it from the glance.
 - **Disable Sleep Mode or schedule it around your desk hours** (System → Sleep Mode) so the watch keeps showing cards.
+- **Make it brighter:** the screen is reflective, so a desk lamp helps most. For evenings, set Backlight to Low, Medium or High.
 - **Protect the battery from being held at 100% for months.** A smart plug on a schedule can keep it roughly between 40% and 80%.
 
 ## Contributing

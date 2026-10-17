@@ -13,6 +13,11 @@
     <string id="unitsC">Celsius</string>
     <string id="unitsF">Fahrenheit</string>
     <string id="cityNone">None</string>
+    <string id="backlightTitle">Backlight (use on a charger)</string>
+    <string id="blOff">Off</string>
+    <string id="blLow">Low</string>
+    <string id="blMedium">Medium</string>
+    <string id="blHigh">High</string>
     <string id="city1Title">World clock city 1</string>
     <string id="city2Title">World clock city 2</string>
     <string id="city3Title">World clock city 3</string>
