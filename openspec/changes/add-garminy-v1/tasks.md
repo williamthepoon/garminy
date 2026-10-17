@@ -10,14 +10,14 @@
 
 - [x] 2.1 Implement the `Layout` helper (header band, circular safe box, font picks) and verify a unit test shows the safe box fits inside the circle for 218, 240, 260 and 280 px screens
 - [x] 2.2 Implement the `Card` interface, `CarouselView` (single 1 s timer, index, pin, elapsed time, minute-change redraw) and the persistent clock header; verify in the simulator that two placeholder cards rotate at 10 s and the header clock updates
-- [ ] 2.3 Implement `CarouselDelegate` (UP/DOWN and swipe navigation with timer reset, tap pin/unpin with indicator, navigation clears the pin); verify each scenario in the card-carousel spec in the fenix7 simulator
+- [x] 2.3 Implement `CarouselDelegate` (UP/DOWN and swipe navigation with timer reset, tap pin/unpin with indicator, navigation clears the pin); verify each scenario in the card-carousel spec in the fenix7 simulator
 - [x] 2.4 Implement the guarded exit (short BACK shows the hint, holding for 1 s or more exits, timer-poll fallback); verify both scenarios in the simulator
-- [ ] 2.5 Implement the glance view (app name plus a one-line summary) and launch-to-first-card; verify in the simulator's glance mode that tapping opens the carousel
+- [x] 2.5 Implement the glance view (app name plus a one-line summary) and launch-to-first-card; verify in the simulator's glance mode that tapping opens the carousel
 - [x] 2.6 Implement the "Enable cards in Garmin Connect" empty state; verify it appears with every card disabled
 
 ## 3. Settings (app-settings)
 
-- [ ] 3.1 Add `properties.xml` and `settings.xml` (8 card toggles, interval 5/10/20/30/60 with a 10 default, city1–3 with "None", units C/F/Follow device); verify the defaults in the simulator's App Settings editor
+- [x] 3.1 Add `properties.xml` and `settings.xml` (8 card toggles, interval 5/10/20/30/60 with a 10 default, city1–3 with "None", units C/F/Follow device); verify the defaults in the simulator's App Settings editor
 - [x] 3.2 Implement a settings reader and `onSettingsChanged()` live rebuild that keeps the current card when it is still enabled; verify that changing the interval and disabling a card in the simulator take effect without a restart
 
 - [x] 3.3 Add the Backlight setting (Off/Low/Medium/High, default Off) and hold the backlight on from the carousel timer; verify a unit test covers the level mapping and the Off transition, and verify in the simulator that the backlight stays on at Medium with no input

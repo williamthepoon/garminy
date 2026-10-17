@@ -72,6 +72,17 @@ Edit text content in `content/*.json`. The build checks it (maximum 90 character
 
 ## Install on the watch (sideload)
 
+**One command (macOS):** plug in the watch, quit Garmin Express, then run:
+
+```sh
+brew install libmtp      # once
+scripts/sideload.sh      # builds, then copies GARMINY.PRG onto the watch
+```
+
+Unplug the watch to install. Running it again replaces the app in place and keeps your settings.
+
+**Manually:**
+
 1. Connect the watch to your computer with its USB cable. On macOS, use [OpenMTP](https://openmtp.ganeshrvel.com/) and fully quit Garmin Express first.
 2. Copy `bin/garminy-fenix7.prg` into `GARMIN/APPS/` on the watch.
 3. Unplug the watch. garminy appears in the glance loop.

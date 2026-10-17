@@ -26,6 +26,7 @@ See the [README](README.md#build) for toolchain setup.
 ```sh
 scripts/build.sh   # build bin/garminy-fenix7.prg
 scripts/test.sh    # unit tests in the Connect IQ simulator
+scripts/sideload.sh  # build and copy onto a USB-connected fēnix 7 (macOS, needs `brew install libmtp`)
 ```
 
 - Put pure logic (maths, rules) in modules with `(:test)` coverage in `tests/Tests.mc`.
