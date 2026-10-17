@@ -27,7 +27,7 @@
 - [x] 4.4 Implement `Presence` (idle seconds, lock/unlock, sleep/wake, frontmost bundle ID) and `KeepAwake` (IOPM assertion with a user toggle); verify `pmset -g assertions` shows the assertion while a fake working session exists and it is released within 1 minute after it ends
 - [ ] 4.5 Implement the `MenuBarExtra` UI (connection state, sessions, pending alerts, Bluetooth-denied message with a System Settings link, Launch at login via `SMAppService`, Quit) and verify each state by running the app with Bluetooth on and with the watch out of range
 - [x] 4.6 Add `scripts/bundle-mac.sh` and `scripts/mac-signing-identity.sh` (explicit `arm64-apple-macos14.0` target, Info.plist keys, `garminy-local` identity with ad-hoc fallback, install to `~/Applications`, symlink `garminy-hook` into `~/.local/bin`); verify `codesign -dr -` output is identical across two rebuilds and Bluetooth is not re-prompted
-- [ ] 4.7 Add a macOS CI job running `swift build` and `swift test` in `mac/`, and verify it passes on a pushed branch
+- [x] 4.7 Add a macOS CI job running `swift build` and `swift test` in `mac/`, and verify it passes on a pushed branch
 
 ## 5. Alerts (desk-alerts)
 
