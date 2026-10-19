@@ -90,12 +90,17 @@ public struct WireSettings: Equatable, Sendable {
     public var chargerSignal: UInt8
     /// 0 soft, 1 chime, 2 standard.
     public var beepSound: UInt8
+    /// Backlight off from quietStart up to quietEnd (whole hours, wrapping past midnight).
+    public var quietHours: Bool
+    public var quietStart: UInt8
+    public var quietEnd: UInt8
 
     public init(changedAt: UInt32, cards: UInt16, interval: UInt8, cities: [Int8], units: UInt8, backlight: UInt8, companion: Bool,
-                chargerSignal: UInt8 = 1, beepSound: UInt8 = 0) {
+                chargerSignal: UInt8 = 1, beepSound: UInt8 = 0, quietHours: Bool = true, quietStart: UInt8 = 18, quietEnd: UInt8 = 9) {
         self.changedAt = changedAt; self.cards = cards; self.interval = interval; self.cities = cities
         self.units = units; self.backlight = backlight; self.companion = companion
         self.chargerSignal = chargerSignal; self.beepSound = beepSound
+        self.quietHours = quietHours; self.quietStart = quietStart; self.quietEnd = quietEnd
     }
 }
 
@@ -335,6 +340,7 @@ extension Data {
         c.forEach { i8($0) }
         append(s.units); append(s.backlight); append(s.companion ? 1 : 0)
         append(s.chargerSignal); append(s.beepSound)
+        append(s.quietHours ? 1 : 0); append(s.quietStart); append(s.quietEnd)
     }
 }
 
@@ -367,8 +373,9 @@ struct Reader {
         guard let at = u32(), let cards = u16(), let iv = u8(),
               let c1 = i8(), let c2 = i8(), let c3 = i8(),
               let un = u8(), let bl = u8(), let co = u8() else { return nil }
-        // Added later: a 13-byte payload from an older side gets the defaults.
+        // Added later: a 13- or 15-byte payload from an older side gets the defaults.
         return WireSettings(changedAt: at, cards: cards, interval: iv, cities: [c1, c2, c3],
-                            units: un, backlight: bl, companion: co != 0, chargerSignal: u8() ?? 1, beepSound: u8() ?? 0)
+                            units: un, backlight: bl, companion: co != 0, chargerSignal: u8() ?? 1, beepSound: u8() ?? 0,
+                            quietHours: (u8() ?? 1) != 0, quietStart: u8() ?? 18, quietEnd: u8() ?? 9)
     }
 }

@@ -20,8 +20,9 @@ Shared by `GarminyCoreTests` (Swift) and `tests/CompanionTests.mc` (Monkey C). E
   - `080801`
 - LOCATION Montreal 45.50, -73.57, msgId 9
   - `06090111c6e343`
-- SETTINGS changedAt 1760000000, cards 0x01FF, interval 10, cities 0/33/9, units 0, backlight 0, companion 1, charger signal 1, beep sound 0, msgId 10
-  - `070a0168e7780001ff0a0021090000010100`
+- SETTINGS changedAt 1760000000, cards 0x01FF, interval 10, cities 0/33/9, units 0, backlight 0, companion 1, charger signal 1, beep sound 0, quiet hours 1, quiet start 18, quiet end 9, msgId 10
+  - `070a0268e7780001ff0a00210900000101000112`
+  - `070a1209`
 - WEATHER observed 1760000000, now 12C cond 1, today 15/6 cond 3, tomorrow 9/2 cond 3, hourly base 1759998600, chances 0,10,20,30,40,50,60,70,80,90,100,255, msgId 11
   - `050b0268e778000c010f060309020368e7728800`
   - `050b120a141e28323c46505a64ff`
@@ -47,7 +48,7 @@ Frame: `[type][msgId][part<<4 | total]` + up to 17 payload bytes. Parts are numb
 | `04` BUZZ | alert id u8 |
 | `05` WEATHER | observed u32, now temp i8, now condition u8, today hi i8 lo i8 condition u8, tomorrow hi i8 lo i8 condition u8, hourly base u32, 12 × chance u8 (255 = unknown) |
 | `06` LOCATION | lat i16 ×100, lon i16 ×100 |
-| `07`/`43` SETTINGS | changedAt u32, cards u16, interval u8, city1–3 i8, units u8, backlight u8, companion u8, charger signal u8, beep sound u8 (the last two are optional: a 13-byte payload means 1 and 0) |
+| `07`/`43` SETTINGS | changedAt u32, cards u16, interval u8, city1–3 i8, units u8, backlight u8, companion u8, charger signal u8, beep sound u8, quiet hours u8, quiet start u8, quiet end u8 (the last five are optional and default to 1, 0, 1, 18, 9: an older side sends 13 or 15 bytes) |
 | `0A` TEST_SIGNAL | alert kind u8 |
 | `08` SNAPSHOT_END, `09` HEARTBEAT | none |
 | `41` HELLO | version u8 |

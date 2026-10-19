@@ -80,6 +80,20 @@ module Settings {
         return (v instanceof Number && v >= 0 && v < BACKLIGHT_LEVELS.size()) ? BACKLIGHT_LEVELS[v] as Float : 0.0;
     }
 
+    // Quiet hours run from start up to (not including) end, wrapping past midnight.
+    // Equal hours mean never quiet.
+    function isQuiet(enabled as Boolean, start as Number, end as Number, hour as Number) as Boolean {
+        if (!enabled || start == end) {
+            return false;
+        }
+        return start < end ? hour >= start && hour < end : hour >= start || hour < end;
+    }
+
+    function quietNow() as Boolean {
+        return isQuiet(get("quietHours", true) == true, get("quietStart", 18) as Number,
+                       get("quietEnd", 9) as Number, System.getClockTime().hour);
+    }
+
     function companion() as Boolean {
         return get("companion", true) == true;
     }
@@ -107,7 +121,10 @@ module Settings {
             :backlight => get("backlight", 0),
             :companion => companion(),
             :chargerSignal => get("chargerSignal", 1),
-            :beepSound => get("beepSound", 0)
+            :beepSound => get("beepSound", 0),
+            :quietHours => get("quietHours", true) == true,
+            :quietStart => get("quietStart", 18),
+            :quietEnd => get("quietEnd", 9)
         };
     }
 
@@ -135,6 +152,9 @@ module Settings {
         Application.Properties.setValue("companion", d[:companion] as Boolean);
         Application.Properties.setValue("chargerSignal", d[:chargerSignal] as Number);
         Application.Properties.setValue("beepSound", d[:beepSound] as Number);
+        Application.Properties.setValue("quietHours", d[:quietHours] as Boolean);
+        Application.Properties.setValue("quietStart", d[:quietStart] as Number);
+        Application.Properties.setValue("quietEnd", d[:quietEnd] as Number);
         Application.Storage.setValue("settingsChangedAt", at);
         return true;
     }

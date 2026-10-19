@@ -510,6 +510,9 @@ module TS {
         Application.Properties.setValue("city3", TimeZones.MONTREAL);
         Application.Properties.setValue("units", Settings.UNITS_DEVICE);
         Application.Properties.setValue("backlight", 0);
+        Application.Properties.setValue("quietHours", true);
+        Application.Properties.setValue("quietStart", 18);
+        Application.Properties.setValue("quietEnd", 9);
     }
 }
 
@@ -648,6 +651,31 @@ function testBacklightSetting(logger as Test.Logger) as Boolean {
     Application.Properties.setValue("backlight", 0);
     v.reload();
     ok = T.check(logger, "switching off releases it", v._backlight == 0.0) && ok;
+    Application.Properties.setValue("backlight", 3);
+    v.reload();
+    v.holdBacklight(true);
+    ok = T.check(logger, "quiet hours tracked", v._quiet && v._backlight == 1.0) && ok;
+    v.holdBacklight(false);
+    ok = T.check(logger, "quiet hours end", !v._quiet && v._backlight == 1.0) && ok;
+    Application.Properties.setValue("backlight", 0);
+    v.reload();
+    v.holdBacklight(true);
+    ok = T.check(logger, "quiet hours tracked with backlight off", v._quiet) && ok;
     TS.reset();
+    return ok;
+}
+
+(:test)
+function testQuietHours(logger as Test.Logger) as Boolean {
+    TS.reset();
+    var ok = T.check(logger, "default on 18-9", Settings.get("quietHours", false) == true
+        && Settings.get("quietStart", 0) == 18 && Settings.get("quietEnd", 0) == 9);
+    ok = T.check(logger, "overnight 02:00 quiet", Settings.isQuiet(true, 18, 9, 2)) && ok;
+    ok = T.check(logger, "start hour quiet", Settings.isQuiet(true, 18, 9, 18)) && ok;
+    ok = T.check(logger, "end hour not quiet", !Settings.isQuiet(true, 18, 9, 9)) && ok;
+    ok = T.check(logger, "midday not quiet", !Settings.isQuiet(true, 18, 9, 12)) && ok;
+    ok = T.check(logger, "same-day window", Settings.isQuiet(true, 12, 14, 13) && !Settings.isQuiet(true, 12, 14, 14)) && ok;
+    ok = T.check(logger, "equal hours never quiet", !Settings.isQuiet(true, 8, 8, 8)) && ok;
+    ok = T.check(logger, "off never quiet", !Settings.isQuiet(false, 18, 9, 23)) && ok;
     return ok;
 }

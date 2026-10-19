@@ -47,6 +47,19 @@ struct SettingsView: View {
                                                        set: { v in model.editSettings { $0.backlight = v } })) {
                     Text("Off").tag(UInt8(0)); Text("Low").tag(UInt8(1)); Text("Medium").tag(UInt8(2)); Text("High").tag(UInt8(3))
                 }
+                Toggle("Quiet hours (backlight off)", isOn: Binding(get: { model.settings.value.quietHours },
+                                                                    set: { v in model.editSettings { $0.quietHours = v } }))
+                HStack {
+                    Picker("From", selection: Binding(get: { model.settings.value.quietStart },
+                                                      set: { v in model.editSettings { $0.quietStart = v } })) {
+                        ForEach(0..<24, id: \.self) { h in Text(String(format: "%02d:00", h)).tag(UInt8(h)) }
+                    }
+                    Picker("Until", selection: Binding(get: { model.settings.value.quietEnd },
+                                                       set: { v in model.editSettings { $0.quietEnd = v } })) {
+                        ForEach(0..<24, id: \.self) { h in Text(String(format: "%02d:00", h)).tag(UInt8(h)) }
+                    }
+                }
+                .disabled(!model.settings.value.quietHours)
                 Picker("On the charger", selection: Binding(get: { model.settings.value.chargerSignal },
                                                             set: { v in model.editSettings { $0.chargerSignal = v } })) {
                     Text("Nothing").tag(UInt8(0)); Text("Beep").tag(UInt8(1)); Text("Light").tag(UInt8(2)); Text("Beep and light").tag(UInt8(3))

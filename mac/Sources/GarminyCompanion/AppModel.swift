@@ -119,14 +119,17 @@ final class AppModel: ObservableObject {
         return WireSettings(changedAt: UInt32(n("changedAt")), cards: UInt16(n("cards")), interval: UInt8(n("interval")),
                             cities: (d["cities"] as? [Int] ?? [0, 33, 9]).map { Int8($0) }, units: UInt8(n("units")),
                             backlight: UInt8(n("backlight")), companion: d["companion"] as? Bool ?? true,
-                            chargerSignal: UInt8(d["chargerSignal"] as? Int ?? 1), beepSound: UInt8(n("beepSound")))
+                            chargerSignal: UInt8(d["chargerSignal"] as? Int ?? 1), beepSound: UInt8(n("beepSound")),
+                            quietHours: d["quietHours"] as? Bool ?? true, quietStart: UInt8(d["quietStart"] as? Int ?? 18),
+                            quietEnd: UInt8(d["quietEnd"] as? Int ?? 9))
     }
 
     func saveSettings() {
         let v = settings.value
         UserDefaults.standard.set(["changedAt": Int(v.changedAt), "cards": Int(v.cards), "interval": Int(v.interval),
                                    "cities": v.cities.map { Int($0) }, "units": Int(v.units), "backlight": Int(v.backlight),
-                                   "companion": v.companion, "chargerSignal": Int(v.chargerSignal), "beepSound": Int(v.beepSound)], forKey: "watchSettings")
+                                   "companion": v.companion, "chargerSignal": Int(v.chargerSignal), "beepSound": Int(v.beepSound),
+                                   "quietHours": v.quietHours, "quietStart": Int(v.quietStart), "quietEnd": Int(v.quietEnd)], forKey: "watchSettings")
     }
 
     func sendSnapshot() {

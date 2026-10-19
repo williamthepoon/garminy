@@ -160,17 +160,18 @@ module Buzz {
 
     // What to do for a buzz: [vibrate, beep, light]. The watch can't vibrate while charging,
     // so the On the charger setting picks a beep and/or the backlight instead (charger-alert-signal).
-    function plan(charging as Boolean, signal as Number) as Array<Boolean> {
+    // Quiet hours drop the light (quiet-hours).
+    function plan(charging as Boolean, signal as Number, quiet as Boolean) as Array<Boolean> {
         if (!charging) {
             return [true, false, false];
         }
-        return [false, (signal & SIGNAL_BEEP) != 0, (signal & SIGNAL_LIGHT) != 0];
+        return [false, (signal & SIGNAL_BEEP) != 0, !quiet && (signal & SIGNAL_LIGHT) != 0];
     }
 
     function play(kind as Number) as Void {
         var stats = System.getSystemStats();
         var charging = (stats has :charging) && stats.charging == true;
-        var p = plan(charging, Settings.get("chargerSignal", 1) as Number);
+        var p = plan(charging, Settings.get("chargerSignal", 1) as Number, Settings.quietNow());
         if (p[0] && Attention has :vibrate) {
             Attention.vibrate(vibes(kind));
         }

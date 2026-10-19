@@ -169,7 +169,7 @@ module Proto {
 
     // s: decoded settings dictionary (same keys as decodeSettings).
     function settings(msgId as Number, s as Dictionary) as Array<ByteArray> {
-        var p = new [15]b;
+        var p = new [18]b;
         p.encodeNumber(s[:changedAt] as Number, Lang.NUMBER_FORMAT_UINT32, { :offset => 0, :endianness => Lang.ENDIAN_BIG });
         p.encodeNumber(s[:cards] as Number, Lang.NUMBER_FORMAT_UINT16, { :offset => 4, :endianness => Lang.ENDIAN_BIG });
         p[6] = (s[:interval] as Number) & 0xFF;
@@ -182,6 +182,9 @@ module Proto {
         p[12] = (s[:companion] as Boolean) ? 1 : 0;
         p[13] = (s[:chargerSignal] as Number) & 0xFF;
         p[14] = (s[:beepSound] as Number) & 0xFF;
+        p[15] = (s[:quietHours] as Boolean) ? 1 : 0;
+        p[16] = (s[:quietStart] as Number) & 0xFF;
+        p[17] = (s[:quietEnd] as Number) & 0xFF;
         return frames(WATCH_SETTINGS, msgId, p);
     }
 
@@ -193,6 +196,9 @@ module Proto {
         };
         d[:chargerSignal] = r.optU8(1);
         d[:beepSound] = r.optU8(0);
+        d[:quietHours] = r.optU8(1) == 1;
+        d[:quietStart] = r.optU8(18);
+        d[:quietEnd] = r.optU8(9);
         return r.ok() ? d : null;
     }
 
