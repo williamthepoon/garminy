@@ -101,6 +101,12 @@ final class AppModel: ObservableObject {
         ble.send(.settings(settings.value))
     }
 
+    /// Test on watch: plays a needs-you signal with the current settings.
+    func testSignal() {
+        ble.send(.settings(settings.value))
+        ble.send(.testSignal(kind: .needsYou))
+    }
+
     func setCard(_ i: Int, _ on: Bool) {
         settings.setCard(i, on, now: Date())
         saveSettings()
@@ -112,14 +118,15 @@ final class AppModel: ObservableObject {
         func n(_ k: String) -> Int { d[k] as? Int ?? 0 }
         return WireSettings(changedAt: UInt32(n("changedAt")), cards: UInt16(n("cards")), interval: UInt8(n("interval")),
                             cities: (d["cities"] as? [Int] ?? [0, 33, 9]).map { Int8($0) }, units: UInt8(n("units")),
-                            backlight: UInt8(n("backlight")), companion: d["companion"] as? Bool ?? true)
+                            backlight: UInt8(n("backlight")), companion: d["companion"] as? Bool ?? true,
+                            chargerSignal: UInt8(d["chargerSignal"] as? Int ?? 1), beepSound: UInt8(n("beepSound")))
     }
 
     func saveSettings() {
         let v = settings.value
         UserDefaults.standard.set(["changedAt": Int(v.changedAt), "cards": Int(v.cards), "interval": Int(v.interval),
                                    "cities": v.cities.map { Int($0) }, "units": Int(v.units), "backlight": Int(v.backlight),
-                                   "companion": v.companion], forKey: "watchSettings")
+                                   "companion": v.companion, "chargerSignal": Int(v.chargerSignal), "beepSound": Int(v.beepSound)], forKey: "watchSettings")
     }
 
     func sendSnapshot() {

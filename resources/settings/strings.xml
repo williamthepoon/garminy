@@ -18,6 +18,15 @@
     <string id="blLow">Low</string>
     <string id="blMedium">Medium</string>
     <string id="blHigh">High</string>
+    <string id="chargerSignalTitle">On the charger (needs Alert Tones on)</string>
+    <string id="csNothing">Nothing</string>
+    <string id="csBeep">Beep</string>
+    <string id="csLight">Light</string>
+    <string id="csBoth">Beep and light</string>
+    <string id="beepSoundTitle">Beep sound</string>
+    <string id="bsSoft">Soft</string>
+    <string id="bsChime">Chime</string>
+    <string id="bsStandard">Standard</string>
     <string id="city1Title">World clock city 1</string>
     <string id="city2Title">World clock city 2</string>
     <string id="city3Title">World clock city 3</string>

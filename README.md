@@ -48,6 +48,8 @@ In the Garmin Connect app on your phone, go to **Devices → fēnix 7 → Activi
 - World clock cities 1–3, chosen from 45 cities, or None
 - Temperature units: follow device, °C or °F
 - Backlight: Off, Low, Medium or High. Holds the light on while garminy is open. Use it only on a charger.
+- On the charger: what an alert that would buzz does while the watch is charging, since the watch can't vibrate then. Nothing, Beep (default), Light, or Beep and light. Beeps need the watch's own **Alert Tones** setting on (MENU → System → Sound & Vibe).
+- Beep sound: Soft (default: quiet low clicks), Chime, or Standard (Garmin's loud built-in tones). The companion's Watch settings window has a **Test on watch** button to hear it.
 - Mac companion: On (default) or Off. Off stops all Bluetooth use by garminy.
 
 No phone? The Mac companion's **Watch settings** window has the same options and sends them to the watch over Bluetooth. Whichever change is most recent wins.

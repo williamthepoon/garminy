@@ -15,6 +15,7 @@ module Proto {
     const SETTINGS = 0x07;
     const SNAPSHOT_END = 0x08;
     const HEARTBEAT = 0x09;
+    const TEST_SIGNAL = 0x0A;
     const HELLO = 0x41;
     const ACK = 0x42;
     const WATCH_SETTINGS = 0x43;
@@ -101,6 +102,11 @@ module Proto {
         }
 
         function u8() as Number? { return num(Lang.NUMBER_FORMAT_UINT8, 1); }
+        // A trailing field added later: absent from an older sender's payload.
+        function optU8(fallback as Number) as Number {
+            var v = _i < _b.size() ? u8() : null;
+            return v == null ? fallback : v;
+        }
         function i8() as Number? { return num(Lang.NUMBER_FORMAT_SINT8, 1); }
         function u16() as Number? { return num(Lang.NUMBER_FORMAT_UINT16, 2); }
         function i16() as Number? { return num(Lang.NUMBER_FORMAT_SINT16, 2); }
@@ -163,7 +169,7 @@ module Proto {
 
     // s: decoded settings dictionary (same keys as decodeSettings).
     function settings(msgId as Number, s as Dictionary) as Array<ByteArray> {
-        var p = new [13]b;
+        var p = new [15]b;
         p.encodeNumber(s[:changedAt] as Number, Lang.NUMBER_FORMAT_UINT32, { :offset => 0, :endianness => Lang.ENDIAN_BIG });
         p.encodeNumber(s[:cards] as Number, Lang.NUMBER_FORMAT_UINT16, { :offset => 4, :endianness => Lang.ENDIAN_BIG });
         p[6] = (s[:interval] as Number) & 0xFF;
@@ -174,6 +180,8 @@ module Proto {
         p[10] = (s[:units] as Number) & 0xFF;
         p[11] = (s[:backlight] as Number) & 0xFF;
         p[12] = (s[:companion] as Boolean) ? 1 : 0;
+        p[13] = (s[:chargerSignal] as Number) & 0xFF;
+        p[14] = (s[:beepSound] as Number) & 0xFF;
         return frames(WATCH_SETTINGS, msgId, p);
     }
 
@@ -183,6 +191,8 @@ module Proto {
             :cities => [r.i8(), r.i8(), r.i8()],
             :units => r.u8(), :backlight => r.u8(), :companion => r.u8() == 1
         };
+        d[:chargerSignal] = r.optU8(1);
+        d[:beepSound] = r.optU8(0);
         return r.ok() ? d : null;
     }
 
@@ -237,6 +247,8 @@ module Proto {
             }
         } else if (type == SETTINGS) {
             d = decodeSettings(r);
+        } else if (type == TEST_SIGNAL) {
+            d = { :kind => r.u8() };
         } else if (type == SNAPSHOT_END || type == HEARTBEAT) {
             d = {};
         }

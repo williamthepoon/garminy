@@ -86,10 +86,16 @@ public struct WireSettings: Equatable, Sendable {
     public var units: UInt8
     public var backlight: UInt8
     public var companion: Bool
+    /// What a buzz does while the watch charges: 0 nothing, 1 beep, 2 light, 3 beep and light.
+    public var chargerSignal: UInt8
+    /// 0 soft, 1 chime, 2 standard.
+    public var beepSound: UInt8
 
-    public init(changedAt: UInt32, cards: UInt16, interval: UInt8, cities: [Int8], units: UInt8, backlight: UInt8, companion: Bool) {
+    public init(changedAt: UInt32, cards: UInt16, interval: UInt8, cities: [Int8], units: UInt8, backlight: UInt8, companion: Bool,
+                chargerSignal: UInt8 = 1, beepSound: UInt8 = 0) {
         self.changedAt = changedAt; self.cards = cards; self.interval = interval; self.cities = cities
         self.units = units; self.backlight = backlight; self.companion = companion
+        self.chargerSignal = chargerSignal; self.beepSound = beepSound
     }
 }
 
@@ -99,6 +105,8 @@ public enum MacMessage: Equatable, Sendable {
     case sessions([WireSession], hidden: UInt8)
     case alerts([WireAlert], total: UInt8)
     case buzz(id: UInt8)
+    /// Play an alert kind's signal now (Test on watch).
+    case testSignal(kind: AlertKind)
     case weather(WireWeather)
     case location(lat: Double, lon: Double)
     case settings(WireSettings)
@@ -127,7 +135,7 @@ public enum Wire {
 
     enum Kind: UInt8 {
         case helloReply = 0x01, sessions = 0x02, alerts = 0x03, buzz = 0x04, weather = 0x05
-        case location = 0x06, settings = 0x07, snapshotEnd = 0x08, heartbeat = 0x09
+        case location = 0x06, settings = 0x07, snapshotEnd = 0x08, heartbeat = 0x09, testSignal = 0x0A
         case hello = 0x41, ack = 0x42, watchSettings = 0x43, open = 0x44
     }
 
@@ -167,6 +175,8 @@ public enum Wire {
             }
         case let .buzz(id):
             kind = .buzz; p.append(id)
+        case let .testSignal(k):
+            kind = .testSignal; p.append(k.rawValue)
         case let .weather(w):
             kind = .weather
             p.u32(w.observed); p.i8(w.temperature); p.append(w.condition)
@@ -242,6 +252,8 @@ public enum Wire {
             return .alerts(list, total: total)
         case .buzz:
             return r.u8().map { .buzz(id: $0) }
+        case .testSignal:
+            return r.u8().flatMap(AlertKind.init).map { .testSignal(kind: $0) }
         case .weather:
             guard let obs = r.u32(), let t = r.i8(), let c = r.u8(),
                   let th = r.i8(), let tl = r.i8(), let tc = r.u8(),
@@ -322,6 +334,7 @@ extension Data {
         let c = Array(s.cities.prefix(3)) + Array(repeating: Int8(-1), count: Swift.max(0, 3 - s.cities.count))
         c.forEach { i8($0) }
         append(s.units); append(s.backlight); append(s.companion ? 1 : 0)
+        append(s.chargerSignal); append(s.beepSound)
     }
 }
 
@@ -354,7 +367,8 @@ struct Reader {
         guard let at = u32(), let cards = u16(), let iv = u8(),
               let c1 = i8(), let c2 = i8(), let c3 = i8(),
               let un = u8(), let bl = u8(), let co = u8() else { return nil }
+        // Added later: a 13-byte payload from an older side gets the defaults.
         return WireSettings(changedAt: at, cards: cards, interval: iv, cities: [c1, c2, c3],
-                            units: un, backlight: bl, companion: co != 0)
+                            units: un, backlight: bl, companion: co != 0, chargerSignal: u8() ?? 1, beepSound: u8() ?? 0)
     }
 }

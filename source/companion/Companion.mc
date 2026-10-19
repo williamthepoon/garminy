@@ -1,5 +1,6 @@
 import Toybox.Application;
 import Toybox.Attention;
+import Toybox.System;
 import Toybox.Lang;
 import Toybox.Time;
 import Toybox.WatchUi;
@@ -66,6 +67,8 @@ class Companion {
             if (a != null) {
                 Buzz.play(a[1] as Number);
             }
+        } else if (t == Proto.TEST_SIGNAL) {
+            Buzz.play(d[:kind] as Number);
         } else if (t == Proto.WEATHER) {
             MacWeather.save(d, macOffset);
         } else if (t == Proto.LOCATION) {
@@ -150,20 +153,79 @@ class Companion {
 
 // The three vibration patterns: done one short pulse, failed two sharp, needs you three.
 module Buzz {
+    const SIGNAL_BEEP = 1;
+    const SIGNAL_LIGHT = 2;
+    const SOUND_SOFT = 0;
+    const SOUND_CHIME = 1;
+
+    // What to do for a buzz: [vibrate, beep, light]. The watch can't vibrate while charging,
+    // so the On the charger setting picks a beep and/or the backlight instead (charger-alert-signal).
+    function plan(charging as Boolean, signal as Number) as Array<Boolean> {
+        if (!charging) {
+            return [true, false, false];
+        }
+        return [false, (signal & SIGNAL_BEEP) != 0, (signal & SIGNAL_LIGHT) != 0];
+    }
+
     function play(kind as Number) as Void {
-        if (!(Attention has :vibrate)) {
+        var stats = System.getSystemStats();
+        var charging = (stats has :charging) && stats.charging == true;
+        var p = plan(charging, Settings.get("chargerSignal", 1) as Number);
+        if (p[0] && Attention has :vibrate) {
+            Attention.vibrate(vibes(kind));
+        }
+        if (p[1] && Attention has :playTone) {
+            beep(kind, Settings.get("beepSound", 0) as Number);
+        }
+        if (p[2] && Attention has :backlight) {
+            Attention.backlight(true);
+        }
+    }
+
+    function vibes(kind as Number) as Array<Attention.VibeProfile> {
+        if (kind == Proto.K_DONE) {
+            return [new Attention.VibeProfile(60, 200)];
+        } else if (kind == Proto.K_FAILED) {
+            return [new Attention.VibeProfile(100, 120), new Attention.VibeProfile(0, 120), new Attention.VibeProfile(100, 120)];
+        }
+        return [new Attention.VibeProfile(100, 250), new Attention.VibeProfile(0, 150),
+                new Attention.VibeProfile(100, 250), new Attention.VibeProfile(0, 150),
+                new Attention.VibeProfile(100, 250)];
+    }
+
+    // Tone notes as [Hz, ms] pairs; 0 Hz is a gap. Low and short is quiet: no volume API exists.
+    function notes(kind as Number, sound as Number) as Array<Array<Number>> {
+        if (sound == SOUND_CHIME) {
+            if (kind == Proto.K_DONE) {
+                return [[880, 90], [1320, 90]];
+            } else if (kind == Proto.K_FAILED) {
+                return [[660, 90], [440, 120]];
+            }
+            return [[880, 90], [1100, 90], [1320, 90]];
+        }
+        var clicks = kind == Proto.K_DONE ? 1 : kind == Proto.K_FAILED ? 2 : 3;
+        var out = [];
+        for (var i = 0; i < clicks; i++) {
+            if (i > 0) {
+                out.add([0, 120]);
+            }
+            out.add([600, 40]);
+        }
+        return out;
+    }
+
+    function beep(kind as Number, sound as Number) as Void {
+        if (sound != SOUND_SOFT && sound != SOUND_CHIME) {
+            var tone = kind == Proto.K_DONE ? Attention.TONE_SUCCESS
+                : kind == Proto.K_FAILED ? Attention.TONE_FAILURE : Attention.TONE_ALERT_HI;
+            Attention.playTone(tone);
             return;
         }
-        var p;
-        if (kind == Proto.K_DONE) {
-            p = [new Attention.VibeProfile(60, 200)];
-        } else if (kind == Proto.K_FAILED) {
-            p = [new Attention.VibeProfile(100, 120), new Attention.VibeProfile(0, 120), new Attention.VibeProfile(100, 120)];
-        } else {
-            p = [new Attention.VibeProfile(100, 250), new Attention.VibeProfile(0, 150),
-                 new Attention.VibeProfile(100, 250), new Attention.VibeProfile(0, 150),
-                 new Attention.VibeProfile(100, 250)];
+        var n = notes(kind, sound);
+        var profile = [];
+        for (var i = 0; i < n.size(); i++) {
+            profile.add(new Attention.ToneProfile(n[i][0], n[i][1]));
         }
-        Attention.vibrate(p);
+        Attention.playTone({ :toneProfile => profile, :repeatCount => 0 });
     }
 }
