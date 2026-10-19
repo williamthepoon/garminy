@@ -41,7 +41,7 @@ let macVectors: [MacVector] = [
     MacVector(message: .buzz(id: 2), msgId: 4, frames: ["04040102"]),
     MacVector(message: .snapshotEnd, msgId: 8, frames: ["080801"]),
     MacVector(message: .location(lat: 45.50, lon: -73.57), msgId: 9, frames: ["06090111c6e343"]),
-    MacVector(message: .settings(sampleSettings), msgId: 10, frames: ["070a0168e7780001ff0a0021090000010100"]),
+    MacVector(message: .settings(sampleSettings), msgId: 10, frames: ["070a0268e7780001ff0a00210900000101000112", "070a1209"]),
     MacVector(message: .testSignal(kind: .needsYou), msgId: 15, frames: ["0a0f0100"]),
     MacVector(message: .weather(sampleWeather), msgId: 11,
               frames: ["050b0268e778000c010f060309020368e7728800", "050b120a141e28323c46505a64ff"]),
@@ -75,11 +75,14 @@ func macVectorDecodes(_ i: Int) throws {
     #expect(Wire.decodeWatch(type: 0x42, payload: Data([5])) == .ack(id: 5))
     #expect(hex(Wire.encode(WatchMessage.open(id: 5), msgId: 6)) == ["44060105"])
     #expect(Wire.decodeWatch(type: 0x44, payload: Data([5])) == .open(id: 5))
-    #expect(Wire.decodeWatch(type: 0x43, payload: unhex("68e7780001ff0a0021090000010100")) == .settings(sampleSettings))
+    #expect(Wire.decodeWatch(type: 0x43, payload: unhex("68e7780001ff0a0021090000010100011209")) == .settings(sampleSettings))
     // A 13-byte payload from an older watch decodes with the default charger signal and beep sound.
     #expect(Wire.decodeWatch(type: 0x43, payload: unhex("68e7780001ff0a002109000001")) == .settings(sampleSettings))
+    // A 15-byte payload decodes with the default quiet hours.
     var chime = sampleSettings; chime.chargerSignal = 3; chime.beepSound = 1
     #expect(Wire.decodeWatch(type: 0x43, payload: unhex("68e7780001ff0a0021090000010301")) == .settings(chime))
+    var quiet = sampleSettings; quiet.quietHours = false; quiet.quietStart = 20; quiet.quietEnd = 7
+    #expect(Wire.decodeWatch(type: 0x43, payload: unhex("68e7780001ff0a0021090000010100001407")) == .settings(quiet))
 }
 
 @Test func missingPartDropsMessage() {

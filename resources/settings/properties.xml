@@ -14,6 +14,9 @@
     <property id="city3" type="number">9</property>
     <property id="units" type="number">0</property>
     <property id="backlight" type="number">0</property>
+    <property id="quietHours" type="boolean">true</property>
+    <property id="quietStart" type="number">18</property>
+    <property id="quietEnd" type="number">9</property>
     <property id="companion" type="boolean">true</property>
     <property id="chargerSignal" type="number">1</property>
     <property id="beepSound" type="number">0</property>

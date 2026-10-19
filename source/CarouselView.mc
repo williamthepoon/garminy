@@ -25,6 +25,7 @@ class CarouselView extends WatchUi.View {
     var _escDownAt as Number? = null;
     var _layout as Layout?;
     var _backlight as Float = 0.0;
+    var _quiet as Boolean = false;
     var _companion as Companion;
     var _link as Link;
 
@@ -116,10 +117,7 @@ class CarouselView extends WatchUi.View {
             System.exit();
         }
 
-        // Repeated calls hold the backlight on past the device timeout.
-        if (_backlight > 0.0) {
-            setBacklight(_backlight);
-        }
+        holdBacklight(Settings.quietNow());
 
         if (_hintUntil != 0 && System.getTimer() >= _hintUntil) {
             _hintUntil = 0;
@@ -144,6 +142,19 @@ class CarouselView extends WatchUi.View {
         if (dirty) {
             WatchUi.requestUpdate();
         }
+    }
+
+    // Repeated calls hold the backlight on past the device timeout. Quiet hours switch it
+    // off once, then leave it to the device so a touch still lights it briefly.
+    function holdBacklight(quiet as Boolean) as Void {
+        if (_backlight > 0.0) {
+            if (!quiet) {
+                setBacklight(_backlight);
+            } else if (!_quiet) {
+                setBacklight(false);
+            }
+        }
+        _quiet = quiet;
     }
 
     function setBacklight(setting as Boolean or Float) as Void {

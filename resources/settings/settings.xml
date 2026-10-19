@@ -203,6 +203,65 @@
             <listEntry value="3">@Strings.blHigh</listEntry>
         </settingConfig>
     </setting>
+    <setting propertyKey="@Properties.quietHours" title="@Strings.quietHoursTitle">
+        <settingConfig type="boolean" />
+    </setting>
+    <setting propertyKey="@Properties.quietStart" title="@Strings.quietStartTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.h0</listEntry>
+            <listEntry value="1">@Strings.h1</listEntry>
+            <listEntry value="2">@Strings.h2</listEntry>
+            <listEntry value="3">@Strings.h3</listEntry>
+            <listEntry value="4">@Strings.h4</listEntry>
+            <listEntry value="5">@Strings.h5</listEntry>
+            <listEntry value="6">@Strings.h6</listEntry>
+            <listEntry value="7">@Strings.h7</listEntry>
+            <listEntry value="8">@Strings.h8</listEntry>
+            <listEntry value="9">@Strings.h9</listEntry>
+            <listEntry value="10">@Strings.h10</listEntry>
+            <listEntry value="11">@Strings.h11</listEntry>
+            <listEntry value="12">@Strings.h12</listEntry>
+            <listEntry value="13">@Strings.h13</listEntry>
+            <listEntry value="14">@Strings.h14</listEntry>
+            <listEntry value="15">@Strings.h15</listEntry>
+            <listEntry value="16">@Strings.h16</listEntry>
+            <listEntry value="17">@Strings.h17</listEntry>
+            <listEntry value="18">@Strings.h18</listEntry>
+            <listEntry value="19">@Strings.h19</listEntry>
+            <listEntry value="20">@Strings.h20</listEntry>
+            <listEntry value="21">@Strings.h21</listEntry>
+            <listEntry value="22">@Strings.h22</listEntry>
+            <listEntry value="23">@Strings.h23</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.quietEnd" title="@Strings.quietEndTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.h0</listEntry>
+            <listEntry value="1">@Strings.h1</listEntry>
+            <listEntry value="2">@Strings.h2</listEntry>
+            <listEntry value="3">@Strings.h3</listEntry>
+            <listEntry value="4">@Strings.h4</listEntry>
+            <listEntry value="5">@Strings.h5</listEntry>
+            <listEntry value="6">@Strings.h6</listEntry>
+            <listEntry value="7">@Strings.h7</listEntry>
+            <listEntry value="8">@Strings.h8</listEntry>
+            <listEntry value="9">@Strings.h9</listEntry>
+            <listEntry value="10">@Strings.h10</listEntry>
+            <listEntry value="11">@Strings.h11</listEntry>
+            <listEntry value="12">@Strings.h12</listEntry>
+            <listEntry value="13">@Strings.h13</listEntry>
+            <listEntry value="14">@Strings.h14</listEntry>
+            <listEntry value="15">@Strings.h15</listEntry>
+            <listEntry value="16">@Strings.h16</listEntry>
+            <listEntry value="17">@Strings.h17</listEntry>
+            <listEntry value="18">@Strings.h18</listEntry>
+            <listEntry value="19">@Strings.h19</listEntry>
+            <listEntry value="20">@Strings.h20</listEntry>
+            <listEntry value="21">@Strings.h21</listEntry>
+            <listEntry value="22">@Strings.h22</listEntry>
+            <listEntry value="23">@Strings.h23</listEntry>
+        </settingConfig>
+    </setting>
     <setting propertyKey="@Properties.chargerSignal" title="@Strings.chargerSignalTitle">
         <settingConfig type="list">
             <listEntry value="0">@Strings.csNothing</listEntry>

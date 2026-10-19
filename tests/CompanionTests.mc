@@ -44,11 +44,16 @@ function testProtoSingleFrames(logger as Test.Logger) as Boolean {
     ok &= T.check(logger, "buzz", bz != null && bz[:id] == 2);
     var loc = TC.run(["06090111c6e343"]);
     ok &= T.check(logger, "location", loc != null && ((loc[:lat] as Float) - 45.5).abs() < 0.001 && ((loc[:lon] as Float) + 73.57).abs() < 0.001);
-    var s = TC.run(["070a0168e7780001ff0a0021090000010100"]);
+    var s = TC.run(["070a0268e7780001ff0a00210900000101000112", "070a1209"]);
     ok &= T.check(logger, "settings", s != null && s[:changedAt] == 1760000000 && s[:cards] == 0x1FF && s[:interval] == 10
-        && (s[:cities] as Array)[1] == 33 && s[:companion] == true && s[:chargerSignal] == 1 && s[:beepSound] == 0);
+        && (s[:cities] as Array)[1] == 33 && s[:companion] == true && s[:chargerSignal] == 1 && s[:beepSound] == 0
+        && s[:quietHours] == true && s[:quietStart] == 18 && s[:quietEnd] == 9);
     var old = TC.run(["070b0168e7780001ff0a002109000001"]);
-    ok &= T.check(logger, "13-byte settings get defaults", old != null && old[:chargerSignal] == 1 && old[:beepSound] == 0);
+    ok &= T.check(logger, "13-byte settings get defaults", old != null && old[:chargerSignal] == 1 && old[:beepSound] == 0
+        && old[:quietHours] == true && old[:quietStart] == 18 && old[:quietEnd] == 9);
+    var mid = TC.run(["070c0168e7780001ff0a0021090000010301"]);
+    ok &= T.check(logger, "15-byte settings get quiet defaults", mid != null && mid[:beepSound] == 1
+        && mid[:quietHours] == true && mid[:quietStart] == 18 && mid[:quietEnd] == 9);
     var ts = TC.run(["0a0f0100"]);
     ok &= T.check(logger, "test signal", ts != null && ts[:type] == Proto.TEST_SIGNAL && ts[:kind] == Proto.K_NEEDS_YOU);
     return ok;
@@ -90,8 +95,11 @@ function testProtoEncodes(logger as Test.Logger) as Boolean {
     ok &= T.check(logger, "ack", TC.hex(Proto.ack(3, 5)[0]).equals("42030105"));
     ok &= T.check(logger, "open", TC.hex(Proto.open(6, 5)[0]).equals("44060105"));
     var s = { :changedAt => 1760000000, :cards => 0x1FF, :interval => 10, :cities => [0, 33, 9],
-              :units => 0, :backlight => 0, :companion => true, :chargerSignal => 1, :beepSound => 0 };
-    ok &= T.check(logger, "settings", TC.hex(Proto.settings(10, s)[0]).equals("430a0168e7780001ff0a0021090000010100"));
+              :units => 0, :backlight => 0, :companion => true, :chargerSignal => 1, :beepSound => 0,
+              :quietHours => true, :quietStart => 18, :quietEnd => 9 };
+    var sf = Proto.settings(10, s);
+    ok &= T.check(logger, "settings", sf.size() == 2 && TC.hex(sf[0]).equals("430a0268e7780001ff0a00210900000101000112")
+        && TC.hex(sf[1]).equals("430a1209"));
     return ok;
 }
 
@@ -263,7 +271,8 @@ function testLocationFallsBackToMac(logger as Test.Logger) as Boolean {
 function testSettingsFromMacNewerWins(logger as Test.Logger) as Boolean {
     Application.Storage.setValue("settingsChangedAt", 1000);
     var d = { :changedAt => 2000, :cards => 0x1FF & ~(1 << 1), :interval => 60, :cities => [9, -1, 16],
-              :units => 2, :backlight => 0, :companion => true, :chargerSignal => 3, :beepSound => 1 };
+              :units => 2, :backlight => 0, :companion => true, :chargerSignal => 3, :beepSound => 1,
+              :quietHours => false, :quietStart => 20, :quietEnd => 7 };
     var ok = T.check(logger, "applied", Settings.applyRemote(d));
     ok &= T.check(logger, "interval 60", Settings.interval() == 60);
     ok &= T.check(logger, "fortune off", Application.Properties.getValue("cardFortune") == false);
@@ -273,7 +282,8 @@ function testSettingsFromMacNewerWins(logger as Test.Logger) as Boolean {
     ok &= T.check(logger, "older ignored", !Settings.applyRemote(d) && Settings.interval() == 60);
     var snap = Settings.snapshot();
     ok &= T.check(logger, "snapshot round trip", snap[:changedAt] == 2000 && snap[:interval] == 60 && snap[:units] == 2
-        && snap[:chargerSignal] == 3 && snap[:beepSound] == 1);
+        && snap[:chargerSignal] == 3 && snap[:beepSound] == 1
+        && snap[:quietHours] == false && snap[:quietStart] == 20 && snap[:quietEnd] == 7);
     TS.reset();
     Application.Storage.deleteValue("settingsChangedAt");
     return ok;
@@ -303,16 +313,22 @@ function testAgentsCardOnlyAfterFirstConnection(logger as Test.Logger) as Boolea
 
 (:test)
 function testChargerSignalPlan(logger as Test.Logger) as Boolean {
-    var p = Buzz.plan(false, 3);
+    var p = Buzz.plan(false, 3, false);
     var ok = T.check(logger, "battery vibrates only", p[0] && !p[1] && !p[2]);
-    p = Buzz.plan(true, 1);
+    p = Buzz.plan(true, 1, false);
     ok &= T.check(logger, "charging beep", !p[0] && p[1] && !p[2]);
-    p = Buzz.plan(true, 2);
+    p = Buzz.plan(true, 2, false);
     ok &= T.check(logger, "charging light", !p[0] && !p[1] && p[2]);
-    p = Buzz.plan(true, 3);
+    p = Buzz.plan(true, 3, false);
     ok &= T.check(logger, "charging both", !p[0] && p[1] && p[2]);
-    p = Buzz.plan(true, 0);
+    p = Buzz.plan(true, 0, false);
     ok &= T.check(logger, "charging nothing", !p[0] && !p[1] && !p[2]);
+    p = Buzz.plan(true, 3, true);
+    ok &= T.check(logger, "quiet hours beep without light", !p[0] && p[1] && !p[2]);
+    p = Buzz.plan(true, 2, true);
+    ok &= T.check(logger, "quiet hours light-only is silent", !p[0] && !p[1] && !p[2]);
+    p = Buzz.plan(false, 3, true);
+    ok &= T.check(logger, "quiet hours still vibrate on battery", p[0] && !p[1] && !p[2]);
     ok &= T.check(logger, "soft needs-you is 3 clicks", Buzz.notes(Proto.K_NEEDS_YOU, Buzz.SOUND_SOFT).size() == 5);
     ok &= T.check(logger, "soft done is 1 click", Buzz.notes(Proto.K_DONE, Buzz.SOUND_SOFT).size() == 1);
     return ok;
