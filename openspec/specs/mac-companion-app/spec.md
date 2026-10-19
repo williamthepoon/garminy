@@ -52,11 +52,15 @@ The companion SHALL provide a zsh snippet the user can add to their shell config
 - **THEN** the line to add to `~/.zshrc` is copied to the clipboard and the instructions are shown
 
 ### Requirement: Presence signals
-The companion SHALL track user input idle time, screen lock and unlock, Mac sleep and wake, and the frontmost app, for alert routing. It SHALL do this without Accessibility, Screen Recording or Full Disk Access permissions.
+The companion SHALL track user input idle time, screen lock and unlock, Mac sleep and wake, and the frontmost app, for alert routing. It SHALL do this without Accessibility, Screen Recording or Full Disk Access permissions. The only privacy prompts SHALL be Bluetooth, Location, and Automation for iTerm2 or Terminal. The Automation prompt SHALL appear only the first time the user opens a session in that app from the watch.
 
 #### Scenario: Permissions requested
-- **WHEN** the companion is installed and run with all features on
+- **WHEN** the companion is installed and run with all features on, and no session has been opened from the watch
 - **THEN** the only privacy prompts are Bluetooth and Location
+
+#### Scenario: First open in iTerm2
+- **WHEN** the user first taps a needs-you alert for a session running in iTerm2
+- **THEN** macOS asks once whether garminy Companion may control iTerm2, and never asks for Accessibility
 
 ### Requirement: Keep awake while work runs
 While any agent session is working, or a long command is running, the companion SHALL prevent idle sleep. When no work is running, it SHALL release this within 1 minute. The user SHALL be able to turn this off.
@@ -70,11 +74,19 @@ While any agent session is working, or a long command is running, the companion 
 - **THEN** the Mac's normal idle-sleep behaviour returns within 1 minute
 
 ### Requirement: Edit watch settings from the Mac
-The app SHALL offer every garminy setting the Garmin Connect app offers: card toggles, rotation interval, world clock cities, temperature units, backlight and the Mac companion toggle. It SHALL send changes to the watch when connected, or on the next connection.
+The app SHALL offer every garminy setting the Garmin Connect app offers: card toggles, rotation interval, world clock cities, temperature units, backlight, Quiet hours with its start and end hours, On the charger, Beep sound and the Mac companion toggle. It SHALL send changes to the watch when connected, or on the next connection.
 
 #### Scenario: Change interval offline
 - **WHEN** the user sets the interval to 30 seconds while the watch is disconnected
 - **THEN** the watch uses 30 seconds after it next connects
+
+#### Scenario: Choose the charger signal
+- **WHEN** the user sets On the charger to "Beep and light" in the Watch settings window while the watch is connected
+- **THEN** the next alert that would buzz on the charging watch beeps and turns on the backlight
+
+#### Scenario: Change quiet hours
+- **WHEN** the user sets quiet hours to 20:00–07:00 in the Watch settings window while the watch is connected
+- **THEN** the watch keeps the backlight off from 20:00 to 07:00
 
 ### Requirement: Build from source
 The repository SHALL contain a script that builds the companion app and `garminy-hook` from source with Apple's free developer tools, and signs them with a stable local identity so that macOS permissions survive rebuilds.
@@ -82,3 +94,14 @@ The repository SHALL contain a script that builds the companion app and `garminy
 #### Scenario: Rebuild keeps permissions
 - **WHEN** the user rebuilds and reinstalls the app with the script
 - **THEN** macOS does not ask for Bluetooth permission again
+
+### Requirement: Test the alert signal
+The Watch settings window SHALL have a Test on watch button. While the watch is connected, it SHALL make the watch play a needs-you signal right away, using the current settings: a vibration on battery, or the On the charger signal while charging. It SHALL be disabled while the watch is disconnected.
+
+#### Scenario: Try a beep sound
+- **WHEN** the watch is charging and connected, the user picks Chime, and clicks Test on watch
+- **THEN** the watch plays the needs-you chime within 2 seconds
+
+#### Scenario: Watch disconnected
+- **WHEN** the watch is not connected
+- **THEN** Test on watch is disabled

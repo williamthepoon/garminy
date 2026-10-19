@@ -82,7 +82,7 @@
 
 - [x] 5.1 `grep -n FONT_XTINY source/` shows only the exit hint, and `grep -n drawTitle source/` returns nothing
 - [x] 5.2 Sideload with `scripts/sideload.sh` and look at every card from desk distance (about 65 cm) with the backlight off. Record whether the vector text is crisp enough and whether redraws lag. If it fails, set `USE_VECTOR = false` and re-check, and note the outcome in design.md.
-- [ ] 5.3 Rebuild the companion with `scripts/bundle-mac.sh`, trigger a permission prompt for an MCP tool and a stop failure, and check that the watch shows "Allow …" and "Error" in full
+- [ ] 5.3 Rebuild the companion with `scripts/bundle-mac.sh`, trigger a permission prompt for an MCP tool and a stop failure, and check that the watch shows "Allow …" and "Error" in full (waived by the user on 2026-10-19 when shipping)
 - [x] 5.4 Update the README screenshots or card descriptions if they mention card titles or the 3-row Agents card, and verify that the README matches the new behaviour
 
 ## Workflow follow-up

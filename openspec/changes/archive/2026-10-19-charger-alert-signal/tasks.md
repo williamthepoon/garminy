@@ -16,6 +16,6 @@
 ## 3. Verify
 
 - [x] 3.1 Simulator: the Garmin Connect settings preview shows the new list, and the default reads Beep
-- [ ] 3.2 Live, charging: use Test on watch for each beep sound and signal. Beep gives the chosen sound, Light lights the screen, and Nothing stays silent. Tune the Soft and Chime values with the user until Soft is acceptably quiet (partly done on 2026-10-19: Soft played 3 quiet clicks on the charger; Chime, Standard, Light and Nothing are not yet tried)
-- [ ] 3.3 Live, on battery: it still vibrates and doesn't beep (not yet tried live; the plan() unit test covers it)
+- [ ] 3.2 Live, charging: use Test on watch for each beep sound and signal. Beep gives the chosen sound, Light lights the screen, and Nothing stays silent. Tune the Soft and Chime values with the user until Soft is acceptably quiet (partly done on 2026-10-19: Soft played 3 quiet clicks on the charger; Chime, Standard, Light and Nothing are not yet tried) (waived by the user on 2026-10-19 when shipping)
+- [ ] 3.3 Live, on battery: it still vibrates and doesn't beep (not yet tried live; the plan() unit test covers it) (waived by the user on 2026-10-19 when shipping)
 - [x] 3.4 README: add On the charger to the settings section, plus the Alert Tones note

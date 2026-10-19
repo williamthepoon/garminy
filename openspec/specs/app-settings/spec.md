@@ -76,3 +76,52 @@ The watch SHALL accept settings sent by the Mac companion, save them as its own 
 #### Scenario: Watch without a phone
 - **WHEN** the watch has never been paired with a phone and the user disables the Fortune card in the companion app
 - **THEN** Fortune no longer appears in the rotation
+
+### Requirement: On the charger setting
+Users SHALL be able to choose what an alert does while the watch is charging: Nothing, Beep, Light, or Beep and light. The default SHALL be Beep.
+
+#### Scenario: Default install
+- **WHEN** settings have never been changed
+- **THEN** On the charger is set to Beep
+
+#### Scenario: Silent on the charger
+- **WHEN** the user sets On the charger to Nothing
+- **THEN** alerts on a charging watch are shown without sound or light
+
+### Requirement: Beep sound setting
+Users SHALL be able to choose the beep sound: Soft, Chime or Standard. The default SHALL be Soft. Soft SHALL play short, low clicks in the alert kind's buzz pattern. Chime SHALL play a short melody per kind. Standard SHALL play the watch's built-in alert, failure and success tones.
+
+#### Scenario: Default install
+- **WHEN** settings have never been changed
+- **THEN** Beep sound is Soft
+
+#### Scenario: Soft needs-you beep
+- **WHEN** Beep sound is Soft and a needs-you alert beeps
+- **THEN** the watch plays three short, low clicks
+
+### Requirement: Quiet hours setting
+Users SHALL be able to turn Quiet hours On or Off and choose a start hour and an end hour, each a whole hour from 00:00 to 23:00. The defaults SHALL be On, starting at 18:00 and ending at 09:00. Quiet hours SHALL run from the start hour up to, but not including, the end hour, wrapping past midnight when the start is later than the end. When the start and end hours are equal, quiet hours SHALL never be active.
+
+#### Scenario: Default install
+- **WHEN** settings have never been changed
+- **THEN** Quiet hours is On, from 18:00 to 09:00
+
+#### Scenario: Overnight window
+- **WHEN** quiet hours run from 18:00 to 09:00 and the local time is 02:30
+- **THEN** quiet hours are active
+
+#### Scenario: End hour is not quiet
+- **WHEN** quiet hours run from 18:00 to 09:00 and the local time is 09:00
+- **THEN** quiet hours are not active
+
+#### Scenario: Same-day window
+- **WHEN** quiet hours run from 12:00 to 14:00 and the local time is 13:15
+- **THEN** quiet hours are active
+
+#### Scenario: Equal start and end
+- **WHEN** the start and end hours are both 08:00
+- **THEN** quiet hours are never active
+
+#### Scenario: Turned off
+- **WHEN** Quiet hours is Off and the local time is 23:00
+- **THEN** quiet hours are not active
