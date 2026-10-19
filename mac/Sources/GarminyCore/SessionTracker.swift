@@ -57,7 +57,7 @@ public struct SessionTracker: Sendable {
             next = .working
         case "PermissionRequest":
             next = .needsYou
-            detail = "Permission: \(e.tool ?? "tool")"
+            detail = Format.allow(e.tool)
         case "Notification" where Self.inputNotifications.contains(e.ntype ?? ""):
             next = s.state == .needsYou ? nil : .needsYou
             detail = e.ntype == "permission_prompt" ? "Permission" : "Input needed"
@@ -85,7 +85,7 @@ public struct SessionTracker: Sendable {
                 effects.append(.resolve(source: src, kinds: [.needsYou]))
             case .error:
                 effects.append(.resolve(source: src, kinds: [.needsYou]))
-                effects.append(.raise(kind: .failed, label: s.label, detail: "Stopped with an error", source: src, term: s.term))
+                effects.append(.raise(kind: .failed, label: s.label, detail: "Error", source: src, term: s.term))
             default:
                 break
             }

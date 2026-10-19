@@ -1,5 +1,6 @@
 import Toybox.Graphics;
 import Toybox.Lang;
+import Toybox.Math;
 
 // Screen geometry derived from the display size, so the same code fits
 // 218-280 px round screens without hard-coded pixel positions.
@@ -29,12 +30,28 @@ class Layout {
         boxH = (h * (BOX_BOTTOM - BOX_TOP)).toNumber();
         dotsY = (h * 0.88).toNumber();
     }
+
+    // The same layout with the usable circle shrunk by px, e.g. inside the alert ring.
+    function inset(px as Number) as Layout {
+        var l = new Layout(w, h);
+        l.r = r - px;
+        return l;
+    }
+
+    // Width of the round screen at height y, less a margin on each side.
+    function chord(y as Number, margin as Number) as Number {
+        var dy = (y - cy).abs();
+        if (dy >= r) {
+            return 0;
+        }
+        return (2 * Math.sqrt(r * r - dy * dy)).toNumber() - 2 * margin;
+    }
 }
 
 const BOX_HEADER = 0.10;
 const BOX_W = 0.70;
-const BOX_TOP = 0.24;
-const BOX_BOTTOM = 0.80;
+const BOX_TOP = 0.18;
+const BOX_BOTTOM = 0.84;
 
 // True when every corner of the content box lies inside the round display.
 function boxInsideCircle(width as Number, height as Number) as Boolean {

@@ -37,9 +37,8 @@ module Daily {
         return entry(fortuneChunks(), indexFor(days, FORTUNE_COUNT)) as String;
     }
 
-    // [text, attribution]
-    function quote(days as Number) as Array<String> {
-        return entry(quoteChunks(), indexFor(days, QUOTE_COUNT)) as Array<String>;
+    function quote(days as Number) as String {
+        return entry(quoteChunks(), indexFor(days, QUOTE_COUNT)) as String;
     }
 
     // [year, text]
@@ -52,13 +51,11 @@ module Daily {
 // Shared base: refresh when the local date changes, then draw wrapped text.
 class TextCard extends Card {
     var _day as Number = -1;
-    var _title as String = "";
     var _text as String = "";
-    var _sub as String? = null;
+    var _year as String? = null;
 
-    function initialize(title as String) {
+    function initialize() {
         Card.initialize();
-        _title = title;
     }
 
     function refresh() as Void {
@@ -73,21 +70,20 @@ class TextCard extends Card {
     }
 
     function draw(dc as Graphics.Dc, l as Layout) as Void {
-        drawTitle(dc, l, _title);
-        var top = l.boxY + l.h / 14;
-        var subH = _sub != null ? l.h / 10 : 0;
-        Ui.drawFitted(dc, _text, l.boxX, top, l.boxW, l.boxY + l.boxH - top - subH, Ui.FG);
-        if (_sub != null) {
+        var top = l.boxY;
+        if (_year != null) {
             dc.setColor(Ui.ACCENT, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(l.cx, l.boxY + l.boxH - subH / 2, Graphics.FONT_XTINY, _sub as String,
+            dc.drawText(l.cx, l.boxY + l.h / 10, Graphics.FONT_NUMBER_MILD, _year as String,
                 Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+            top = l.boxY + l.h / 5;
         }
+        Ui.drawFitted(dc, l, _text, top, l.boxY + l.boxH, Ui.FG, Graphics.FONT_TINY);
     }
 }
 
 class FortuneCard extends TextCard {
     function initialize() {
-        TextCard.initialize("FORTUNE");
+        TextCard.initialize();
     }
 
     function id() as String {
@@ -101,7 +97,7 @@ class FortuneCard extends TextCard {
 
 class QuoteCard extends TextCard {
     function initialize() {
-        TextCard.initialize("QUOTE OF THE DAY");
+        TextCard.initialize();
     }
 
     function id() as String {
@@ -109,15 +105,13 @@ class QuoteCard extends TextCard {
     }
 
     function load(days as Number) as Void {
-        var q = Daily.quote(days);
-        _text = "\"" + q[0] + "\"";
-        _sub = "- " + q[1];
+        _text = Daily.quote(days);
     }
 }
 
 class OnThisDayCard extends TextCard {
     function initialize() {
-        TextCard.initialize("ON THIS DAY");
+        TextCard.initialize();
     }
 
     function id() as String {
@@ -128,6 +122,6 @@ class OnThisDayCard extends TextCard {
         var t = Dates.localToday();
         var e = Daily.onThisDay(t[1], t[2]);
         _text = e[1] as String;
-        _sub = (e[0] as Number).toString();
+        _year = (e[0] as Number).toString();
     }
 }

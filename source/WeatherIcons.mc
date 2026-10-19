@@ -127,6 +127,27 @@ module WeatherIcons {
         }
     }
 
+    // Umbrella with its canopy's straight edge on y; s is the canopy radius.
+    function drawUmbrella(dc as Graphics.Dc, x as Number, y as Number, s as Number, color as Number) as Void {
+        var pts = [] as Array<[Numeric, Numeric]>;
+        for (var i = 0; i <= 12; i++) {
+            var a = Math.PI * i / 12;
+            pts.add([x - (s * Math.cos(a)).toNumber(), y - (s * Math.sin(a)).toNumber()]);
+        }
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        dc.fillPolygon(pts);
+        // Scalloped edge.
+        dc.setColor(Ui.BG, Graphics.COLOR_TRANSPARENT);
+        for (var i = -1; i <= 1; i++) {
+            dc.fillCircle(x + i * s * 2 / 3, y + 1, s / 3);
+        }
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        dc.setPenWidth(3);
+        dc.drawLine(x, y - s / 2, x, y + s * 4 / 5);
+        dc.drawArc(x - s / 4, y + s * 4 / 5, s / 4, Graphics.ARC_COUNTER_CLOCKWISE, 180, 0);
+        dc.setPenWidth(1);
+    }
+
     function drawSun(dc as Graphics.Dc, x as Number, y as Number, s as Number) as Void {
         dc.setColor(Ui.YELLOW, Graphics.COLOR_TRANSPARENT);
         dc.fillCircle(x, y, s / 2);

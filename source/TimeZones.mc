@@ -19,6 +19,17 @@ module TimeZones {
         "Perth", "Tokyo", "Seoul", "Brisbane", "Sydney", "Melbourne",
         "Auckland", "Honolulu", "Anchorage"
     ];
+    // Three-letter code shown on the card, parallel to NAMES (settings keep the full names).
+    const CODES = [
+        "SFO", "LAX", "SEA", "YVR", "DEN", "PHX",
+        "CHI", "MEX", "TOR", "MTL", "NYC", "BOS",
+        "YHZ", "SAO", "BUE", "REK", "LON", "DUB",
+        "LIS", "PAR", "BER", "MAD", "AMS", "STO",
+        "ROM", "ATH", "HEL", "JNB", "IST", "MOW",
+        "DXB", "BOM", "BKK", "SIN", "HKG", "SHA",
+        "PER", "TYO", "SEL", "BNE", "SYD", "MEL",
+        "AKL", "HNL", "ANC"
+    ];
     // Standard (winter) offset from UTC in minutes.
     const STD = [
         -480, -480, -480, -480, -420, -420,

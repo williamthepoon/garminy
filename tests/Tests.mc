@@ -2,6 +2,8 @@ import Toybox.Application;
 import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.Test;
+import Toybox.Time;
+import Toybox.Time.Gregorian;
 import Toybox.WatchUi;
 
 // Unit tests: scripts/test.sh runs them in the simulator.
@@ -21,6 +23,11 @@ module T {
         return ok;
     }
 
+    // A drawing context the size of the fenix 7 screen, for measuring text.
+    function dc() as Graphics.Dc {
+        return (Graphics.createBufferedBitmap({:width => 260, :height => 260}).get() as Graphics.BufferedBitmap).getDc();
+    }
+
     function check(logger as Test.Logger, label as String, ok as Boolean) as Boolean {
         if (!ok) {
             logger.error("failed: " + label);
@@ -37,6 +44,10 @@ function testLayoutFitsRoundScreens(logger as Test.Logger) as Boolean {
     var ok = true;
     for (var i = 0; i < sizes.size(); i++) {
         ok = T.check(logger, "box inside circle at " + sizes[i], boxInsideCircle(sizes[i], sizes[i])) && ok;
+        var l = new Layout(sizes[i], sizes[i]);
+        for (var y = l.boxY; y <= l.boxY + l.boxH; y += 4) {
+            ok = T.check(logger, "chord positive at " + y, l.chord(y, Ui.MARGIN) > 0) && ok;
+        }
     }
     return ok;
 }
@@ -93,9 +104,8 @@ function testFortuneAndQuoteContent(logger as Test.Logger) as Boolean {
         var arr = WatchUi.loadResource(q[i]) as Array;
         qc += arr.size();
         for (var j = 0; j < arr.size(); j++) {
-            var e = arr[j] as Array<String>;
-            ok = T.check(logger, "quote length", e[0].length() <= 90) && ok;
-            ok = T.check(logger, "quote attribution", e[1].length() > 0) && ok;
+            ok = T.check(logger, "quote is text only", arr[j] instanceof String) && ok;
+            ok = T.check(logger, "quote length", (arr[j] as String).length() <= 90) && ok;
         }
     }
     ok = T.check(logger, "fortune count", fc == Daily.FORTUNE_COUNT) && ok;
@@ -166,6 +176,18 @@ function testStaleNote(logger as Test.Logger) as Boolean {
     return ok;
 }
 
+(:test)
+function testHighLowText(logger as Test.Logger) as Boolean {
+    Application.Properties.setValue("units", Settings.UNITS_C);
+    var ok = T.check(logger, "22/13", hiLo(22, 13).equals("22/13"));
+    ok = T.check(logger, "negative", hiLo(-3, -12).equals("-3/-12")) && ok;
+    ok = T.check(logger, "missing", hiLo(null, null).equals("--/--")) && ok;
+    Application.Properties.setValue("units", Settings.UNITS_F);
+    ok = T.check(logger, "fahrenheit", hiLo(22, 13).equals("72/55")) && ok;
+    Application.Properties.setValue("units", Settings.UNITS_DEVICE);
+    return ok;
+}
+
 // ---- Sun ----
 
 (:test)
@@ -203,6 +225,18 @@ function testSunPolar(logger as Test.Logger) as Boolean {
     var winter = SunCalc.compute(2026, 12, 21, 69.6492d, 18.9553d);
     var ok = T.check(logger, "Tromso midnight sun", summer[0] == SunCalc.SUN_UP_ALL_DAY);
     ok = T.check(logger, "Tromso polar night", winter[0] == SunCalc.NO_SUNRISE) && ok;
+    return ok;
+}
+
+(:test)
+function testDaylightLine(logger as Test.Logger) as Boolean {
+    var rise = 1000000;
+    var set = rise + 12 * 3600;
+    var ok = T.check(logger, "day", daylightLine(set - (3 * 3600 + 12 * 60), rise, set, 0).equals("3h 12m left"));
+    ok = T.check(logger, "before sunrise", daylightLine(rise - 300, rise, set, 0).equals("Sunrise in 5m")) && ok;
+    ok = T.check(logger, "after sunset",
+        daylightLine(set + 60, rise, set, set + 60 + 10 * 3600).equals("Sunrise in 10h 0m")) && ok;
+    ok = T.check(logger, "no sunrise tomorrow", daylightLine(set + 60, rise, set, 0).equals("No sunrise tomorrow")) && ok;
     return ok;
 }
 
@@ -252,6 +286,15 @@ function testMoonWaxingCrescent(logger as Test.Logger) as Boolean {
     var ok = T.check(logger, "waxing crescent", MoonCalc.phaseIndex(a) == 1);
     ok = T.check(logger, "thin", MoonCalc.illumination(a) < 0.25d) && ok;
     return ok;
+}
+
+(:test)
+function testFullMoonLine(logger as Test.Logger) as Boolean {
+    var m = new Time.Moment(T.utc(2026, 10, 24, 12, 0));
+    var info = Gregorian.info(m, Time.FORMAT_MEDIUM);
+    var expected = "Full " + info.day_of_week + " " + info.day.toString();
+    var line = fullMoonLine(m);
+    return T.check(logger, "full moon line " + line, line.equals(expected) && line.find(info.month as String) == null);
 }
 
 // ---- Time zones ----
@@ -310,32 +353,59 @@ function testCityTimeAndDayOffset(logger as Test.Logger) as Boolean {
     return ok;
 }
 
+(:test)
+function testCityCodes(logger as Test.Logger) as Boolean {
+    var codes = TimeZones.CODES;
+    var ok = T.check(logger, "one code per city", codes.size() == TimeZones.NAMES.size());
+    var seen = {} as Dictionary<String, Boolean>;
+    for (var i = 0; i < codes.size(); i++) {
+        var c = codes[i];
+        var upper = c.length() == 3;
+        var chars = c.toCharArray();
+        for (var j = 0; j < chars.size(); j++) {
+            upper = upper && chars[j] >= 'A' && chars[j] <= 'Z';
+        }
+        ok = T.check(logger, "three capitals: " + c, upper) && ok;
+        ok = T.check(logger, "unique: " + c, !seen.hasKey(c)) && ok;
+        seen[c] = true;
+    }
+    ok = T.check(logger, "defaults", codes[TimeZones.SAN_FRANCISCO].equals("SFO")
+        && codes[TimeZones.SINGAPORE].equals("SIN") && codes[TimeZones.MONTREAL].equals("MTL")) && ok;
+    return ok;
+}
+
+(:test)
+function testWorldClockTimeFont(logger as Test.Logger) as Boolean {
+    var dc = T.dc();
+    var l = new Layout(260, 260);
+    var codes = ["SFO", "JNB", "SIN"];
+    var times = [["12:45", "pm"], ["9:45", "pm"], ["3:45", "am"]] as Array<Array<String>>;
+    var diffs = [0, 0, 1];
+    var narrowest = Ui.lineWidth(l, l.boxY + l.boxH * 2 / 3, l.boxH / 3) - 2 * (l.boxH / 3 / 8) - CLOCK_GAP;
+    var ok = T.check(logger, "large numerals fit with codes",
+        timeFont(dc, codes, times, diffs, narrowest) == Graphics.FONT_NUMBER_MILD);
+    ok = T.check(logger, "falls back when narrow",
+        timeFont(dc, codes, times, diffs, 120) != Graphics.FONT_NUMBER_MILD) && ok;
+    return ok;
+}
+
 // ---- Text fit (fenix7 260x260 content box, same maths as TextCard.draw) ----
 
 (:test)
 function testAllBundledTextFitsTheScreen(logger as Test.Logger) as Boolean {
     var l = new Layout(260, 260);
-    var top = l.boxY + l.h / 14;
-    var subH = l.h / 10;
-    var w = l.boxW;
-    var hNoSub = l.boxY + l.boxH - top;
-    var hSub = hNoSub - subH;
+    var dc = T.dc();
+    var bottom = l.boxY + l.boxH;
+    var yearTop = l.boxY + l.h / 5;
     var ok = true;
-    var f = Daily.fortuneChunks();
-    for (var i = 0; i < f.size(); i++) {
-        var arr = WatchUi.loadResource(f[i]) as Array;
-        for (var j = 0; j < arr.size(); j++) {
-            ok = T.check(logger, "fortune fits: " + arr[j],
-                Graphics.fitTextToArea(arr[j] as String, Graphics.FONT_XTINY, w, hNoSub, false) != null) && ok;
-        }
-    }
-    var q = Daily.quoteChunks();
-    for (var i = 0; i < q.size(); i++) {
-        var arr = WatchUi.loadResource(q[i]) as Array;
-        for (var j = 0; j < arr.size(); j++) {
-            var e = arr[j] as Array<String>;
-            ok = T.check(logger, "quote fits: " + e[0],
-                Graphics.fitTextToArea("\"" + e[0] + "\"", Graphics.FONT_XTINY, w, hSub, false) != null) && ok;
+    var chunks = [Daily.fortuneChunks(), Daily.quoteChunks()];
+    for (var c = 0; c < chunks.size(); c++) {
+        for (var i = 0; i < chunks[c].size(); i++) {
+            var arr = WatchUi.loadResource(chunks[c][i]) as Array;
+            for (var j = 0; j < arr.size(); j++) {
+                ok = T.check(logger, "fits at TINY or larger: " + arr[j],
+                    Ui.fit(dc, l, arr[j] as String, l.boxY, bottom, Graphics.FONT_TINY) != null) && ok;
+            }
         }
     }
     for (var m = 0; m < 12; m++) {
@@ -343,10 +413,68 @@ function testAllBundledTextFitsTheScreen(logger as Test.Logger) as Boolean {
         for (var d = 0; d < arr.size(); d++) {
             var e = arr[d] as Array;
             ok = T.check(logger, "on this day fits: " + e[1],
-                Graphics.fitTextToArea(e[1] as String, Graphics.FONT_XTINY, w, hSub, false) != null) && ok;
+                Ui.fit(dc, l, e[1] as String, yearTop, bottom, Graphics.FONT_TINY) != null) && ok;
         }
     }
     return ok;
+}
+
+// ---- Text fitting ----
+
+(:test)
+function testFontLadder(logger as Test.Logger) as Boolean {
+    var dc = T.dc();
+    var fs = Ui.fonts(56, Graphics.FONT_TINY);
+    var ok = T.check(logger, "ladder ends at TINY", fs[fs.size() - 1] == Graphics.FONT_TINY);
+    for (var i = 0; i < fs.size(); i++) {
+        ok = T.check(logger, "no XTINY", fs[i] != Graphics.FONT_XTINY) && ok;
+        if (i > 0) {
+            ok = T.check(logger, "descending at " + i, dc.getFontHeight(fs[i]) < dc.getFontHeight(fs[i - 1])) && ok;
+        }
+    }
+    var small = Ui.fonts(56, Graphics.FONT_SMALL);
+    ok = T.check(logger, "SMALL floor", small[small.size() - 1] == Graphics.FONT_SMALL) && ok;
+    ok = T.check(logger, "vector sizes on fenix7", fs.size() > 4) && ok;
+    return ok;
+}
+
+(:test)
+function testFitToRoundScreen(logger as Test.Logger) as Boolean {
+    var l = new Layout(260, 260);
+    var dc = T.dc();
+    var top = l.boxY;
+    var bottom = l.boxY + l.boxH;
+    var r = Ui.fit(dc, l, "Mac offline", top, bottom, Graphics.FONT_SMALL);
+    var ok = T.check(logger, "short text fits", r != null);
+    if (r != null) {
+        ok = T.check(logger, "short text bigger than SMALL",
+            dc.getFontHeight(r[0] as Graphics.FontType) > dc.getFontHeight(Graphics.FONT_SMALL)) && ok;
+        ok = T.check(logger, "cache hit returns same lines", Ui.fit(dc, l, "Mac offline", top, bottom, Graphics.FONT_SMALL) == r) && ok;
+    }
+    ok = T.check(logger, "unbreakable word does not fit",
+        Ui.fit(dc, l, "Pneumonoultramicroscopicsilicovolcanoconiosis", top, bottom, Graphics.FONT_TINY) == null) && ok;
+    var text = "It is not that we have a short time to live, but that we waste a lot of it.";
+    var f = Ui.fit(dc, l, text, top, bottom, Graphics.FONT_TINY);
+    ok = T.check(logger, "long text fits", f != null) && ok;
+    if (f != null) {
+        var font = f[0] as Graphics.FontType;
+        var lines = f[1] as Array<String>;
+        var lh = dc.getFontHeight(font);
+        var y = (top + bottom) / 2 - lines.size() * lh / 2;
+        for (var i = 0; i < lines.size(); i++) {
+            ok = T.check(logger, "line " + i + " inside circle",
+                dc.getTextWidthInPixels(lines[i], font) <= Ui.lineWidth(l, y + i * lh, lh)) && ok;
+        }
+    }
+    return ok;
+}
+
+(:test)
+function testTwelveHourSplit(logger as Test.Logger) as Boolean {
+    var a = Ui.splitAmPm("2:05pm");
+    var b = Ui.splitAmPm("14:05");
+    return T.check(logger, "12h", a[0].equals("2:05") && a[1].equals("pm"))
+        && T.check(logger, "24h", b[0].equals("14:05") && b[1].equals(""));
 }
 
 // ---- Carousel + settings (drives Application.Properties directly) ----

@@ -74,6 +74,21 @@ module LocationSource {
     }
 }
 
+// "Xh Ym left" by day, "Sunrise in Xh Ym" at night (nextRise 0 = none tomorrow).
+function daylightLine(now as Number, rise as Number, set as Number, nextRise as Number) as String {
+    if (now >= rise && now < set) {
+        return Ui.formatDuration(set - now) + " left";
+    }
+    var target = now < rise ? rise : nextRise;
+    return target > 0 ? "Sunrise in " + Ui.formatDuration(target - now) : "No sunrise tomorrow";
+}
+
+// "Full Fri 24": the next full moon is always less than a month away.
+function fullMoonLine(m as Time.Moment) as String {
+    var full = Gregorian.info(m, Time.FORMAT_MEDIUM);
+    return "Full " + full.day_of_week + " " + full.day.toString();
+}
+
 class DaylightCard extends Card {
     var _status as Number = -1;    // -1 = unknown location
     var _rise as Number = 0;
@@ -106,7 +121,6 @@ class DaylightCard extends Card {
     }
 
     function draw(dc as Graphics.Dc, l as Layout) as Void {
-        drawTitle(dc, l, "DAYLIGHT");
         if (_status == -1) {
             drawMessage(dc, l, "Location unknown - get a GPS fix or run the Mac companion");
             return;
@@ -122,7 +136,7 @@ class DaylightCard extends Card {
 
         var now = Time.now().value();
         var ar = (l.h * 0.27).toNumber();
-        var ay = l.cy + l.h / 10;
+        var ay = l.cy + l.h / 20;
         var day = now >= _rise && now < _set;
 
         // Horizon and arc.
@@ -133,29 +147,23 @@ class DaylightCard extends Card {
         dc.drawArc(l.cx, ay, ar, Graphics.ARC_CLOCKWISE, 180, 0);
         dc.setPenWidth(1);
 
-        var line;
         if (day) {
             var frac = (now - _rise).toFloat() / (_set - _rise).toFloat();
             var a = Math.PI * (1.0 - frac);
             var sx = l.cx + (ar * Math.cos(a)).toNumber();
             var sy = ay - (ar * Math.sin(a)).toNumber();
             dc.setColor(Ui.YELLOW, Graphics.COLOR_TRANSPARENT);
-            dc.fillCircle(sx, sy, 7);
-            line = Ui.formatDuration(_set - now) + " of daylight left";
-        } else {
-            var target = now < _rise ? _rise : _nextRise;
-            line = target > 0 ? "Sunrise in " + Ui.formatDuration(target - now) : "No sunrise tomorrow";
+            dc.fillCircle(sx, sy, 8);
         }
 
-        dc.setColor(Ui.DIM, Graphics.COLOR_TRANSPARENT);
-        var ty = ay + l.h / 16;
-        dc.drawText(l.cx - ar, ty, Graphics.FONT_XTINY, Ui.formatMoment(new Time.Moment(_rise)),
-            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-        dc.drawText(l.cx + ar, ty, Graphics.FONT_XTINY, Ui.formatMoment(new Time.Moment(_set)),
-            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
         dc.setColor(Ui.FG, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(l.cx, ty + l.h / 11, Graphics.FONT_TINY, line,
+        var ty = ay + l.h / 14;
+        dc.drawText(l.cx - ar, ty, Graphics.FONT_SMALL, Ui.formatMoment(new Time.Moment(_rise)),
             Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        dc.drawText(l.cx + ar, ty, Graphics.FONT_SMALL, Ui.formatMoment(new Time.Moment(_set)),
+            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        Ui.drawLine(dc, l, daylightLine(now, _rise, _set, _nextRise), ty + l.h / 7,
+            [Graphics.FONT_MEDIUM, Graphics.FONT_SMALL] as Array<Graphics.FontType>, Ui.FG);
     }
 }
 
@@ -178,20 +186,19 @@ class MoonCard extends Card {
     }
 
     function draw(dc as Graphics.Dc, l as Layout) as Void {
-        drawTitle(dc, l, "MOON");
-        var mr = l.h / 7;
-        var my = l.cy - l.h / 24;
-        drawMoon(dc, l.cx, my, mr, _age);
+        var mr = l.h / 8;
+        var my = l.cy - l.h / 8;
+        drawMoon(dc, l.cx - l.w / 6, my, mr, _age);
 
         var illum = Math.round(MoonCalc.illumination(_age) * 100.0d).toNumber();
         dc.setColor(Ui.FG, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(l.cx, my + mr + l.h / 18, Graphics.FONT_TINY,
-            MoonCalc.NAMES[MoonCalc.phaseIndex(_age)] + " " + illum.toString() + "%",
+        dc.drawText(l.cx + l.w / 6, my, Graphics.FONT_NUMBER_MILD, illum.toString() + "%",
             Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-        var full = Gregorian.info(new Time.Moment(_nextFull), Time.FORMAT_MEDIUM);
-        dc.setColor(Ui.DIM, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(l.cx, my + mr + l.h / 18 + l.h / 12, Graphics.FONT_XTINY,
-            "Full moon " + full.day_of_week + " " + full.day.toString() + " " + full.month,
+        var ny = my + mr + l.h / 10;
+        Ui.drawLine(dc, l, MoonCalc.NAMES[MoonCalc.phaseIndex(_age)], ny,
+            [Graphics.FONT_MEDIUM, Graphics.FONT_SMALL] as Array<Graphics.FontType>, Ui.FG);
+        dc.setColor(Ui.FG, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(l.cx, ny + l.h / 7, Graphics.FONT_SMALL, fullMoonLine(new Time.Moment(_nextFull)),
             Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
     }
 

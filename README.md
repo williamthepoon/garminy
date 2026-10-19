@@ -14,15 +14,17 @@ garminy turns a retired Garmin fēnix 7 into a desk display. It sits on a stand 
 
 | Card | Shows |
 |---|---|
-| Agents | Your Claude Code sessions and what each is doing (needs the [Mac companion](#mac-companion-optional)) |
+| Agents | Your two most urgent Claude Code sessions and what each is doing, plus a count of the rest (needs the [Mac companion](#mac-companion-optional)) |
 | Fortune | One fortune per day |
-| Motivational quote | One public-domain quote per day |
+| Motivational quote | One public-domain quote per day (the text only, so it can be large) |
 | Umbrella? | **YES / MAYBE / NO** from the highest hourly rain chance in the next 12 h (YES ≥ 50%, MAYBE 30–49%, NO < 30%) |
 | Weather | Today and tomorrow: icon, high/low, current temperature |
 | Daylight | Sun arc, sunrise/sunset, daylight left or time until sunrise |
 | Moon phase | Drawn moon, phase name, illumination, next full moon |
-| World clock | Up to 3 cities (default San Francisco, Singapore, Montreal), DST-aware |
+| World clock | Up to 3 cities shown by three-letter code (default SFO, SIN, MTL), DST-aware |
 | On this day | A historical event for every date of the year |
+
+Text is sized to be read from a desk: there are no card titles, and each card's main value is drawn as large as the round screen allows.
 
 It needs no accounts, API keys or servers. Weather comes from the watch's built-in Garmin weather, which the Garmin Connect phone app keeps up to date. A watch without a phone can get weather from the [Mac companion](#mac-companion-optional) instead. Everything else is bundled with the app or calculated on the watch.
 
@@ -58,7 +60,7 @@ No phone? The Mac companion's **Watch settings** window has the same options and
 
 A small menu-bar app for macOS 14 or later that turns the watch into a status light for your desk. It runs only on your Mac: no account, no server, no API key. The watch connects to it over Bluetooth while garminy is open.
 
-- **Agents card:** every Claude Code session by folder name, with its state (working, needs you, done, error) and how long it has been in it.
+- **Agents card:** every Claude Code session by folder name, with its state (busy, waiting, done, error) and how long it has been in it.
 - **Alerts:** when an agent needs you, finishes a long turn or fails, or a long terminal command finishes, the watch shows it full screen and buzzes. Tap the watch to dismiss it; it is dismissed on the Mac too.
 - **Tap to open:** tapping a Claude Code alert (needs you, done or failed) brings that session to the front on the Mac. Working in that session's tab on the Mac clears its alerts from the watch within a few seconds, without a tap. In iTerm2 and Terminal it selects the exact tab; in other apps (VS Code, Ghostty and so on) it brings the app forward. The first time, macOS asks whether garminy Companion may control iTerm2 or Terminal. Update the watch app and the companion together, because an older companion ignores this tap.
 - **Buzzes only when useful:** no buzz while you're typing in that terminal, one buzz if you're in another app, and if you're away (idle 2 minutes or screen locked) a needs-you alert buzzes again every 5 minutes, up to 3 more times.
