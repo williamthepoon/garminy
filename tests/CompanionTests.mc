@@ -60,10 +60,10 @@ function testProtoMultiPart(logger as Test.Logger) as Boolean {
     var w = TC.run(["050b0268e778000c010f060309020368e7728800", "050b120a141e28323c46505a64ff"]);
     ok &= T.check(logger, "weather", w != null && w[:temp] == 12 && (w[:today] as Array)[0] == 15
         && (w[:tomorrow] as Array)[1] == 2 && w[:base] == 1759998600 && (w[:chances] as Array)[11] == 255);
-    var a = TC.run(["030c020101010001076761726d696e7910506572", "030c126d697373696f6e3a2042617368"]);
+    var a = TC.run(["030c020101010001076761726d696e790a416c6c", "030c126f772042617368"]);
     var first = a == null ? null : ((a[:list] as Array)[0] as Array);
     ok &= T.check(logger, "alerts", first != null && first[0] == 1 && first[1] == Proto.K_NEEDS_YOU && first[2] == true
-        && "garminy".equals(first[3]) && "Permission: Bash".equals(first[4]) && first[5] == false);
+        && "garminy".equals(first[3]) && "Allow Bash".equals(first[4]) && first[5] == false);
     var o = TC.run(["030e010101020202076761726d696e7902346d"]);
     var op = o == null ? null : ((o[:list] as Array)[0] as Array);
     ok &= T.check(logger, "openable alert", op != null && op[1] == Proto.K_DONE && op[2] == false && op[5] == true);
@@ -315,5 +315,16 @@ function testChargerSignalPlan(logger as Test.Logger) as Boolean {
     ok &= T.check(logger, "charging nothing", !p[0] && !p[1] && !p[2]);
     ok &= T.check(logger, "soft needs-you is 3 clicks", Buzz.notes(Proto.K_NEEDS_YOU, Buzz.SOUND_SOFT).size() == 5);
     ok &= T.check(logger, "soft done is 1 click", Buzz.notes(Proto.K_DONE, Buzz.SOUND_SOFT).size() == 1);
+    return ok;
+}
+
+(:test)
+function testAgentsCardRows(logger as Test.Logger) as Boolean {
+    var ok = T.check(logger, "1 session", shownSessions(1) == 1 && hiddenSessions(1, 0) == 0);
+    ok = T.check(logger, "2 sessions", shownSessions(2) == 2 && hiddenSessions(2, 0) == 0) && ok;
+    ok = T.check(logger, "4 sessions", shownSessions(4) == 2 && hiddenSessions(4, 0) == 2) && ok;
+    ok = T.check(logger, "4 sent + 2 held back", hiddenSessions(4, 2) == 4) && ok;
+    ok = T.check(logger, "waiting line", stateLine(1, 3).equals("waiting · 3m")) && ok;
+    ok = T.check(logger, "busy line", stateLine(0, 12).equals("busy · 12m")) && ok;
     return ok;
 }

@@ -1,10 +1,9 @@
 import Toybox.Graphics;
 import Toybox.Lang;
-import Toybox.Math;
 
 // Colour and word for session states and alert kinds.
 module Look {
-    const STATE_WORDS = ["working", "needs you", "done", "error"];
+    const STATE_WORDS = ["busy", "waiting", "done", "error"];
     const STATE_COLORS = [Ui.BLUE, Ui.ACCENT, Ui.GREEN, Ui.RED];
     const KIND_WORDS = ["NEEDS YOU", "FAILED", "DONE"];
     const KIND_COLORS = [Ui.ACCENT, Ui.RED, Ui.GREEN];
@@ -30,20 +29,12 @@ module Look {
         }
         return "…";
     }
-
-    // Width of the round screen at height y, less a margin.
-    function chord(l as Layout, y as Number, margin as Number) as Number {
-        var dy = (y - l.cy).abs();
-        if (dy >= l.r) {
-            return 0;
-        }
-        return (2 * Math.sqrt(l.r * l.r - dy * dy)).toNumber() - 2 * margin;
-    }
 }
+
+const AGENT_ROWS = 2;
 
 // Claude Code sessions on the Mac, most urgent first (agent-status).
 class AgentsCard extends Card {
-    const ROWS = 3;
     var _c as Companion;
 
     function initialize(c as Companion) {
@@ -56,7 +47,6 @@ class AgentsCard extends Card {
     }
 
     function draw(dc as Graphics.Dc, l as Layout) as Void {
-        drawTitle(dc, l, "AGENTS");
         if (_c.versionMismatch) {
             drawMessage(dc, l, "Update garminy");
             return;
@@ -70,33 +60,49 @@ class AgentsCard extends Card {
             drawMessage(dc, l, "No agents running");
             return;
         }
-        var top = l.boxY + l.h / 20;
-        var rowH = (l.dotsY - 30 - top) / ROWS;
-        var labelH = dc.getFontHeight(Graphics.FONT_TINY);
-        var n = list.size() < ROWS ? list.size() : ROWS;
-        var more = _c.moreSessions + list.size() - n;
+        var labelH = dc.getFontHeight(Graphics.FONT_MEDIUM);
+        var stateH = dc.getFontHeight(Graphics.FONT_SMALL);
+        var rowH = labelH + stateH;
+        var n = shownSessions(list.size());
+        var more = hiddenSessions(list.size(), _c.moreSessions);
+        var top = l.boxY + (l.boxH - n * rowH - (more > 0 ? stateH : 0)) / 2;
         for (var i = 0; i < n; i++) {
             var s = list[i] as Array;
             var state = s[0] as Number;
             var y = top + i * rowH;
             var color = Look.stateColor(state);
-            var label = Look.truncate(dc, s[2] as String, Graphics.FONT_TINY, Look.chord(l, y + labelH / 2, 14) - 14);
-            var lw = dc.getTextWidthInPixels(label, Graphics.FONT_TINY);
-            var x = l.cx - lw / 2;
+            var label = Look.truncate(dc, s[2] as String, Graphics.FONT_MEDIUM, l.chord(y + labelH / 2, 14) - 20);
+            var lw = dc.getTextWidthInPixels(label, Graphics.FONT_MEDIUM);
+            var x = l.cx - lw / 2 + 8;
             dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-            dc.fillCircle(x - 9, y + labelH / 2, 4);
+            dc.fillCircle(x - 12, y + labelH / 2, 6);
             dc.setColor(Ui.FG, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(x, y, Graphics.FONT_TINY, label, Graphics.TEXT_JUSTIFY_LEFT);
-            var word = state >= 0 && state < Look.STATE_WORDS.size() ? Look.STATE_WORDS[state] : "?";
+            dc.drawText(x, y, Graphics.FONT_MEDIUM, label, Graphics.TEXT_JUSTIFY_LEFT);
             dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(l.cx, y + labelH - 4, Graphics.FONT_XTINY,
-                word + " · " + Ui.formatDuration((s[1] as Number) * 60), Graphics.TEXT_JUSTIFY_CENTER);
+            dc.drawText(l.cx, y + labelH - 4, Graphics.FONT_SMALL, stateLine(state, s[1] as Number),
+                Graphics.TEXT_JUSTIFY_CENTER);
         }
         if (more > 0) {
-            dc.setColor(Ui.DIM, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(l.cx, top + n * rowH - 2, Graphics.FONT_XTINY, "+" + more + " more", Graphics.TEXT_JUSTIFY_CENTER);
+            dc.setColor(Ui.FG, Graphics.COLOR_TRANSPARENT);
+            dc.drawText(l.cx, top + n * rowH, Graphics.FONT_SMALL, "+" + more, Graphics.TEXT_JUSTIFY_CENTER);
         }
     }
+}
+
+// Rows shown on the Agents card for count sessions received.
+function shownSessions(count as Number) as Number {
+    return count < AGENT_ROWS ? count : AGENT_ROWS;
+}
+
+// Sessions not shown: those received but beyond the rows, plus those the Mac held back.
+function hiddenSessions(count as Number, held as Number) as Number {
+    return held + count - shownSessions(count);
+}
+
+// "waiting · 3m"
+function stateLine(state as Number, minutes as Number) as String {
+    var word = state >= 0 && state < Look.STATE_WORDS.size() ? Look.STATE_WORDS[state] : "?";
+    return word + " · " + Ui.formatDuration(minutes * 60);
 }
 
 // Full-screen alert drawn over the current card (desk-alerts).
@@ -117,18 +123,31 @@ module AlertOverlay {
         dc.setPenWidth(1);
 
         var word = kind >= 0 && kind < Look.KIND_WORDS.size() ? Look.KIND_WORDS[kind] : "ALERT";
-        dc.drawText(l.cx, l.boxY - 4, Graphics.FONT_SMALL, word, Graphics.TEXT_JUSTIFY_CENTER);
-        Ui.drawFitted(dc, a[3] as String, l.boxX, l.boxY + l.boxH / 5, l.boxW, l.boxH * 2 / 5, Ui.FG);
+        // Fit text inside the ring, not the bezel.
+        var rl = l.inset(10);
+        Ui.drawLine(dc, rl, word, l.boxY + l.h / 14, Ui.fonts(44, Graphics.FONT_SMALL), color);
+        var top = l.boxY + l.h / 6;
+        var bottom = l.cy + l.h / 15;
+        if (!Ui.drawFitted(dc, rl, a[3] as String, top, bottom, Ui.FG, Graphics.FONT_SMALL)) {
+            // A long unbroken label: one SMALL line, cut with "…".
+            var y = (top + bottom) / 2;
+            dc.setColor(Ui.FG, Graphics.COLOR_TRANSPARENT);
+            dc.drawText(l.cx, y, Graphics.FONT_SMALL,
+                Look.truncate(dc, a[3] as String, Graphics.FONT_SMALL, Ui.lineWidth(rl, y - 16, 32)),
+                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        }
         var detail = a[4] as String;
         if (detail.length() > 0) {
-            dc.setColor(Ui.DIM, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(l.cx, l.boxY + l.boxH * 3 / 5 + 4, Graphics.FONT_XTINY, detail, Graphics.TEXT_JUSTIFY_CENTER);
+            dc.setColor(Ui.FG, Graphics.COLOR_TRANSPARENT);
+            dc.drawText(l.cx, l.cy + l.h / 8, Graphics.FONT_SMALL, detail,
+                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
         }
         var foot = c.connected ? (c.opensOnTap(a) ? "Tap to open" : "Tap to dismiss") : "Mac offline";
         if (c.alertTotal > 1) {
-            foot = "+" + (c.alertTotal - 1) + "  ·  " + foot;
+            foot = "+" + (c.alertTotal - 1) + " · " + foot;
         }
-        dc.setColor(c.connected ? Ui.FAINT : Ui.ACCENT, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(l.cx, l.boxY + l.boxH - 18, Graphics.FONT_XTINY, foot, Graphics.TEXT_JUSTIFY_CENTER);
+        dc.setColor(c.connected ? Ui.DIM : Ui.ACCENT, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(l.cx, l.cy + l.h / 4, Graphics.FONT_SMALL, foot,
+            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
     }
 }

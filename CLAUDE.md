@@ -51,6 +51,8 @@ Mac companion (`mac/`, SwiftPM, Swift 6, macOS 14+):
 - **Tap to open (open-agent-session):** the hook records `__CFBundleIdentifier`, the `ITERM_SESSION_ID` UUID and the controlling tty, and these never go on the wire. The ALERTS buzz byte is a flags byte (bit 0 buzz, bit 1 openable), and the watch sends `OPEN` (0x44) in place of `ACK` for a live tap on an openable alert. A 2 s focus poll clears a session's alerts when the user is active in its tab; it checks `AEDeterminePermissionToAutomateTarget` first, so it never prompts. `SessionOpener` uses AppleScript for iTerm2 and Terminal and falls back to `NSWorkspace.openApplication`. This needs the `com.apple.security.automation.apple-events` entitlement; check `-1743` in the log if tab selection fails.
 - **Claude Code exports `CLAUDECODE`,** so the zsh snippet ignores commands run from Claude's own shell. Unset it when testing the snippet.
 - **Monkey C reserves the word `hidden`.**
+- **Monkey C can't reference a class `const` from outside an instance** (`WorldClockCard.GAP` fails with "Cannot find symbol"). Use a module-level constant (e.g. `CLOCK_GAP`, `AGENT_ROWS`).
+- **Desk text:** the floor is `FONT_SMALL` (daily content may drop to TINY). Draw text with `Ui.drawFitted` / `Ui.fitLine` / `Ui.fonts`, which wrap to the round screen's chord and use vector RobotoCondensedBold above 40 px. NUMBER fonts only have digits and `# % + - . / : °`.
 
 Simulator verification notes:
 - `scripts/test.sh` leaves the simulator with no app loaded. Relaunch with `monkeydo bin/garminy-fenix7.prg fenix7`.

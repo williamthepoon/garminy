@@ -20,16 +20,9 @@ class Card {
     }
 }
 
-// Shows a centred, wrapped message below the card title. Used for empty and no-data states.
+// Shows a centred, wrapped message in the content area. Used for empty and no-data states.
 function drawMessage(dc as Graphics.Dc, l as Layout, text as String) as Void {
-    var top = l.boxY + l.h / 14;
-    Ui.drawFitted(dc, text, l.boxX, top, l.boxW, l.boxY + l.boxH - top, Ui.DIM);
-}
-
-// Small title line at the top of the content area.
-function drawTitle(dc as Graphics.Dc, l as Layout, text as String) as Void {
-    dc.setColor(Ui.ACCENT, Graphics.COLOR_TRANSPARENT);
-    dc.drawText(l.cx, l.boxY, Graphics.FONT_XTINY, text, Graphics.TEXT_JUSTIFY_CENTER);
+    Ui.drawFitted(dc, l, text, l.boxY, l.boxY + l.boxH, Ui.FG, Graphics.FONT_SMALL);
 }
 
 function makeCard(id as String) as Card? {

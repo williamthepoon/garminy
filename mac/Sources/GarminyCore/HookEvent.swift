@@ -98,4 +98,19 @@ public enum Format {
         let m = (secs % 3600) / 60
         return m == 0 ? "\(secs / 3600)h" : "\(secs / 3600)h \(m)m"
     }
+
+    /// "Allow Bash" for a permission alert, within the wire's detail limit.
+    /// Drops an `mcp__<server>__` prefix and ends a shortened name with "…".
+    public static func allow(_ tool: String?) -> String {
+        var name = tool ?? ""
+        if name.hasPrefix("mcp__"), let r = name.range(of: "__", range: name.index(name.startIndex, offsetBy: 5)..<name.endIndex) {
+            name = String(name[r.upperBound...])
+        }
+        if name.isEmpty { name = "tool" }
+        let full = "Allow " + name
+        if full.utf8.count <= Wire.maxAlertDetail { return full }
+        var cut = name
+        while !cut.isEmpty && ("Allow " + cut + "…").utf8.count > Wire.maxAlertDetail { cut.removeLast() }
+        return "Allow " + cut + "…"
+    }
 }

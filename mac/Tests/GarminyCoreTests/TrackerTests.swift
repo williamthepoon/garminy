@@ -31,7 +31,7 @@ func claude(_ event: String, _ session: String = "s1", cwd: String = "/Users/x/g
     _ = t.apply(claude("UserPromptSubmit"), now: at(0))
     let fx = t.apply(claude("PermissionRequest", tool: "Bash"), now: at(5))
     #expect(t.sessions["s1"]?.state == .needsYou)
-    #expect(fx == [.raise(kind: .needsYou, label: "garminy", detail: "Permission: Bash", source: "claude:s1", term: "iTerm.app")])
+    #expect(fx == [.raise(kind: .needsYou, label: "garminy", detail: "Allow Bash", source: "claude:s1", term: "iTerm.app")])
     // Answering resolves it.
     let fx2 = t.apply(claude("PostToolUse", tool: "Bash"), now: at(9))
     #expect(fx2 == [.resolve(source: "claude:s1", kinds: [.needsYou])])
@@ -56,7 +56,7 @@ func claude(_ event: String, _ session: String = "s1", cwd: String = "/Users/x/g
     _ = t.apply(claude("UserPromptSubmit"), now: at(0))
     let fx = t.apply(claude("StopFailure"), now: at(5))
     #expect(t.sessions["s1"]?.state == .error)
-    #expect(fx.contains(.raise(kind: .failed, label: "garminy", detail: "Stopped with an error", source: "claude:s1", term: "iTerm.app")))
+    #expect(fx.contains(.raise(kind: .failed, label: "garminy", detail: "Error", source: "claude:s1", term: "iTerm.app")))
 }
 
 @Test func newPromptResolvesEverything() {
@@ -284,4 +284,16 @@ let itermUUID = "9B2568DF-31BB-4892-97AC-5DAAD4A462F3"
     #expect(FocusPolicy.hostToCheck(alerts: q.alerts, location: loc, presence: Presence(idleSeconds: 300, locked: false, frontmostBundle: iterm)) == nil)
     #expect(FocusPolicy.hostToCheck(alerts: q.alerts, location: loc, presence: Presence(idleSeconds: 1, locked: true, frontmostBundle: iterm)) == nil)
     #expect(FocusPolicy.hostToCheck(alerts: q.alerts, location: loc, presence: Presence(idleSeconds: 1, locked: false, frontmostBundle: "com.apple.Safari")) == nil)
+}
+
+@Test func permissionDetailFitsTheWire() {
+    #expect(Format.allow("Bash") == "Allow Bash")
+    #expect(Format.allow(nil) == "Allow tool")
+    #expect(Format.allow("mcp__github__list_prs") == "Allow list_prs")
+    #expect(Format.allow("mcp__claude_ai_Gmail__search_threads") == "Allow search_threads")
+    let long = Format.allow("mcp__claude_ai_Google_Calendar__create_event_now")
+    #expect(long.utf8.count <= Wire.maxAlertDetail)
+    #expect(long.hasPrefix("Allow create_") && long.hasSuffix("…"))
+    #expect(Format.allow("NotebookEdit") == "Allow NotebookEdit")
+    #expect(Format.allow("AVeryLongToolNameIndeed").utf8.count <= Wire.maxAlertDetail)
 }

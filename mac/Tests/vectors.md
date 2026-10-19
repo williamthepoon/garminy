@@ -25,9 +25,9 @@ Shared by `GarminyCoreTests` (Swift) and `tests/CompanionTests.mc` (Monkey C). E
 - WEATHER observed 1760000000, now 12C cond 1, today 15/6 cond 3, tomorrow 9/2 cond 3, hourly base 1759998600, chances 0,10,20,30,40,50,60,70,80,90,100,255, msgId 11
   - `050b0268e778000c010f060309020368e7728800`
   - `050b120a141e28323c46505a64ff`
-- ALERTS total 1: id 1 needs-you buzz label "garminy" detail "Permission: Bash", msgId 12
-  - `030c020101010001076761726d696e7910506572`
-  - `030c126d697373696f6e3a2042617368`
+- ALERTS total 1: id 1 needs-you buzz label "garminy" detail "Allow Bash", msgId 12
+  - `030c020101010001076761726d696e790a416c6c`
+  - `030c126f772042617368`
 - ALERTS total 1: id 2 done, openable, no buzz, label "garminy" detail "4m", msgId 14
   - `030e010101020202076761726d696e7902346d`
 - SESSIONS 3 shown, 0 hidden: needs-you 0m "garminy", working 12m "api-svc", done 3m "website", msgId 13

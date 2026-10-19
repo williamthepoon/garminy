@@ -52,7 +52,8 @@ def main():
             fail(f"quote {i}: missing attribution")
     if len(set(q[0] for q in quotes)) != len(quotes):
         fail("duplicate quote")
-    write_chunks("quotes", quotes, xml)
+    # Authors stay in content/quotes.json as the source record; the watch shows the text only.
+    write_chunks("quotes", [q[0] for q in quotes], xml)
 
     otd = json.load(open("content/onthisday.json"))
     for m in range(1, 13):
