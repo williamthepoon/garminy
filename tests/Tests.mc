@@ -657,6 +657,10 @@ function testBacklightSetting(logger as Test.Logger) as Boolean {
     ok = T.check(logger, "quiet hours tracked", v._quiet && v._backlight == 1.0) && ok;
     v.holdBacklight(false);
     ok = T.check(logger, "quiet hours end", !v._quiet && v._backlight == 1.0) && ok;
+    Application.Properties.setValue("backlight", 0);
+    v.reload();
+    v.holdBacklight(true);
+    ok = T.check(logger, "quiet hours tracked with backlight off", v._quiet) && ok;
     TS.reset();
     return ok;
 }

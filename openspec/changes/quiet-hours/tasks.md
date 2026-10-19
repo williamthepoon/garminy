@@ -7,7 +7,7 @@
 
 ## 2. Backlight and alerts
 
-- [x] 2.1 In `CarouselView`, add a `_quiet` edge state: send `setBacklight(false)` once when quiet hours begin, and skip the hold while they're active. Verify in the simulator using a temporary preview build that sets the start hour one minute ahead: the backlight hold stops at the start hour and comes back at the end hour. Don't commit the preview hook.
+- [x] 2.1 In `CarouselView`, add a `_quiet` edge state: send `setBacklight(false)` once when quiet hours begin or the app opens during them, whatever the Backlight setting, and skip the hold while they're active. Verify in the simulator using a temporary preview build that sets the start hour one minute ahead: the backlight hold stops at the start hour and comes back at the end hour. Don't commit the preview hook.
 - [x] 2.2 Add a `quiet` parameter to `Buzz.plan` that clears the light flag, and pass `Settings.quietNow()` from `Buzz.play`. Add `(:test)` cases for "Beep and light" while quiet (beep only) and Light while not quiet. Verify that `scripts/test.sh` passes.
 
 ## 3. Wire protocol
@@ -22,8 +22,9 @@
 
 ## 5. Integration
 
-- [ ] 5.1 Verify live on the fēnix 7 after `scripts/sideload.sh`, with Backlight set to High. Set quiet hours from the Mac to start at the next hour, then confirm that the light goes off at that hour and that a charger alert with "Beep and light" beeps without lighting the screen.
-- [x] 5.2 Run `openspec validate quiet-hours --strict` and verify that it passes.
+- [ ] 5.1 Verify live with Backlight Off: at 19:52 the light goes off within 2 s of opening garminy.
+- [ ] 5.2 Verify live on the fēnix 7 after `scripts/sideload.sh`, with Backlight set to High. Set quiet hours from the Mac to start at the next hour, then confirm that the light goes off at that hour and that a charger alert with "Beep and light" beeps without lighting the screen.
+- [x] 5.3 Run `openspec validate quiet-hours --strict` and verify that it passes.
 
 ## Workflow follow-up
 

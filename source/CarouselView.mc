@@ -145,14 +145,15 @@ class CarouselView extends WatchUi.View {
     }
 
     // Repeated calls hold the backlight on past the device timeout. Quiet hours switch it
-    // off once, then leave it to the device so a touch still lights it briefly.
+    // off once, whatever the Backlight setting, then leave it to the device so a touch
+    // still lights it briefly.
     function holdBacklight(quiet as Boolean) as Void {
-        if (_backlight > 0.0) {
-            if (!quiet) {
-                setBacklight(_backlight);
-            } else if (!_quiet) {
+        if (quiet) {
+            if (!_quiet) {
                 setBacklight(false);
             }
+        } else if (_backlight > 0.0) {
+            setBacklight(_backlight);
         }
         _quiet = quiet;
     }

@@ -1,14 +1,14 @@
 ## MODIFIED Requirements
 
 ### Requirement: Keep backlight on
-While the app is open and the Backlight setting is Low, Medium or High, the app SHALL hold the display backlight on at that brightness, overriding the device's backlight timeout, except during quiet hours. When quiet hours begin, the app SHALL turn the backlight off and stop holding it; when they end, it SHALL hold it on again. When the setting is Off, the app SHALL leave the backlight to the device.
+While the app is open and the Backlight setting is Low, Medium or High, the app SHALL hold the display backlight on at that brightness, overriding the device's backlight timeout, except during quiet hours. When quiet hours begin, or the app opens during them, the app SHALL turn the backlight off once, whatever the Backlight setting, and SHALL NOT hold it on until they end. Outside quiet hours, when the setting is Off, the app SHALL leave the backlight to the device.
 
 #### Scenario: Backlight on Medium
 - **WHEN** the Backlight setting is Medium, quiet hours are not active, and the app has been open for 10 minutes with no input
 - **THEN** the backlight is still lit at medium brightness
 
 #### Scenario: Backlight Off
-- **WHEN** the Backlight setting is Off
+- **WHEN** the Backlight setting is Off and quiet hours are not active
 - **THEN** the backlight turns off after the device's normal timeout
 
 #### Scenario: Turned off while lit
@@ -29,4 +29,8 @@ While the app is open and the Backlight setting is Low, Medium or High, the app 
 
 #### Scenario: Opened during quiet hours
 - **WHEN** the Backlight setting is High and the app is opened at 22:00 with quiet hours from 18:00 to 09:00
-- **THEN** the app does not hold the backlight on
+- **THEN** the backlight turns off within 2 seconds and the app does not hold it on
+
+#### Scenario: Backlight Off when quiet hours begin
+- **WHEN** the Backlight setting is Off, the backlight is lit, and quiet hours begin with the app open
+- **THEN** the backlight turns off within 2 seconds
