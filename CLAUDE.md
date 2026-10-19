@@ -26,6 +26,7 @@ Rules:
 ## Platform constraints (verified during research)
 
 - Connect IQ, Monkey C, Fenix 7 = API 5.2. The display is 260x260 round MIP with 64 colours, and the backlight is off by default.
+- **The watch doesn't vibrate while charging** (tested 2026-10-19). `Attention.vibrate` does nothing on the charger, but `playTone` and `backlight` still work; tones need the watch's Alert Tones setting on. That's why `Buzz.play` swaps to the On the charger signal (charger-alert-signal).
 - **START (KEY_ENTER) cannot be relied on.** Inputs are touch (tap/swipe), UP, DOWN, BACK. LIGHT belongs to the system.
 - Ship as a device app with a glance. Users open it via the glance; widgets time out, device apps don't.
 - Weather comes from `Toybox.Weather` (via the phone's Garmin Connect). Avoid `makeWebRequest` unless a spec requires it.

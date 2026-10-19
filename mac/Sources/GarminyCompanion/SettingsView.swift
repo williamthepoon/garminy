@@ -47,6 +47,20 @@ struct SettingsView: View {
                                                        set: { v in model.editSettings { $0.backlight = v } })) {
                     Text("Off").tag(UInt8(0)); Text("Low").tag(UInt8(1)); Text("Medium").tag(UInt8(2)); Text("High").tag(UInt8(3))
                 }
+                Picker("On the charger", selection: Binding(get: { model.settings.value.chargerSignal },
+                                                            set: { v in model.editSettings { $0.chargerSignal = v } })) {
+                    Text("Nothing").tag(UInt8(0)); Text("Beep").tag(UInt8(1)); Text("Light").tag(UInt8(2)); Text("Beep and light").tag(UInt8(3))
+                }
+                Picker("Beep sound", selection: Binding(get: { model.settings.value.beepSound },
+                                                        set: { v in model.editSettings { $0.beepSound = v } })) {
+                    Text("Soft").tag(UInt8(0)); Text("Chime").tag(UInt8(1)); Text("Standard").tag(UInt8(2))
+                }
+                HStack {
+                    Text("The watch can't vibrate while charging. Beeps need the watch's Alert Tones on.")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Test on watch") { model.testSignal() }.disabled(!model.watchConnected)
+                }
                 Toggle("Mac companion on the watch", isOn: Binding(get: { model.settings.value.companion },
                                                                   set: { v in model.editSettings { $0.companion = v } }))
             }

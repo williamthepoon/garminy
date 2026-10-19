@@ -203,4 +203,19 @@
             <listEntry value="3">@Strings.blHigh</listEntry>
         </settingConfig>
     </setting>
+    <setting propertyKey="@Properties.chargerSignal" title="@Strings.chargerSignalTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.csNothing</listEntry>
+            <listEntry value="1">@Strings.csBeep</listEntry>
+            <listEntry value="2">@Strings.csLight</listEntry>
+            <listEntry value="3">@Strings.csBoth</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.beepSound" title="@Strings.beepSoundTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.bsSoft</listEntry>
+            <listEntry value="1">@Strings.bsChime</listEntry>
+            <listEntry value="2">@Strings.bsStandard</listEntry>
+        </settingConfig>
+    </setting>
 </settings>

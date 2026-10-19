@@ -105,7 +105,9 @@ module Settings {
             :cities => [get("city1", TimeZones.SAN_FRANCISCO), get("city2", TimeZones.SINGAPORE), get("city3", TimeZones.MONTREAL)],
             :units => get("units", UNITS_DEVICE),
             :backlight => get("backlight", 0),
-            :companion => companion()
+            :companion => companion(),
+            :chargerSignal => get("chargerSignal", 1),
+            :beepSound => get("beepSound", 0)
         };
     }
 
@@ -131,6 +133,8 @@ module Settings {
         Application.Properties.setValue("units", d[:units] as Number);
         Application.Properties.setValue("backlight", d[:backlight] as Number);
         Application.Properties.setValue("companion", d[:companion] as Boolean);
+        Application.Properties.setValue("chargerSignal", d[:chargerSignal] as Number);
+        Application.Properties.setValue("beepSound", d[:beepSound] as Number);
         Application.Storage.setValue("settingsChangedAt", at);
         return true;
     }
