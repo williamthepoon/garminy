@@ -34,6 +34,22 @@ func send(_ e: HookEvent) {
     _ = line.withUnsafeBytes { write(fd, $0.baseAddress, line.count) }
 }
 
+/// The controlling terminal of this process or its nearest ancestor, e.g. "/dev/ttys004". No subprocess.
+func controllingTTY() -> String? {
+    var pid = getpid()
+    for _ in 0..<4 {
+        var info = kinfo_proc()
+        var size = MemoryLayout<kinfo_proc>.stride
+        var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, pid]
+        guard sysctl(&mib, 4, &info, &size, nil, 0) == 0, size > 0 else { return nil }
+        let dev = info.kp_eproc.e_tdev
+        if dev != -1, let name = devname(dev, S_IFCHR) { return "/dev/" + String(cString: name) }
+        pid = info.kp_eproc.e_ppid
+        if pid <= 1 { return nil }
+    }
+    return nil
+}
+
 func option(_ name: String, in args: [String]) -> String? {
     guard let i = args.firstIndex(of: name), i + 1 < args.count else { return nil }
     return args[i + 1]
@@ -78,7 +94,8 @@ let args = Array(CommandLine.arguments.dropFirst())
 switch args.first {
 case "claude":
     let input = FileHandle.standardInput.readData(ofLength: 1 << 20)
-    if let e = HookEvent.fromClaudeHook(input, term: term) { send(e) }
+    if let e = HookEvent.fromClaudeHook(input, term: term, env: ProcessInfo.processInfo.environment,
+                                        tty: controllingTTY()) { send(e) }
 case "shell" where args.count >= 2 && (args[1] == "start" || args[1] == "end"):
     send(HookEvent(src: "shell", phase: args[1], cmd: option("--cmd", in: args).map { String($0.prefix(24)) },
                    exit: option("--exit", in: args).flatMap { Int($0) },

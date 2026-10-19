@@ -59,7 +59,10 @@ function testProtoMultiPart(logger as Test.Logger) as Boolean {
     var a = TC.run(["030c020101010001076761726d696e7910506572", "030c126d697373696f6e3a2042617368"]);
     var first = a == null ? null : ((a[:list] as Array)[0] as Array);
     ok &= T.check(logger, "alerts", first != null && first[0] == 1 && first[1] == Proto.K_NEEDS_YOU && first[2] == true
-        && "garminy".equals(first[3]) && "Permission: Bash".equals(first[4]));
+        && "garminy".equals(first[3]) && "Permission: Bash".equals(first[4]) && first[5] == false);
+    var o = TC.run(["030e010101020202076761726d696e7902346d"]);
+    var op = o == null ? null : ((o[:list] as Array)[0] as Array);
+    ok &= T.check(logger, "openable alert", op != null && op[1] == Proto.K_DONE && op[2] == false && op[5] == true);
     var ss = TC.run(["020d030300010000076761726d696e7900000c07", "020d136170692d73766302000307776562736974", "020d2365"]);
     var list = ss == null ? [] : ss[:list] as Array;
     ok &= T.check(logger, "sessions", list.size() == 3 && (list[1] as Array)[1] == 12 && "website".equals((list[2] as Array)[2]));
@@ -81,6 +84,7 @@ function testProtoEncodes(logger as Test.Logger) as Boolean {
     var ok = true;
     ok &= T.check(logger, "hello", TC.hex(Proto.hello(0)[0]).equals("41000101"));
     ok &= T.check(logger, "ack", TC.hex(Proto.ack(3, 5)[0]).equals("42030105"));
+    ok &= T.check(logger, "open", TC.hex(Proto.open(6, 5)[0]).equals("44060105"));
     var s = { :changedAt => 1760000000, :cards => 0x1FF, :interval => 10, :cities => [0, 33, 9],
               :units => 0, :backlight => 0, :companion => true };
     ok &= T.check(logger, "settings", TC.hex(Proto.settings(10, s)[0]).equals("430a0168e7780001ff0a002109000001"));
@@ -136,6 +140,18 @@ function testCompanionOfflineAck(logger as Test.Logger) as Boolean {
     // A snapshot that still contains 7 (the Mac hasn't heard yet) keeps it hidden.
     c.handle({ :type => Proto.ALERTS, :total => 2, :list => [[7, Proto.K_FAILED, false, "pytest", ""], [8, Proto.K_DONE, false, "cargo", ""]] });
     ok &= T.check(logger, "still hidden", c.alerts.size() == 1 && c.alertTotal == 1);
+    return ok;
+}
+
+(:test)
+function testOpensOnTapOnlyForLiveOpenable(logger as Test.Logger) as Boolean {
+    var c = new Companion();
+    var claude = [2, Proto.K_DONE, false, "garminy", "Done · 4m", true];
+    var shell = [3, Proto.K_DONE, false, "cargo", "2m", false];
+    var ok = T.check(logger, "offline never opens", !c.opensOnTap(claude));
+    c.connected = true;
+    ok &= T.check(logger, "live openable opens", c.opensOnTap(claude));
+    ok &= T.check(logger, "shell only dismisses", !c.opensOnTap(shell));
     return ok;
 }
 

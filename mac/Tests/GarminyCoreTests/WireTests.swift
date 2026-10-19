@@ -46,6 +46,8 @@ let macVectors: [MacVector] = [
               frames: ["050b0268e778000c010f060309020368e7728800", "050b120a141e28323c46505a64ff"]),
     MacVector(message: .alerts([sampleAlert], total: 1), msgId: 12,
               frames: ["030c020101010001076761726d696e7910506572", "030c126d697373696f6e3a2042617368"]),
+    MacVector(message: .alerts([WireAlert(id: 2, kind: .done, buzz: false, label: "garminy", detail: "4m", openable: true)], total: 1),
+              msgId: 14, frames: ["030e010101020202076761726d696e7902346d"]),
     MacVector(message: .sessions(sampleSessions, hidden: 0), msgId: 13,
               frames: ["020d030300010000076761726d696e7900000c07", "020d136170692d73766302000307776562736974", "020d2365"]),
 ]
@@ -70,11 +72,13 @@ func macVectorDecodes(_ i: Int) throws {
     #expect(hex(Wire.encode(WatchMessage.hello(version: 1), msgId: 0)) == ["41000101"])
     #expect(hex(Wire.encode(WatchMessage.ack(id: 5), msgId: 3)) == ["42030105"])
     #expect(Wire.decodeWatch(type: 0x42, payload: Data([5])) == .ack(id: 5))
+    #expect(hex(Wire.encode(WatchMessage.open(id: 5), msgId: 6)) == ["44060105"])
+    #expect(Wire.decodeWatch(type: 0x44, payload: Data([5])) == .open(id: 5))
     #expect(Wire.decodeWatch(type: 0x43, payload: unhex("68e7780001ff0a002109000001")) == .settings(sampleSettings))
 }
 
 @Test func missingPartDropsMessage() {
-    let f = macVectors[8].frames.map(unhex)
+    let f = macVectors[9].frames.map(unhex)
     var r = Reassembler()
     #expect(r.feed(f[0]) == nil)
     #expect(r.feed(f[2]) == nil)  // part 1 lost
@@ -83,7 +87,7 @@ func macVectorDecodes(_ i: Int) throws {
 }
 
 @Test func interleavedMessageDropsFirst() {
-    let a = macVectors[8].frames.map(unhex)
+    let a = macVectors[9].frames.map(unhex)
     var r = Reassembler()
     _ = r.feed(a[0])
     #expect(r.feed(unhex("030c126d697373696f6e3a2042617368")) == nil)

@@ -34,7 +34,7 @@ garminy never uses the START button, so a watch with a broken START button works
 |---|---|
 | DOWN / swipe up | Next card |
 | UP / swipe down | Previous card |
-| Tap | Dismiss the alert on screen; otherwise pin or unpin the current card (an orange dot right of the clock means pinned) |
+| Tap | Dismiss the alert on screen (a Claude alert also opens that session on the Mac); otherwise pin or unpin the current card (an orange dot right of the clock means pinned) |
 | Hold BACK for 1 s | Exit (a short press only shows a hint) |
 
 **Opening it:** from the watch face, press UP or DOWN to scroll through the glances, then tap the **GARMINY** glance.
@@ -58,6 +58,7 @@ A small menu-bar app for macOS 14 or later that turns the watch into a status li
 
 - **Agents card:** every Claude Code session by folder name, with its state (working, needs you, done, error) and how long it has been in it.
 - **Alerts:** when an agent needs you, finishes a long turn or fails, or a long terminal command finishes, the watch shows it full screen and buzzes. Tap the watch to dismiss it; it is dismissed on the Mac too.
+- **Tap to open:** tapping a Claude Code alert (needs you, done or failed) brings that session to the front on the Mac. Working in that session's tab on the Mac clears its alerts from the watch within a few seconds, without a tap. In iTerm2 and Terminal it selects the exact tab; in other apps (VS Code, Ghostty and so on) it brings the app forward. The first time, macOS asks whether garminy Companion may control iTerm2 or Terminal. Update the watch app and the companion together, because an older companion ignores this tap.
 - **Buzzes only when useful:** no buzz while you're typing in that terminal, one buzz if you're in another app, and if you're away (idle 2 minutes or screen locked) a needs-you alert buzzes again every 5 minutes, up to 3 more times.
 - **Keeps the Mac awake** while an agent works or a long command runs, so idle sleep doesn't stop it. Turn this off in the menu.
 - **Weather and settings for a phone-less watch** (see below). Open the **Watch settings** window from the menu, or by opening garminy Companion again from Spotlight or Finder.

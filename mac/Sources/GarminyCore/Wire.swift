@@ -42,9 +42,12 @@ public struct WireAlert: Equatable, Sendable {
     public var buzz: Bool
     public var label: String
     public var detail: String
+    /// Tapping it on the watch can open the session that raised it.
+    public var openable: Bool
 
-    public init(id: UInt8, kind: AlertKind, buzz: Bool, label: String, detail: String) {
+    public init(id: UInt8, kind: AlertKind, buzz: Bool, label: String, detail: String, openable: Bool = false) {
         self.id = id; self.kind = kind; self.buzz = buzz; self.label = label; self.detail = detail
+        self.openable = openable
     }
 }
 
@@ -107,6 +110,8 @@ public enum MacMessage: Equatable, Sendable {
 public enum WatchMessage: Equatable, Sendable {
     case hello(version: UInt8)
     case ack(id: UInt8)
+    /// Acknowledge and open the session that raised the alert (a live tap on a needs-you alert).
+    case open(id: UInt8)
     case settings(WireSettings)
 }
 
@@ -123,7 +128,7 @@ public enum Wire {
     enum Kind: UInt8 {
         case helloReply = 0x01, sessions = 0x02, alerts = 0x03, buzz = 0x04, weather = 0x05
         case location = 0x06, settings = 0x07, snapshotEnd = 0x08, heartbeat = 0x09
-        case hello = 0x41, ack = 0x42, watchSettings = 0x43
+        case hello = 0x41, ack = 0x42, watchSettings = 0x43, open = 0x44
     }
 
     // MARK: Framing
@@ -157,7 +162,7 @@ public enum Wire {
             p.append(max(total, UInt8(shown.count)))
             p.append(UInt8(shown.count))
             for a in shown {
-                p.append(a.id); p.append(a.kind.rawValue); p.append(a.buzz ? 1 : 0)
+                p.append(a.id); p.append(a.kind.rawValue); p.append((a.buzz ? 1 : 0) | (a.openable ? 2 : 0))
                 p.str(a.label, max: maxAlertLabel); p.str(a.detail, max: maxAlertDetail)
             }
         case let .buzz(id):
@@ -187,6 +192,7 @@ public enum Wire {
         switch m {
         case let .hello(v): kind = .hello; p.append(v)
         case let .ack(id): kind = .ack; p.append(id)
+        case let .open(id): kind = .open; p.append(id)
         case let .settings(s): kind = .watchSettings; p.settings(s)
         }
         return frames(type: kind.rawValue, msgId: msgId, payload: p)
@@ -204,6 +210,7 @@ public enum Wire {
         switch Kind(rawValue: type) {
         case .hello: return r.u8().map { .hello(version: $0) }
         case .ack: return r.u8().map { .ack(id: $0) }
+        case .open: return r.u8().map { .open(id: $0) }
         case .watchSettings: return r.settings().map { .settings($0) }
         default: return nil
         }
@@ -230,7 +237,7 @@ public enum Wire {
             for _ in 0..<n {
                 guard let id = r.u8(), let k = r.u8().flatMap(AlertKind.init), let b = r.u8(),
                       let l = r.str(), let d = r.str() else { return nil }
-                list.append(WireAlert(id: id, kind: k, buzz: b != 0, label: l, detail: d))
+                list.append(WireAlert(id: id, kind: k, buzz: b & 1 != 0, label: l, detail: d, openable: b & 2 != 0))
             }
             return .alerts(list, total: total)
         case .buzz:

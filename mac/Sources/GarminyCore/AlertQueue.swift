@@ -14,6 +14,8 @@ public struct Alert: Equatable, Sendable {
     public var lastBuzz: Date?
     /// Buzz when the watch first shows it.
     public var buzzOnShow: Bool = false
+    /// Raised by a Claude session whose host app is known (open-agent-session).
+    public var openable: Bool = false
 }
 
 /// The Mac-owned alert queue (desk-alerts). Ordered needs you, failed, done; oldest first within a kind.
@@ -57,7 +59,7 @@ public struct AlertQueue: Sendable {
     public func wire() -> (alerts: [WireAlert], total: UInt8) {
         let o = ordered
         let shown = o.prefix(Wire.maxAlerts).map {
-            WireAlert(id: $0.id, kind: $0.kind, buzz: $0.buzzOnShow, label: $0.label, detail: $0.detail)
+            WireAlert(id: $0.id, kind: $0.kind, buzz: $0.buzzOnShow, label: $0.label, detail: $0.detail, openable: $0.openable)
         }
         return (Array(shown), UInt8(min(255, o.count)))
     }
@@ -117,5 +119,32 @@ public enum PresencePolicy {
         guard a.kind == .needsYou, presence.away, a.buzzes >= 1, a.buzzes <= maxRepeats,
               let last = a.lastBuzz else { return false }
         return now.timeIntervalSince(last) >= repeatEvery
+    }
+}
+
+/// Clears a session's alerts when the user is working in it (open-agent-session).
+public enum FocusPolicy {
+    public static let activeWithin: Double = 3
+    /// Hosts where only the selected tab counts; anywhere else the frontmost app is enough.
+    public static let tabHosts: Set<String> = ["com.googlecode.iterm2", "com.apple.Terminal"]
+
+    /// Hosts worth asking for their selected tab: the frontmost app, if it hosts an alerting session.
+    public static func hostToCheck(alerts: [Alert], location: (String) -> SessionLocation?, presence: Presence) -> String? {
+        guard !presence.locked, presence.idleSeconds < activeWithin, let front = presence.frontmostBundle else { return nil }
+        return alerts.contains { location($0.source)?.app == front } ? front : nil
+    }
+
+    /// Sources of alerts whose session is in front. `selected` is the host's selected tab (iTerm2 or Terminal),
+    /// or nil when it could not be read; tab hosts then clear nothing.
+    public static func inFront(alerts: [Alert], location: (String) -> SessionLocation?, host: String,
+                               selected: SessionLocation?) -> Set<String> {
+        Set(alerts.compactMap { a -> String? in
+            guard let loc = location(a.source), loc.app == host else { return nil }
+            if !tabHosts.contains(host) { return a.source }
+            guard let selected else { return nil }
+            if let id = loc.itermSession, id == selected.itermSession { return a.source }
+            if let tty = loc.tty, tty == selected.tty { return a.source }
+            return nil
+        })
     }
 }

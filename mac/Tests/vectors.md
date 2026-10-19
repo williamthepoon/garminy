@@ -8,6 +8,8 @@ Shared by `GarminyCoreTests` (Swift) and `tests/CompanionTests.mc` (Monkey C). E
   - `41000101`
 - ACK alert 5, msgId 3
   - `42030105`
+- OPEN alert 5, msgId 6
+  - `44060105`
 - HELLO_REPLY version 1, Mac time 1760000000, msgId 1
   - `0101010168e77800`
 - BUZZ alert 2, msgId 4
@@ -24,6 +26,8 @@ Shared by `GarminyCoreTests` (Swift) and `tests/CompanionTests.mc` (Monkey C). E
 - ALERTS total 1: id 1 needs-you buzz label "garminy" detail "Permission: Bash", msgId 12
   - `030c020101010001076761726d696e7910506572`
   - `030c126d697373696f6e3a2042617368`
+- ALERTS total 1: id 2 done, openable, no buzz, label "garminy" detail "4m", msgId 14
+  - `030e010101020202076761726d696e7902346d`
 - SESSIONS 3 shown, 0 hidden: needs-you 0m "garminy", working 12m "api-svc", done 3m "website", msgId 13
   - `020d030300010000076761726d696e7900000c07`
   - `020d136170692d73766302000307776562736974`
@@ -37,7 +41,7 @@ Frame: `[type][msgId][part<<4 | total]` + up to 17 payload bytes. Parts are numb
 |---|---|
 | `01` HELLO_REPLY | version u8, Mac time u32 |
 | `02` SESSIONS | shown u8, hidden u8, then per session: state u8, minutes in state u16, label (≤16 bytes) |
-| `03` ALERTS | total u8, shown u8 (≤5), then per alert: id u8, kind u8, buzz u8, label (≤24), detail (≤20) |
+| `03` ALERTS | total u8, shown u8 (≤5), then per alert: id u8, kind u8, flags u8 (bit 0 buzz, bit 1 openable), label (≤24), detail (≤20) |
 | `04` BUZZ | alert id u8 |
 | `05` WEATHER | observed u32, now temp i8, now condition u8, today hi i8 lo i8 condition u8, tomorrow hi i8 lo i8 condition u8, hourly base u32, 12 × chance u8 (255 = unknown) |
 | `06` LOCATION | lat i16 ×100, lon i16 ×100 |
@@ -45,6 +49,7 @@ Frame: `[type][msgId][part<<4 | total]` + up to 17 payload bytes. Parts are numb
 | `08` SNAPSHOT_END, `09` HEARTBEAT | none |
 | `41` HELLO | version u8 |
 | `42` ACK | alert id u8 |
+| `44` OPEN | alert id u8 (acknowledge, then open the session on the Mac) |
 
 - **Session state:** 0 working, 1 needs you, 2 done, 3 error.
 - **Alert kind:** 0 needs you, 1 failed, 2 done.

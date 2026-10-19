@@ -13,7 +13,7 @@ class Companion {
     var versionMismatch as Boolean = false;
     var sessions as Array = [];        // [state, minutes, label], most urgent first
     var moreSessions as Number = 0;
-    var alerts as Array = [];          // [id, kind, buzz, label, detail], most urgent first
+    var alerts as Array = [];          // [id, kind, buzz, label, detail, openable], most urgent first
     var alertTotal as Number = 0;
     var pendingAcks as Array<Number> = [] as Array<Number>;
     var macOffset as Number = 0;       // Mac clock minus watch clock, seconds
@@ -101,6 +101,11 @@ class Companion {
         return alerts.size() > 0 ? alerts[0] as Array : null;
     }
 
+    // A live tap on an openable alert also asks the Mac to open its session (open-agent-session).
+    function opensOnTap(a as Array) as Boolean {
+        return connected && a.size() > 5 && a[5] == true;
+    }
+
     // Tap on a showing alert.
     function acknowledge() as Void {
         var a = current();
@@ -108,11 +113,12 @@ class Companion {
             return;
         }
         var id = a[0] as Number;
+        var open = opensOnTap(a);
         alerts = alerts.slice(1, null);
         alertTotal = alertTotal > 0 ? alertTotal - 1 : 0;
         var link = _link;
         if (connected && link != null) {
-            link.send(Proto.ack(link.nextMsgId(), id));
+            link.send(open ? Proto.open(link.nextMsgId(), id) : Proto.ack(link.nextMsgId(), id));
         } else {
             pendingAcks.add(id);
         }

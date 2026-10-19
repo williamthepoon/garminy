@@ -39,6 +39,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>NSLocationWhenInUseUsageDescription</key><string>garminy can use this Mac's location for the weather shown on your watch.</string>
   <key>NSLocationUsageDescription</key><string>garminy can use this Mac's location for the weather shown on your watch.</string>
   <key>NSLocationAlwaysAndWhenInUseUsageDescription</key><string>garminy uses this Mac's location for the weather shown on your watch.</string>
+  <key>NSAppleEventsUsageDescription</key><string>garminy brings the Claude Code session you tapped on your watch to the front.</string>
   <key>NSLocationAlwaysUsageDescription</key><string>garminy uses this Mac's location for the weather shown on your watch.</string>
 </dict></plist>
 PLIST
@@ -50,13 +51,14 @@ else
   echo "warning: no garminy-local signing identity; signing ad-hoc, so macOS may ask for Bluetooth again after each rebuild." >&2
   echo "         Run scripts/mac-signing-identity.sh once to fix this." >&2
 fi
-# The hardened runtime blocks Location requests unless the app declares this entitlement.
+# The hardened runtime blocks Location requests and Apple Events unless the app declares these entitlements.
 ENT="$(mktemp)"; trap 'rm -f "$ENT"' EXIT
 cat > "$ENT" <<ENTS
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>com.apple.security.personal-information.location</key><true/>
+  <key>com.apple.security.automation.apple-events</key><true/>
 </dict></plist>
 ENTS
 codesign --force --options runtime -s "$IDENTITY" "$APP/Contents/MacOS/garminy-hook"
