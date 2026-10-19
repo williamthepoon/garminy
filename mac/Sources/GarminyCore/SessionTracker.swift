@@ -9,6 +9,7 @@ public struct SessionTracker: Sendable {
         public var since: Date
         public var lastEvent: Date
         public var term: String?
+        public var location = SessionLocation(app: nil, itermSession: nil, tty: nil)
     }
 
     /// An alert-worthy change produced by `apply`.
@@ -37,6 +38,7 @@ public struct SessionTracker: Sendable {
         var s = sessions[id] ?? Session(id: id, label: label(for: e.cwd), state: .done, since: now, lastEvent: now, term: e.term)
         s.lastEvent = now
         if let t = e.term { s.term = t }
+        s.location = s.location.merged(with: e.location)
         let src = Self.source(id)
         var effects: [Effect] = []
 
@@ -90,6 +92,12 @@ public struct SessionTracker: Sendable {
         }
         sessions[id] = s
         return effects
+    }
+
+    /// Where the session behind an alert source runs, if it is a known Claude session.
+    public func location(source: String) -> SessionLocation? {
+        guard source.hasPrefix("claude:") else { return nil }
+        return sessions[String(source.dropFirst("claude:".count))]?.location
     }
 
     /// Removes sessions with no events for 12 hours; returns their ids.

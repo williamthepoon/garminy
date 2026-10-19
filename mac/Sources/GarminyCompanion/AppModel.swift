@@ -19,11 +19,13 @@ final class AppModel: ObservableObject {
     let keepAwake = KeepAwake()
     let socket = SocketServer()
     let weather = WeatherService()
+    let opener = SessionOpener()
     @Published private(set) var settings = SettingsModel(AppModel.loadSettings())
     private var tracker = SessionTracker()
     private var commands = CommandTracker()
     private var queue = AlertQueue()
     private var tick: Timer?
+    private var focusTick: Timer?
     private var lastSessionsWire: [WireSession] = []
     /// Opens the Watch settings window (set by the app delegate).
     var showSettings: (() -> Void)?
@@ -53,6 +55,7 @@ final class AppModel: ObservableObject {
         weather.start()
         presence.onSleep = { Log.info("mac will sleep") }
         tick = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in self?.periodic() }
+        focusTick = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in self?.clearFocused() }
     }
 
     // MARK: Watch messages
@@ -65,6 +68,16 @@ final class AppModel: ObservableObject {
         case .ack(let id):
             queue.acknowledge(id: id)
             publish()
+        case .open(let id):
+            // Look the alert up before acknowledging removes it.
+            let a = queue.alerts.first { $0.id == id }
+            queue.acknowledge(id: id)
+            publish()
+            if let a, a.openable, let loc = tracker.location(source: a.source) {
+                opener.open(loc, label: a.label)
+            } else {
+                Log.info("open \(id): nothing to open")
+            }
         case .settings(let w):
             if settings.adoptFromWatch(w) {
                 saveSettings()
@@ -132,6 +145,8 @@ final class AppModel: ObservableObject {
                 // Replace an older alert of the same kind from the same source.
                 queue.resolve(source: source, kinds: [kind])
                 var a = queue.add(kind: kind, label: label, detail: detail, source: source, term: term, now: now)
+                a.openable = tracker.location(source: source)?.app != nil
+                queue.update(a)
                 if PresencePolicy.buzzOnRaise(term: term, presence: p) {
                     a.buzzOnShow = true; a.buzzes = 1; a.lastBuzz = now
                     queue.update(a)
@@ -160,6 +175,26 @@ final class AppModel: ObservableObject {
         }
         publish()
         updateKeepAwake()
+    }
+
+    /// Withdraws alerts of the session the user is working in (open-agent-session).
+    func clearFocused() {
+        let loc = { [tracker] (s: String) in tracker.location(source: s) }
+        guard let host = FocusPolicy.hostToCheck(alerts: queue.alerts, location: loc, presence: presence.snapshot) else { return }
+        let resolve = { [weak self] (selected: SessionLocation?) in
+            guard let self else { return }
+            let loc = { [tracker = self.tracker] (s: String) in tracker.location(source: s) }
+            let sources = FocusPolicy.inFront(alerts: self.queue.alerts, location: loc, host: host, selected: selected)
+            guard !sources.isEmpty else { return }
+            for s in sources { self.queue.resolve(source: s) }
+            Log.info("cleared \(sources.count) alert(s): user is in the session")
+            self.publish()
+        }
+        if FocusPolicy.tabHosts.contains(host) {
+            opener.selectedTab(in: host) { resolve($0) }
+        } else {
+            resolve(nil)
+        }
     }
 
     func updateKeepAwake() {

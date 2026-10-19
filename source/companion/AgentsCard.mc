@@ -124,7 +124,7 @@ module AlertOverlay {
             dc.setColor(Ui.DIM, Graphics.COLOR_TRANSPARENT);
             dc.drawText(l.cx, l.boxY + l.boxH * 3 / 5 + 4, Graphics.FONT_XTINY, detail, Graphics.TEXT_JUSTIFY_CENTER);
         }
-        var foot = c.connected ? "Tap to dismiss" : "Mac offline";
+        var foot = c.connected ? (c.opensOnTap(a) ? "Tap to open" : "Tap to dismiss") : "Mac offline";
         if (c.alertTotal > 1) {
             foot = "+" + (c.alertTotal - 1) + "  ·  " + foot;
         }

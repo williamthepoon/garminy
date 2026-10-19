@@ -18,6 +18,7 @@ module Proto {
     const HELLO = 0x41;
     const ACK = 0x42;
     const WATCH_SETTINGS = 0x43;
+    const OPEN = 0x44;
 
     const MAX_PAYLOAD = 17;
 
@@ -155,6 +156,11 @@ module Proto {
         return frames(ACK, msgId, [alertId & 0xFF]b);
     }
 
+    // Acknowledge and ask the Mac to open the session that raised the alert.
+    function open(msgId as Number, alertId as Number) as Array<ByteArray> {
+        return frames(OPEN, msgId, [alertId & 0xFF]b);
+    }
+
     // s: decoded settings dictionary (same keys as decodeSettings).
     function settings(msgId as Number, s as Dictionary) as Array<ByteArray> {
         var p = new [13]b;
@@ -203,7 +209,12 @@ module Proto {
             var n = r.u8();
             var list = [];
             for (var i = 0; n != null && i < n && r.ok(); i++) {
-                list.add([r.u8(), r.u8(), r.u8() == 1, r.str(), r.str()]);
+                var id = r.u8();
+                var kind = r.u8();
+                var flags = r.u8();
+                flags = flags == null ? 0 : flags;
+                // [id, kind, buzz, label, detail, openable]
+                list.add([id, kind, (flags & 1) != 0, r.str(), r.str(), (flags & 2) != 0]);
             }
             d = { :total => total, :list => list };
         } else if (type == BUZZ) {

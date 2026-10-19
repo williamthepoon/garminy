@@ -214,3 +214,74 @@ func shell(_ phase: String, _ cmd: String, exit: Int? = nil, secs: Int? = nil, p
     _ = c.apply(HookEvent(src: "shell", phase: "start", cmd: "make", pid: 9, id: "200.1", threshold: 30), now: at(1))
     #expect(c.running[9]?.cmd == "make")
 }
+
+// MARK: open-agent-session
+
+let itermUUID = "9B2568DF-31BB-4892-97AC-5DAAD4A462F3"
+
+@Test func hookCapturesSessionLocation() throws {
+    let raw = #"{"hook_event_name":"SessionStart","session_id":"s1","cwd":"/x/garminy"}"#
+    let env = ["__CFBundleIdentifier": "com.googlecode.iterm2", "ITERM_SESSION_ID": "w0t1p0:\(itermUUID)"]
+    let e = try #require(HookEvent.fromClaudeHook(Data(raw.utf8), term: "iTerm.app", env: env, tty: "/dev/ttys004"))
+    #expect(e.location == SessionLocation(app: "com.googlecode.iterm2", itermSession: itermUUID, tty: "/dev/ttys004"))
+}
+
+@Test func sessionLocationRejectsScriptInjection() {
+    let l = SessionLocation(app: "com.x\" & do shell script \"x", itermSession: "\" & quit & \"", tty: "/dev/ttys1\"")
+    #expect(l == SessionLocation(app: nil, itermSession: nil, tty: nil))
+}
+
+@Test func trackerKeepsLatestLocation() {
+    var t = SessionTracker()
+    var e = claude("SessionStart")
+    e.app = "com.googlecode.iterm2"; e.itermSession = itermUUID; e.tty = "/dev/ttys004"
+    _ = t.apply(e, now: at(0))
+    var e2 = claude("PermissionRequest", tool: "Bash")
+    e2.tty = "/dev/ttys009"
+    _ = t.apply(e2, now: at(1))
+    #expect(t.location(source: "claude:s1") == SessionLocation(app: "com.googlecode.iterm2", itermSession: itermUUID, tty: "/dev/ttys009"))
+    #expect(t.location(source: "shell:42") == nil)
+}
+
+@Test func locationNeverReachesTheWire() {
+    var t = SessionTracker()
+    var e = claude("PermissionRequest", tool: "Bash")
+    e.app = "com.googlecode.iterm2"; e.itermSession = itermUUID; e.tty = "/dev/ttys004"
+    let fx = t.apply(e, now: at(0))
+    var q = AlertQueue()
+    for case let .raise(kind, label, detail, source, term) in fx {
+        q.add(kind: kind, label: label, detail: detail, source: source, term: term, now: at(0))
+    }
+    let frames = Wire.encode(MacMessage.sessions(t.wire(now: at(0)).sessions, hidden: 0), msgId: 1)
+        + Wire.encode(MacMessage.alerts(q.wire().alerts, total: q.wire().total), msgId: 2)
+    let bytes = frames.reduce(Data(), +)
+    for secret in ["iterm2", "9B2568DF", "ttys"] {
+        #expect(bytes.range(of: Data(secret.utf8)) == nil)
+    }
+}
+
+@Test func focusClearsOnlyTheSelectedTab() {
+    var q = AlertQueue()
+    q.add(kind: .done, label: "a", detail: "", source: "claude:a", term: nil, now: at(0))
+    q.add(kind: .needsYou, label: "b", detail: "", source: "claude:b", term: nil, now: at(0))
+    q.add(kind: .done, label: "c", detail: "", source: "claude:c", term: nil, now: at(0))
+    q.add(kind: .done, label: "cargo", detail: "", source: "shell:1", term: nil, now: at(0))
+    let iterm = "com.googlecode.iterm2"
+    let locs: [String: SessionLocation] = [
+        "claude:a": SessionLocation(app: iterm, itermSession: itermUUID, tty: "/dev/ttys004"),
+        "claude:b": SessionLocation(app: iterm, itermSession: "11111111-2222-3333-4444-555555555555", tty: "/dev/ttys005"),
+        "claude:c": SessionLocation(app: "com.microsoft.VSCode", itermSession: nil, tty: "/dev/ttys006"),
+    ]
+    let loc = { (s: String) in locs[s] }
+    let typing = Presence(idleSeconds: 1, locked: false, frontmostBundle: iterm)
+    let host = FocusPolicy.hostToCheck(alerts: q.alerts, location: loc, presence: typing)
+    #expect(host == iterm)
+    let selectedA = SessionLocation(app: nil, itermSession: itermUUID, tty: nil)
+    #expect(FocusPolicy.inFront(alerts: q.alerts, location: loc, host: iterm, selected: selectedA) == ["claude:a"])
+    #expect(FocusPolicy.inFront(alerts: q.alerts, location: loc, host: iterm, selected: nil).isEmpty)
+    #expect(FocusPolicy.inFront(alerts: q.alerts, location: loc, host: "com.microsoft.VSCode", selected: nil) == ["claude:c"])
+    // Idle, locked, or in an app with no alerting session: nothing to check.
+    #expect(FocusPolicy.hostToCheck(alerts: q.alerts, location: loc, presence: Presence(idleSeconds: 300, locked: false, frontmostBundle: iterm)) == nil)
+    #expect(FocusPolicy.hostToCheck(alerts: q.alerts, location: loc, presence: Presence(idleSeconds: 1, locked: true, frontmostBundle: iterm)) == nil)
+    #expect(FocusPolicy.hostToCheck(alerts: q.alerts, location: loc, presence: Presence(idleSeconds: 1, locked: false, frontmostBundle: "com.apple.Safari")) == nil)
+}
