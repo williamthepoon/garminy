@@ -18,12 +18,12 @@
 
 ## 4. Mac companion
 
-- [ ] 4.1 In `AppModel`, persist the three fields with defaults of 1/18/9 when keys are missing. In `SettingsView`, add the Quiet hours toggle and the From/Until hour pickers after Backlight, disabled while the toggle is off. Verify that `scripts/bundle-mac.sh` succeeds and that the Watch settings window shows the controls with 18:00 and 09:00 on a fresh install.
+- [ ] 4.1 In `AppModel`, persist the three fields with defaults of 1/18/9 when keys are missing. In `SettingsView`, add the Quiet hours toggle and the From/Until hour pickers after Backlight, disabled while the toggle is off. Verify that `scripts/bundle-mac.sh` succeeds and that the Watch settings window shows the controls with 18:00 and 09:00 on a fresh install. (waived by the user on 2026-10-19 when shipping)
 
 ## 5. Integration
 
-- [ ] 5.1 Verify live with Backlight Off: at 19:52 the light goes off within 2 s of opening garminy.
-- [ ] 5.2 Verify live on the fēnix 7 after `scripts/sideload.sh`, with Backlight set to High. Set quiet hours from the Mac to start at the next hour, then confirm that the light goes off at that hour and that a charger alert with "Beep and light" beeps without lighting the screen.
+- [ ] 5.1 Verify live with Backlight Off: at 19:52 the light goes off within 2 s of opening garminy. (waived by the user on 2026-10-19 when shipping)
+- [ ] 5.2 Verify live on the fēnix 7 after `scripts/sideload.sh`, with Backlight set to High. Set quiet hours from the Mac to start at the next hour, then confirm that the light goes off at that hour and that a charger alert with "Beep and light" beeps without lighting the screen. (waived by the user on 2026-10-19 when shipping)
 - [x] 5.3 Run `openspec validate quiet-hours --strict` and verify that it passes.
 
 ## Workflow follow-up

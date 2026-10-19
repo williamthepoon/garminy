@@ -17,29 +17,33 @@ The Fortune card SHALL show one fortune from the bundled set. It SHALL stay the 
 - **THEN** the Fortune card shows a fortune chosen for the new date
 
 ### Requirement: One motivational quote per day
-The Motivational quote card SHALL show one motivational quote and its attribution from the bundled set, selected per local calendar day like the Fortune card. Bundled quotes MUST be public domain or original text.
+The Motivational quote card SHALL show one motivational quote from the bundled set, selected per local calendar day like the Fortune card. It SHALL show the quote text only, with no attribution line. Bundled quotes MUST be public domain or original text, and each bundled quote's source SHALL stay recorded in the repository.
 
 #### Scenario: Quote with attribution
 - **WHEN** the Motivational quote card is shown
-- **THEN** the quote text and its author or source line are both visible
+- **THEN** only the quote text is visible, with no author or source line
 
 ### Requirement: On this day
-The On-this-day card SHALL show one bundled historical fact for the current month and day, including the year it happened. Every calendar date, including 29 February, SHALL have an entry.
+The On-this-day card SHALL show one bundled historical fact for the current month and day, including the year it happened. The year SHALL be shown above the fact. Every calendar date, including 29 February, SHALL have an entry.
 
 #### Scenario: Normal date
 - **WHEN** the local date is 20 July
-- **THEN** the card shows a fact tied to 20 July, with its year
+- **THEN** the card shows a fact tied to 20 July, with its year above the fact
 
 #### Scenario: Leap day
 - **WHEN** the local date is 29 February
 - **THEN** the card shows a fact tied to 29 February
 
 ### Requirement: Text fits the screen
-Daily content SHALL be fully readable within the visible area of a round screen, without being clipped by the bezel. Long text SHALL wrap or use a smaller font, and SHALL NOT be truncated mid-word.
+Daily content SHALL be fully readable within the visible area of a round screen, without being clipped by the bezel. Long text SHALL wrap to the width of the circle at each line's height and use the largest size that fits, never smaller than the TINY system font. It SHALL NOT be truncated mid-word.
 
 #### Scenario: Longest bundled entry
 - **WHEN** the longest bundled entry is shown on the smallest supported round screen
-- **THEN** every word is visible inside the circular display area
+- **THEN** every word is visible inside the circular display area, at TINY size or larger
+
+#### Scenario: Short fortune
+- **WHEN** a fortune of under 40 characters is shown
+- **THEN** it is drawn larger than the SMALL system font
 
 ### Requirement: Varied selection
 Consecutive days SHALL NOT show the same fortune or quote. A full set SHALL be shown before any entry repeats.

@@ -24,22 +24,42 @@ While any unacknowledged alert exists, the watch SHALL show it over the current 
 - **THEN** the alert shows "+2"
 
 ### Requirement: Buzz vocabulary
-Each alert kind SHALL have its own fixed vibration pattern: done is one short pulse, failed is two sharp pulses, needs you is three pulses. The watch SHALL vibrate only when the Mac asks it to for that alert.
+Each alert kind SHALL have its own fixed vibration pattern: done is one short pulse, failed is two sharp pulses, needs you is three pulses. The watch SHALL vibrate only when the Mac asks it to for that alert. While the watch is charging, when it cannot vibrate, it SHALL instead use the On the charger signal for that alert. The beep uses the chosen Beep sound for that kind. The light turns the backlight on.
 
 #### Scenario: Done with buzz
-- **WHEN** a done alert arrives with a buzz request
+- **WHEN** a done alert arrives with a buzz request and the watch is on battery
 - **THEN** the watch vibrates once briefly
 
 #### Scenario: Alert without buzz
 - **WHEN** an alert arrives without a buzz request
-- **THEN** the alert is shown silently
+- **THEN** the alert is shown silently, whether or not the watch is charging
+
+#### Scenario: Needs you on the charger
+- **WHEN** a needs-you alert arrives with a buzz request, the watch is charging, and On the charger is Beep
+- **THEN** the watch plays the needs-you beep in the chosen Beep sound
+
+#### Scenario: Light on the charger
+- **WHEN** a done alert arrives with a buzz request, the watch is charging, and On the charger is Light
+- **THEN** the backlight comes on and no tone plays
 
 ### Requirement: Acknowledge on the watch
-Tapping the screen while an alert is showing SHALL acknowledge that alert, remove it from the watch and tell the Mac. Swiping or pressing UP or DOWN SHALL NOT acknowledge it.
+Tapping the screen while an alert is showing SHALL acknowledge that alert, remove it from the watch and tell the Mac. If the alert is openable and the watch is connected, the tap SHALL also ask the Mac to open the session that raised it. While connected, an openable alert's footer SHALL read "Tap to open", and other alerts SHALL read "Tap to dismiss". Swiping or pressing UP or DOWN SHALL NOT acknowledge it.
 
 #### Scenario: Tap to acknowledge
 - **WHEN** an alert is showing and the user taps the screen
 - **THEN** the alert disappears, the next queued alert or the card is shown, and the Mac marks it acknowledged
+
+#### Scenario: Tap an openable alert
+- **WHEN** an openable alert from a Claude Code session is showing, the watch is connected, and the user taps the screen
+- **THEN** the alert disappears and the Mac is asked to open the session that raised it
+
+#### Scenario: Tap a shell command alert
+- **WHEN** a done alert for a shell command is showing and the user taps the screen
+- **THEN** the alert is acknowledged and the Mac is not asked to open anything
+
+#### Scenario: Footer wording
+- **WHEN** an openable alert is showing and the watch is connected
+- **THEN** the footer reads "Tap to open"
 
 #### Scenario: Swipe does not dismiss
 - **WHEN** an alert is showing and the user swipes up
@@ -95,3 +115,14 @@ The Mac SHALL own the alert queue. On every new connection, the watch SHALL repl
 #### Scenario: Tap while offline
 - **WHEN** the user taps an alert while the link is down
 - **THEN** the alert disappears from the watch and the Mac marks it acknowledged after the link returns
+
+### Requirement: No alert light during quiet hours
+During quiet hours, an alert SHALL NOT turn on the backlight, even when On the charger includes Light. The alert SHALL still be shown, and a beep SHALL still play when On the charger includes Beep.
+
+#### Scenario: Beep and light at night
+- **WHEN** quiet hours are active, the watch is charging, On the charger is Beep and light, and a needs-you alert arrives with a buzz request
+- **THEN** the watch beeps and shows the alert, and the backlight stays off
+
+#### Scenario: Light outside quiet hours
+- **WHEN** quiet hours are not active, the watch is charging, On the charger is Light, and a done alert arrives with a buzz request
+- **THEN** the backlight comes on

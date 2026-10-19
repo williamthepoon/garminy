@@ -17,7 +17,7 @@ The Daylight card SHALL draw an arc from sunrise to sunset with a sun marker at 
 
 #### Scenario: Afternoon
 - **WHEN** the current time is between sunrise and sunset
-- **THEN** the marker sits on the arc in proportion to elapsed daylight, and the text reads "Xh Ym of daylight left"
+- **THEN** the marker sits on the arc in proportion to elapsed daylight, and the text reads "Xh Ym left"
 
 #### Scenario: Night
 - **WHEN** the current time is after sunset
