@@ -1,7 +1,7 @@
 import Foundation
 
 /// One text item for a watch card (mac-content-feeds).
-public struct FeedItem: Equatable, Sendable {
+public struct FeedItem: Equatable, Codable, Sendable {
     /// Mac time for news, a channel-defined number otherwise; 0 = none.
     public var stamp: UInt32
     public var source: String

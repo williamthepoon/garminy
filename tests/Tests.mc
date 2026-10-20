@@ -619,32 +619,58 @@ function testCitiesAndUnitsSettings(logger as Test.Logger) as Boolean {
 }
 
 (:test)
-function testDailyCardsChangeWithTheDate(logger as Test.Logger) as Boolean {
-    var ok = true;
-    var cards = [new FortuneCard(), new QuoteCard(), new OnThisDayCard()] as Array<TextCard>;
-    for (var i = 0; i < cards.size(); i++) {
-        var c = cards[i];
-        c.refresh();
-        var today = c._text;
-        c.refresh();
-        ok = T.check(logger, c.id() + " stable within the day", c._text.equals(today)) && ok;
-        // Pretend the card was last loaded yesterday: refresh must reload.
-        c._day -= 1;
-        c._text = "";
-        c.refresh();
-        ok = T.check(logger, c.id() + " reloads on date change", c._text.equals(today)) && ok;
-    }
+function testDailyCardsRotateWithFallback(logger as Test.Logger) as Boolean {
+    Feeds.reset(Feeds.FORTUNE);
+    Feeds.reset(Feeds.QUOTE);
+    Feeds.reset(Feeds.ON_THIS_DAY);
+    var today = Dates.localTodayDays();
+    // No Mac: the first showing is today's bundled entry, then each showing moves on.
     var f = new FortuneCard();
-    var d = Dates.localTodayDays();
-    f.load(d);
-    var a = f._text;
-    f.load(d + 1);
-    ok = T.check(logger, "fortune differs tomorrow", !f._text.equals(a)) && ok;
+    f.shown();
+    var ok = T.check(logger, "seeded by date", Feeds.cursor(Feeds.FORTUNE) == Daily.indexFor(today, Daily.FORTUNE_COUNT));
+    var first = (f.current() as Array)[2] as String;
+    ok &= T.check(logger, "today's fortune", first.equals(Daily.fortune(today)));
+    f.shown();
+    ok &= T.check(logger, "next showing differs", !((f.current() as Array)[2] as String).equals(first));
+    ok &= T.check(logger, "no meta for bundled", f.meta(f.current() as Array) == null);
     var q = new QuoteCard();
-    q.load(d);
-    var qa = q._text;
-    q.load(d + 1);
-    ok = T.check(logger, "quote differs tomorrow", !q._text.equals(qa)) && ok;
+    var qa = (q.current() as Array)[2] as String;
+    q.shown();
+    q.shown();
+    ok &= T.check(logger, "quote moves on", !((q.current() as Array)[2] as String).equals(qa));
+
+    // A fresh Mac set of 12 cycles each item once.
+    var items = [];
+    for (var i = 0; i < 12; i++) {
+        items.add([0, i % 3 == 2 ? "" : "Wikipedia", "item " + i]);
+    }
+    Feeds.save(Feeds.FORTUNE, 100, items, 0);
+    var seen = {};
+    for (var i = 0; i < 12; i++) {
+        f.shown();
+        seen[(f.current() as Array)[2]] = true;
+    }
+    ok &= T.check(logger, "12 showings, 12 items", seen.size() == 12);
+    var m = f.meta(["", "Wikipedia", "x"]) as Array;
+    ok &= T.check(logger, "Wikipedia meta", "Wikipedia".equals(m[0]));
+    // A 37-hour-old set falls back to bundled content.
+    var s = Feeds.get(Feeds.FORTUNE) as Dictionary;
+    s["receivedAt"] = Time.now().value() - 37 * 3600;
+    ok &= T.check(logger, "stale set ignored", f.macSet() == null && f.count() == Daily.FORTUNE_COUNT);
+
+    // On this day: only a set for today's date is used.
+    var o = new OnThisDayCard();
+    var now = Time.now().value();
+    Feeds.save(Feeds.ON_THIS_DAY, now, [[1969, "Wikipedia", "Moon landing"], [-44, "Wikipedia", "Caesar"]], 0);
+    ok &= T.check(logger, "today's events used", o.macSet() != null && o.count() == 2);
+    ok &= T.check(logger, "BC year", yearText(-44).equals("-44"));
+    Feeds.save(Feeds.ON_THIS_DAY, now - 86400 * 2, [[1969, "Wikipedia", "Moon landing"]], 0);
+    var t = Dates.localToday();
+    ok &= T.check(logger, "other date ignored", o.macSet() == null
+        && ((o.current() as Array)[2] as String).equals(Daily.onThisDay(t[1], t[2])[1] as String));
+    Feeds.reset(Feeds.FORTUNE);
+    Feeds.reset(Feeds.QUOTE);
+    Feeds.reset(Feeds.ON_THIS_DAY);
     return ok;
 }
 

@@ -20,23 +20,37 @@ class FeedCard extends Card {
         return s == null ? [] : s["items"] as Array;
     }
 
+    // Number of items and item i as [stamp, source, text]; subclasses may serve bundled content.
+    function count() as Number {
+        return items().size();
+    }
+
+    function itemAt(i as Number) as Array {
+        return items()[i] as Array;
+    }
+
     function shown() as Void {
-        Feeds.advance(_channel, items().size());
+        Feeds.advance(_channel, count());
     }
 
     function tick() as Boolean {
-        var n = items().size();
+        var n = count();
         Feeds.advance(_channel, n);
         return n > 1;
     }
 
     function current() as Array? {
-        var list = items();
-        if (list.size() == 0) {
+        var n = count();
+        if (n == 0) {
             return null;
         }
         var i = Feeds.cursor(_channel);
-        return list[i < list.size() ? i : 0] as Array;
+        return itemAt(i < n ? i : 0);
+    }
+
+    // Draws anything above the text and returns where the text starts.
+    function header(dc as Graphics.Dc, l as Layout, item as Array) as Number {
+        return l.boxY;
     }
 
     // [text, colour] for the line below the item, or null for none.
@@ -60,7 +74,7 @@ class FeedCard extends Card {
                 Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
             bottom -= lh;
         }
-        drawText(dc, l, item[2] as String, l.boxY, bottom);
+        drawText(dc, l, item[2] as String, header(dc, l, item), bottom);
     }
 
     // The item's text at the largest size that fits; cut at a word with "…" if even minFont is too big.

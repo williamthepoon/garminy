@@ -11,7 +11,7 @@ Fortune, Quote and On this day each pick one bundled entry per day. With nine ca
   - Each day the Mac sends up to 12 items: that day's Wikipedia "Did you know…" facts (keyless Wikimedia feed, CC BY-SA, shown with "Wikipedia" as the source) mixed with a few dad jokes from icanhazdadjoke (keyless).
   - The card's settings name becomes "Fortunes & facts".
 - **Quote comes from a large pool on the Mac:**
-  - The companion app bundles at least 1,000 public-domain or original quotes and sends 12 a day.
+  - The companion app bundles at least 400 public-domain or original quotes and sends 12 a day.
   - It sends no quote again within 30 days.
   - There's no network dependency and still no attribution line.
 - **On this day comes from Wikipedia:** the Mac sends up to 12 of the day's selected events from the Wikimedia on-this-day feed. The year shows above the event, as today.

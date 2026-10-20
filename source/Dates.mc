@@ -50,6 +50,12 @@ module Dates {
         return [info.year as Number, info.month as Number, info.day as Number];
     }
 
+    // Local calendar day number of a Unix time (watch clock).
+    function localDays(t as Number) as Number {
+        var info = Gregorian.info(new Time.Moment(t), Time.FORMAT_SHORT);
+        return daysFromCivil(info.year as Number, info.month as Number, info.day as Number);
+    }
+
     function localTodayDays() as Number {
         var t = localToday();
         return daysFromCivil(t[0], t[1], t[2]);

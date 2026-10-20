@@ -6,22 +6,31 @@ import Toybox.Time;
 // Not part of the glance. Times are stored in watch-clock seconds; a missing time is null.
 module Feeds {
     const NEWS = 0;
-    // Channels this build shows. Quote, fortune and on-this-day (1-3) come with fresh-daily-cards.
-    const CHANNELS = [NEWS];
+    const QUOTE = 1;
+    const FORTUNE = 2;
+    const ON_THIS_DAY = 3;
+    const CHANNELS = [NEWS, QUOTE, FORTUNE, ON_THIS_DAY];
     const MAX_ITEMS = 12;
 
     var _cache as Dictionary = {};
     var _cursor as Dictionary = {};
 
-    // items: [[stamp, source, text], ...] with stamps in Mac time (0 = none).
+    // items: [[stamp, source, text], ...]. News stamps are Mac times (0 = none) and are converted to
+    // watch time; on other channels the stamp is a plain number (on-this-day: the year).
     function save(channel as Number, batch as Number, items as Array, macOffset as Number) as Void {
         var out = [];
         for (var i = 0; i < items.size(); i++) {
             var it = items[i] as Array;
-            var stamp = it[0] as Number;
-            out.add([stamp == 0 ? null : stamp - macOffset, it[1], it[2]]);
+            var stamp = it[0];
+            if (stamp instanceof Long) {
+                stamp = stamp.toNumber();
+            }
+            if (channel == NEWS) {
+                stamp = stamp == 0 ? null : (stamp as Number) - macOffset;
+            }
+            out.add([stamp, it[1], it[2]]);
         }
-        var set = { "batch" => batch, "receivedAt" => Time.now().value(), "items" => out };
+        var set = { "batch" => batch, "batchAt" => batch - macOffset, "receivedAt" => Time.now().value(), "items" => out };
         Application.Storage.setValue("feed" + channel, set);
         _cache[channel] = set;
     }
@@ -42,6 +51,10 @@ module Feeds {
         i = n > 0 ? i % n : 0;
         _cursor[channel] = i;
         return i;
+    }
+
+    function setCursor(channel as Number, i as Number) as Void {
+        _cursor[channel] = i;
     }
 
     function cursor(channel as Number) as Number {
