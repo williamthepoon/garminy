@@ -58,15 +58,19 @@ The watch SHALL show an Agents card listing up to 2 sessions, most urgent first.
 - **THEN** the card reads "No agents running"
 
 ### Requirement: Agent alerts
-A session entering needs you SHALL raise a needs-you alert. A session entering done after working for at least 30 seconds SHALL raise a done alert. A session entering error SHALL raise a failed alert. Each alert SHALL be labelled with the session label. Each alert's detail SHALL fit the 20-byte detail limit as whole words or with a trailing "…", never cut silently mid-word.
+A session entering needs you SHALL raise a needs-you alert. A session entering done at the end of a turn SHALL raise a done alert, however short the turn was. A session entering error SHALL raise a failed alert. Each alert SHALL be labelled with the session label. Each alert's detail SHALL fit the 20-byte detail limit as whole words or with a trailing "…", never cut silently mid-word.
 
 #### Scenario: Quick turn
 - **WHEN** a session works for 10 seconds and then finishes
-- **THEN** its state becomes done but no alert is raised
+- **THEN** a done alert labelled with the session is raised
 
 #### Scenario: Long turn
 - **WHEN** a session works for 4 minutes and then finishes
 - **THEN** a done alert labelled with the session is raised
+
+#### Scenario: Turn ends after a question
+- **WHEN** a session asked the user something and its turn then ends
+- **THEN** the needs-you alert is withdrawn and a done alert is raised
 
 #### Scenario: Stop failure
 - **WHEN** a session's turn ends with a stop failure
