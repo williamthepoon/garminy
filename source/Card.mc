@@ -15,6 +15,16 @@ class Card {
     function refresh() as Void {
     }
 
+    // Called each time the card becomes the current one, by rotation or UP/DOWN.
+    function shown() as Void {
+    }
+
+    // Called once per rotation interval while the card is pinned or the only card.
+    // Returns true when the card changed and needs a redraw.
+    function tick() as Boolean {
+        return false;
+    }
+
     // Draw inside the layout's content area (the header is drawn by the carousel).
     function draw(dc as Graphics.Dc, l as Layout) as Void {
     }

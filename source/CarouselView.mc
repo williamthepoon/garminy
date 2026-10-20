@@ -28,6 +28,8 @@ class CarouselView extends WatchUi.View {
     var _quiet as Boolean = false;
     var _companion as Companion;
     var _link as Link;
+    var _hasNews as Boolean = false;
+    var _cardTick as Number = 0;     // seconds towards the current card's own tick
 
     function initialize(companion as Companion, link as Link) {
         View.initialize();
@@ -44,7 +46,14 @@ class CarouselView extends WatchUi.View {
         var cards = [] as Array<Card>;
         var newIdx = 0;
         for (var i = 0; i < ids.size(); i++) {
-            var c = ids[i].equals("agents") ? showAgents() ? new AgentsCard(_companion) : null : makeCard(ids[i]);
+            var c = null as Card?;
+            if (ids[i].equals("agents")) {
+                c = showAgents() ? new AgentsCard(_companion) : null;
+            } else if (ids[i].equals("news")) {
+                c = showNews() ? new NewsCard() : null;
+            } else {
+                c = makeCard(ids[i]);
+            }
             if (c != null) {
                 if (currentId != null && ids[i].equals(currentId)) {
                     newIdx = cards.size();
@@ -54,6 +63,10 @@ class CarouselView extends WatchUi.View {
         }
         _cards = cards;
         _idx = newIdx;
+        _hasNews = false;
+        for (var i = 0; i < cards.size(); i++) {
+            _hasNews = _hasNews || cards[i].id().equals("news");
+        }
         _interval = Settings.interval();
         var level = Settings.backlightLevel();
         if (level == 0.0 && _backlight > 0.0) {
@@ -90,6 +103,11 @@ class CarouselView extends WatchUi.View {
         return Settings.companion() && _companion.everConnected;
     }
 
+    // The News card appears once a full set of headlines has arrived (news-headlines).
+    function showNews() as Boolean {
+        return Settings.companion() && Feeds.get(Feeds.NEWS) != null;
+    }
+
     function onShow() as Void {
         if (_timer == null) {
             _timer = new Timer.Timer();
@@ -111,6 +129,10 @@ class CarouselView extends WatchUi.View {
             reload();
             return;
         }
+        if (!_hasNews && Settings.newsEnabled() && showNews()) {
+            reload();
+            return;
+        }
         var alerting = _companion.current() != null;
 
         if (_escDownAt != null && System.getTimer() - (_escDownAt as Number) >= HOLD_TO_EXIT_MS) {
@@ -129,6 +151,16 @@ class CarouselView extends WatchUi.View {
             _lastMinute = minute;
             refreshCurrent();
             dirty = true;
+        }
+
+        if ((_pinned || _cards.size() == 1) && !alerting && _cards.size() > 0) {
+            _cardTick += 1;
+            if (_cardTick >= _interval) {
+                _cardTick = 0;
+                dirty = _cards[_idx].tick() || dirty;
+            }
+        } else {
+            _cardTick = 0;
         }
 
         if (!_pinned && !alerting && _cards.size() > 1) {
@@ -176,6 +208,8 @@ class CarouselView extends WatchUi.View {
         }
         _idx = ((idx % n) + n) % n;
         _elapsed = 0;
+        _cardTick = 0;
+        _cards[_idx].shown();
         refreshCurrent();
         WatchUi.requestUpdate();
     }

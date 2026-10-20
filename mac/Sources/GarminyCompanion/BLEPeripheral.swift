@@ -12,7 +12,9 @@ final class BLEPeripheral: NSObject, CBPeripheralManagerDelegate {
     private var pm: CBPeripheralManager!
     private var toWatch: CBMutableCharacteristic?
     private var centrals: Set<UUID> = []
-    private var outbox: [Data] = []
+    /// Frames of the message being sent; the next message is taken from `queue` only once it is out.
+    private var sending: [Data] = []
+    private var queue = Outbox()
     private var msgId: UInt8 = 0
     private var reassembler = Reassembler()
     private var heartbeat: Timer?
@@ -36,7 +38,15 @@ final class BLEPeripheral: NSObject, CBPeripheralManagerDelegate {
     func send(_ m: MacMessage) {
         guard connected else { return }
         msgId &+= 1
-        outbox.append(contentsOf: Wire.encode(m, msgId: msgId))
+        queue.push(Wire.encode(m, msgId: msgId))
+        flush()
+    }
+
+    /// Feed items go out only when nothing else is waiting (mac-content-feeds).
+    func sendFeed(_ m: MacMessage) {
+        guard connected, case let .feed(channel, batch, _, _, _) = m else { return }
+        msgId &+= 1
+        queue.pushFeed(channel: channel, batch: batch, frames: Wire.encode(m, msgId: msgId))
         flush()
     }
 
@@ -50,10 +60,14 @@ final class BLEPeripheral: NSObject, CBPeripheralManagerDelegate {
 
     private func flush() {
         guard let c = toWatch else { return }
-        while let f = outbox.first {
-            guard pm.updateValue(f, for: c, onSubscribedCentrals: nil) else { return }  // resumes in isReady
+        while true {
+            if sending.isEmpty {
+                guard let next = queue.next() else { return }
+                sending = next
+            }
+            guard let f = sending.first, pm.updateValue(f, for: c, onSubscribedCentrals: nil) else { return }  // resumes in isReady
             Log.frame("tx", f)
-            outbox.removeFirst()
+            sending.removeFirst()
         }
     }
 
@@ -63,7 +77,7 @@ final class BLEPeripheral: NSObject, CBPeripheralManagerDelegate {
         Log.info("bluetooth state \(p.state.rawValue), authorization \(CBManager.authorization.rawValue)")
         onStateChange?()
         guard p.state == .poweredOn else {
-            centrals.removeAll(); outbox.removeAll()
+            centrals.removeAll(); sending.removeAll(); queue.clear()
             onConnectionChange?(false)
             return
         }
@@ -93,7 +107,7 @@ final class BLEPeripheral: NSObject, CBPeripheralManagerDelegate {
 
     func peripheralManager(_ p: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom c: CBCharacteristic) {
         centrals.remove(central.identifier)
-        if centrals.isEmpty { outbox.removeAll() }
+        if centrals.isEmpty { sending.removeAll(); queue.clear() }
         Log.info("watch unsubscribed")
         onConnectionChange?(connected)
     }

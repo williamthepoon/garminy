@@ -11,6 +11,20 @@ import Toybox.WatchUi;
 // Helpers (not tests). The module annotation keeps them out of release builds.
 (:test)
 module T {
+    // A copy of d with key set to value, and :text set when text is not null.
+    function with(d as Dictionary, key as Symbol, value, text as String?) as Dictionary {
+        var out = {};
+        var keys = d.keys();
+        for (var i = 0; i < keys.size(); i++) {
+            out[keys[i]] = d[keys[i]];
+        }
+        out[key] = value;
+        if (text != null) {
+            out[:text] = text;
+        }
+        return out;
+    }
+
     function utc(y as Number, m as Number, d as Number, h as Number, min as Number) as Number {
         return Dates.daysFromCivil(y, m, d) * 86400 + h * 3600 + min * 60;
     }
@@ -504,6 +518,7 @@ module TS {
 
     function reset() as Void {
         setAll(true);
+        Application.Properties.setValue("cardNews", true);
         Application.Properties.setValue("interval", 10);
         Application.Properties.setValue("city1", TimeZones.SAN_FRANCISCO);
         Application.Properties.setValue("city2", TimeZones.SINGAPORE);

@@ -117,6 +117,8 @@ public enum MacMessage: Equatable, Sendable {
     case settings(WireSettings)
     case snapshotEnd
     case heartbeat
+    /// One item of a channel's set (mac-content-feeds).
+    case feed(channel: UInt8, batch: UInt32, index: UInt8, count: UInt8, item: FeedItem)
 }
 
 /// Watch → Mac messages.
@@ -140,7 +142,7 @@ public enum Wire {
 
     enum Kind: UInt8 {
         case helloReply = 0x01, sessions = 0x02, alerts = 0x03, buzz = 0x04, weather = 0x05
-        case location = 0x06, settings = 0x07, snapshotEnd = 0x08, heartbeat = 0x09, testSignal = 0x0A
+        case location = 0x06, settings = 0x07, snapshotEnd = 0x08, heartbeat = 0x09, testSignal = 0x0A, feed = 0x0B
         case hello = 0x41, ack = 0x42, watchSettings = 0x43, open = 0x44
     }
 
@@ -197,6 +199,10 @@ public enum Wire {
             kind = .snapshotEnd
         case .heartbeat:
             kind = .heartbeat
+        case let .feed(channel, batch, index, count, item):
+            kind = .feed
+            p.append(channel); p.u32(batch); p.append(index); p.append(count); p.u32(item.stamp)
+            p.str(item.source, max: Feeds.maxSource); p.str(item.text, max: Feeds.maxText)
         }
         return frames(type: kind.rawValue, msgId: msgId, payload: p)
     }
@@ -275,6 +281,10 @@ public enum Wire {
             return r.settings().map { .settings($0) }
         case .snapshotEnd: return .snapshotEnd
         case .heartbeat: return .heartbeat
+        case .feed:
+            guard let ch = r.u8(), let b = r.u32(), let i = r.u8(), let n = r.u8(), let st = r.u32(),
+                  let src = r.str(), let t = r.str() else { return nil }
+            return .feed(channel: ch, batch: b, index: i, count: n, item: FeedItem(stamp: st, source: src, text: t))
         default: return nil
         }
     }

@@ -131,6 +131,63 @@ function testLinkPolicyBackoff(logger as Test.Logger) as Boolean {
 }
 
 (:test)
+function testFeedVectorDecodes(logger as Test.Logger) as Boolean {
+    var d = TC.run(["0b10020068e77800000868e7741808536b79204e", "0b10126577730b53746f726d206e616d6564"]);
+    var ok = T.check(logger, "decoded", d != null && d[:type] == Proto.FEED);
+    if (d != null) {
+        ok &= T.check(logger, "fields", d[:channel] == 0 && d[:batch] == 1760000000 && d[:index] == 0 && d[:count] == 8
+            && d[:stamp] == 1759999000 && "Sky News".equals(d[:source]) && "Storm named".equals(d[:text]));
+    }
+    // 11-frame worst case: 20-byte source, 140-byte text.
+    var p = [0]b;
+    p.addAll([0x68, 0xe7, 0x78, 0x00, 0, 12, 0, 0, 0, 1]b);
+    p.add(20);
+    for (var i = 0; i < 20; i++) { p.add(0x73); }
+    p.add(140);
+    for (var i = 0; i < 140; i++) { p.add(0x74); }
+    var fr = Proto.frames(Proto.FEED, 3, p);
+    var a = new Proto.Assembler();
+    var out = null;
+    for (var i = 0; i < fr.size(); i++) { out = a.feed(fr[i]); }
+    var big = out == null ? null : Proto.decode(out[0] as Number, out[1] as ByteArray);
+    ok &= T.check(logger, "11 frames", fr.size() == 11 && big != null && (big[:text] as String).length() == 140);
+    return ok;
+}
+
+(:test)
+function testFeedStagingWholeSetsOnly(logger as Test.Logger) as Boolean {
+    Feeds.reset(Feeds.NEWS);
+    var c = new Companion();
+    var item = { :type => Proto.FEED, :channel => 0, :batch => 100, :count => 3, :stamp => 0, :source => "Sky News" };
+    c.handle(T.with(item, :index, 1, "b"));
+    c.handle(T.with(item, :index, 1, "b"));  // duplicate
+    c.handle(T.with(item, :index, 0, "a"));
+    var ok = T.check(logger, "partial not saved", Feeds.get(Feeds.NEWS) == null);
+    // A newer batch overtakes the partial one.
+    var newer = T.with(item, :batch, 200, null);
+    c.handle(T.with(newer, :index, 0, "x"));
+    c.handle(T.with(item, :index, 2, "c"));  // old batch: starts a fresh stage, never completes
+    c.handle(T.with(newer, :index, 0, "x"));
+    c.handle(T.with(newer, :index, 1, "y"));
+    c.handle(T.with(newer, :index, 2, "z"));
+    var set = Feeds.get(Feeds.NEWS);
+    ok &= T.check(logger, "newer set saved", set != null && set["batch"] == 200 && (set["items"] as Array).size() == 3
+        && "x".equals(((set["items"] as Array)[0] as Array)[2]));
+    ok &= T.check(logger, "stamp 0 is null", set != null && ((set["items"] as Array)[0] as Array)[0] == null);
+    // Link drop clears a partial set; unknown channels are ignored.
+    c.handle(T.with(T.with(item, :batch, 300, null), :index, 0, "p"));
+    c.linkDown();
+    c.handle(T.with(T.with(item, :batch, 300, null), :index, 1, "q"));
+    c.handle(T.with(T.with(item, :batch, 300, null), :index, 2, "r"));
+    ok &= T.check(logger, "drop cleared stage", (Feeds.get(Feeds.NEWS) as Dictionary)["batch"] == 200);
+    c.handle(T.with(T.with(item, :channel, 9, null), :index, 0, "u"));
+    ok &= T.check(logger, "cursor wraps", Feeds.advance(Feeds.NEWS, 3) == 0 && Feeds.advance(Feeds.NEWS, 3) == 1
+        && Feeds.advance(Feeds.NEWS, 3) == 2 && Feeds.advance(Feeds.NEWS, 3) == 0);
+    Feeds.reset(Feeds.NEWS);
+    return ok;
+}
+
+(:test)
 function testCompanionSnapshotReplacesQueue(logger as Test.Logger) as Boolean {
     var c = new Companion();
     c.handle({ :type => Proto.ALERTS, :total => 2, :list => [[1, Proto.K_NEEDS_YOU, false, "a", ""], [2, Proto.K_DONE, false, "b", ""]] });
@@ -354,5 +411,46 @@ function testAgentsCardRows(logger as Test.Logger) as Boolean {
     ok = T.check(logger, "4 sent + 2 held back", hiddenSessions(4, 2) == 4) && ok;
     ok = T.check(logger, "waiting line", stateLine(1, 3).equals("waiting · 3m")) && ok;
     ok = T.check(logger, "busy line", stateLine(0, 12).equals("busy · 12m")) && ok;
+    return ok;
+}
+
+(:test)
+function testNewsBitInverted(logger as Test.Logger) as Boolean {
+    Application.Storage.setValue("settingsChangedAt", 1000);
+    Application.Properties.setValue("cardNews", false);
+    var d = { :changedAt => 2000, :cards => 0x1FF, :interval => 10, :cities => [0, 33, 9],
+              :units => 0, :backlight => 0, :companion => true, :chargerSignal => 1, :beepSound => 0,
+              :quietHours => true, :quietStart => 18, :quietEnd => 9 };
+    var ok = T.check(logger, "applied", Settings.applyRemote(d));
+    ok &= T.check(logger, "old mask turns News on", Settings.newsEnabled());
+    ok &= T.check(logger, "bit 9 clear when on", Settings.cardBits() & (1 << 9) == 0);
+    Application.Properties.setValue("cardNews", false);
+    ok &= T.check(logger, "bit 9 set when off", Settings.cardBits() & (1 << 9) != 0);
+    TS.reset();
+    Application.Storage.deleteValue("settingsChangedAt");
+    return ok;
+}
+
+(:test)
+function testNewsCardCyclesAndMeta(logger as Test.Logger) as Boolean {
+    Feeds.reset(Feeds.NEWS);
+    Feeds.save(Feeds.NEWS, 1, [[0, "Sky News", "a"], [1000, "Sky News", "b"], [2000, "Sky News", "c"]], 0);
+    var card = new NewsCard();
+    card.shown();
+    var ok = T.check(logger, "first showing", "a".equals((card.current() as Array)[2]));
+    card.shown();
+    card.shown();
+    ok &= T.check(logger, "third showing", "c".equals((card.current() as Array)[2]));
+    ok &= T.check(logger, "pinned tick wraps", card.tick() && "a".equals((card.current() as Array)[2]));
+    ok &= T.check(logger, "no time, source only", newsMeta("Sky News", null, 5000).equals("Sky News"));
+    ok &= T.check(logger, "age", newsMeta("Sky News", 1000, 1000 + 25 * 60).equals("Sky News · 25 min ago")
+        && ageText(3 * 3600 + 5).equals("3 h ago") && ageText(30).equals("just now"));
+    var m = card.meta([null, "Sky News", "a"]) as Array;
+    ok &= T.check(logger, "fresh meta", "Sky News".equals(m[0]) && m[1] == Ui.FG);
+    var s = Feeds.get(Feeds.NEWS) as Dictionary;
+    s["receivedAt"] = Time.now().value() - 13 * 3600;
+    m = card.meta([null, "Sky News", "a"]) as Array;
+    ok &= T.check(logger, "out of date", "Out of date".equals(m[0]) && m[1] == Ui.RED);
+    Feeds.reset(Feeds.NEWS);
     return ok;
 }

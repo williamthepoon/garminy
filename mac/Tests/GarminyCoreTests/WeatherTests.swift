@@ -58,7 +58,17 @@ func fixture(_ name: String) throws -> Data {
     let a3 = m.adoptFromWatch(newer)            // newer Garmin Connect change wins
     #expect(a3)
     #expect(m.value.interval == 5)
-    m.setCard(1, false, now: Date(timeIntervalSince1970: 1_780_000_000))
-    #expect(!m.card(1) && m.card(0))
+    m.setCard(2, false, now: Date(timeIntervalSince1970: 1_780_000_000))  // Fortune, bit 1
+    #expect(!m.card(2) && m.card(0) && m.value.cards & 0b10 == 0)
     #expect(SettingsModel.cities.count == 45 && SettingsModel.cities[33] == "Singapore")
+}
+
+@Test func newsCardBitIsInverted() {
+    var m = SettingsModel()
+    #expect(SettingsModel.cards[1].name == "News")
+    #expect(m.value.cards == 0x1FF && m.card(1))  // settings saved before News existed: On
+    m.setCard(1, false, now: Date(timeIntervalSince1970: 1_780_000_000))
+    #expect(!m.card(1) && m.value.cards & (1 << 9) != 0)
+    m.setCard(1, true, now: Date(timeIntervalSince1970: 1_780_000_001))
+    #expect(m.card(1) && m.value.cards == 0x1FF)
 }

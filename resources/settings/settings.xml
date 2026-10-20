@@ -5,6 +5,9 @@
     <setting propertyKey="@Properties.cardAgents" title="@Strings.cardAgentsTitle">
         <settingConfig type="boolean" />
     </setting>
+    <setting propertyKey="@Properties.cardNews" title="@Strings.cardNewsTitle">
+        <settingConfig type="boolean" />
+    </setting>
     <setting propertyKey="@Properties.cardFortune" title="@Strings.cardFortuneTitle">
         <settingConfig type="boolean" />
     </setting>

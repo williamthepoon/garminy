@@ -22,6 +22,7 @@ final class AppModel: ObservableObject {
     let keepAwake = KeepAwake()
     let socket = SocketServer()
     let weather = WeatherService()
+    let news = NewsService()
     let opener = SessionOpener()
     @Published private(set) var settings = SettingsModel(AppModel.loadSettings())
     private var tracker = SessionTracker()
@@ -58,9 +59,12 @@ final class AppModel: ObservableObject {
             Log.info("mac woke")
             self?.ble.advertise()
             self?.weather.didWake()
+            self?.news.didWake()
         }
         weather.onUpdate = { [weak self] in self?.sendWeather() }
         weather.start()
+        news.onUpdate = { [weak self] in self?.sendNews() }
+        news.start()
         presence.onSleep = { Log.info("mac will sleep") }
         tick = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in self?.periodic() }
         focusTick = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
@@ -155,6 +159,16 @@ final class AppModel: ObservableObject {
         }
         buzzOnReconnect = []
         ble.send(.snapshotEnd)
+        sendNews()
+    }
+
+    /// Queues the news set on the low-priority lane (mac-content-feeds).
+    func sendNews() {
+        let items = Array(news.items.prefix(Feeds.maxItems))
+        for (i, item) in items.enumerated() {
+            ble.sendFeed(.feed(channel: FeedChannel.news.rawValue, batch: news.batch, index: UInt8(i),
+                               count: UInt8(items.count), item: item))
+        }
     }
 
     // MARK: Hook events

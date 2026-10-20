@@ -49,6 +49,9 @@ let macVectors: [MacVector] = [
               frames: ["030c020101010001076761726d696e790a416c6c", "030c126f772042617368"]),
     MacVector(message: .alerts([WireAlert(id: 2, kind: .done, buzz: false, label: "garminy", detail: "4m", openable: true)], total: 1),
               msgId: 14, frames: ["030e010101020202076761726d696e7902346d"]),
+    MacVector(message: .feed(channel: 0, batch: 1_760_000_000, index: 0, count: 8,
+                             item: FeedItem(stamp: 1_759_999_000, source: "Sky News", text: "Storm named")),
+              msgId: 16, frames: ["0b10020068e77800000868e7741808536b79204e", "0b10126577730b53746f726d206e616d6564"]),
     MacVector(message: .sessions(sampleSessions, hidden: 0), msgId: 13,
               frames: ["020d030300010000076761726d696e7900000c07", "020d136170692d73766302000307776562736974", "020d2365"]),
 ]
@@ -122,4 +125,33 @@ func macVectorDecodes(_ i: Int) throws {
     } else {
         Issue.record("alerts did not decode")
     }
+}
+
+@Test func feedWorstCaseFitsElevenFrames() {
+    let item = FeedItem(stamp: 1, source: String(repeating: "s", count: 40), text: String(repeating: "t", count: 300))
+    let f = Wire.encode(.feed(channel: 0, batch: 1, index: 0, count: 12, item: item), msgId: 1)
+    #expect(f.count == 11)
+    #expect(f.allSatisfy { $0.count <= Wire.maxFrame })
+    var r = Reassembler()
+    var out: (type: UInt8, payload: Data)?
+    for x in f { out = r.feed(x) }
+    guard let done = out, case let .feed(_, _, _, _, got)? = Wire.decodeMac(type: done.type, payload: done.payload) else {
+        Issue.record("no feed"); return
+    }
+    #expect(got.source.utf8.count == 20 && got.text.utf8.count == 140)
+}
+
+@Test func outboxPutsAlertsBeforeFeeds() {
+    var o = Outbox()
+    o.pushFeed(channel: 0, batch: 1, frames: [Data([1])])
+    o.pushFeed(channel: 0, batch: 1, frames: [Data([2])])
+    o.push([Data([9])])
+    #expect(o.next() == [Data([9])])
+    #expect(o.next() == [Data([1])])
+    // A newer set drops the unsent rest of the older one.
+    o.pushFeed(channel: 0, batch: 2, frames: [Data([3])])
+    o.push([Data([8])])
+    #expect(o.next() == [Data([8])])
+    #expect(o.next() == [Data([3])])
+    #expect(o.next() == nil)
 }

@@ -21,6 +21,7 @@ class Companion {
     var onSettings as Method? = null;  // called with a decoded SETTINGS dictionary
 
     var _link as Link? = null;
+    var _feedStage as Dictionary = {}; // channel => [batch, items with nulls for missing]
     var _seen as Dictionary = {};      // ids in the last ALERTS list, already buzzed
 
     function initialize() {
@@ -43,6 +44,7 @@ class Companion {
 
     function linkDown() as Void {
         connected = false;
+        _feedStage = {};
         WatchUi.requestUpdate();
     }
 
@@ -73,10 +75,40 @@ class Companion {
             MacWeather.save(d, macOffset);
         } else if (t == Proto.LOCATION) {
             MacWeather.saveLocation(d[:lat] as Float, d[:lon] as Float);
+        } else if (t == Proto.FEED) {
+            stageFeed(d);
         } else if (t == Proto.SETTINGS && onSettings != null) {
             (onSettings as Method).invoke(d);
         }
         WatchUi.requestUpdate();
+    }
+
+    // Collects one FEED item; a channel's set is saved only once every item of its batch has
+    // arrived, and a newer batch replaces a partial older one (mac-content-feeds).
+    function stageFeed(d as Dictionary) as Void {
+        var ch = d[:channel] as Number;
+        var n = d[:count] as Number;
+        var i = d[:index] as Number;
+        if (Feeds.CHANNELS.indexOf(ch) < 0 || n < 1 || n > Feeds.MAX_ITEMS || i >= n) {
+            return;
+        }
+        var stage = _feedStage[ch] as Array?;
+        if (stage == null || stage[0] != d[:batch] || (stage[1] as Array).size() != n) {
+            stage = [d[:batch], new [n]];
+            _feedStage[ch] = stage;
+        }
+        var items = stage[1] as Array;
+        if (items[i] != null) {
+            return;
+        }
+        items[i] = [d[:stamp], d[:source], d[:text]];
+        for (var k = 0; k < n; k++) {
+            if (items[k] == null) {
+                return;
+            }
+        }
+        Feeds.save(ch, d[:batch] as Number, items, macOffset);
+        _feedStage.remove(ch);
     }
 
     function setAlerts(list as Array, total as Number) as Void {
