@@ -2,7 +2,8 @@ import Foundation
 
 /// The Mac's quote pool for the Quote card (fresh-daily-cards). Every quote is public domain:
 /// its author died before 1955, or it is a traditional proverb, and non-English authors are quoted
-/// only in pre-1929 translations. Edit here; the author and work are never sent to the watch.
+/// only in pre-1929 translations. Quotes are at most 100 bytes so they fit the round screen uncut.
+/// Edit here; the author and work are never sent to the watch.
 public enum QuotePool {
     /// Author → year of death, for the public-domain check in the tests.
     public static let authorDeaths: [String: Int] = [
@@ -106,7 +107,6 @@ public enum QuotePool {
         ["A man is rich in proportion to the number of things which he can afford to let alone.", "Henry David Thoreau", "Walden (1854)"],
         ["Every morning was a cheerful invitation to make my life of equal simplicity.", "Henry David Thoreau", "Walden (1854)"],
         ["Only that day dawns to which we are awake.", "Henry David Thoreau", "Walden (1854)"],
-        ["If you have built castles in the air, your work need not be lost; that is where they should be. Now put the foundations under them.", "Henry David Thoreau", "Walden (1854)"],
         ["It is not enough to be busy; so are the ants. The question is: what are we busy about?", "Henry David Thoreau", "letter to H. G. O. Blake (1857)"],
         ["I have never found the companion that was so companionable as solitude.", "Henry David Thoreau", "Walden (1854)"],
         ["Rather than love, than money, than fame, give me truth.", "Henry David Thoreau", "Walden (1854)"],
@@ -172,20 +172,15 @@ public enum QuotePool {
         ["Get your facts first, and then you can distort them as much as you please.", "Mark Twain", "interview by Rudyard Kipling (1899)"],
         ["Let us endeavor so to live that when we come to die even the undertaker will be sorry.", "Mark Twain", "Pudd'nhead Wilson (1894)"],
         ["Few things are harder to put up with than the annoyance of a good example.", "Mark Twain", "Pudd'nhead Wilson (1894)"],
-        ["Habit is habit, and not to be flung out of the window by any man, but coaxed downstairs a step at a time.", "Mark Twain", "Pudd'nhead Wilson (1894)"],
         ["Courage is resistance to fear, mastery of fear, not absence of fear.", "Mark Twain", "Pudd'nhead Wilson (1894)"],
-        ["Work consists of whatever a body is obliged to do, and play consists of whatever a body is not obliged to do.", "Mark Twain", "The Adventures of Tom Sawyer (1876)"],
         ["Travel is fatal to prejudice, bigotry, and narrow-mindedness.", "Mark Twain", "The Innocents Abroad (1869)"],
         ["Whenever you find yourself on the side of the majority, it is time to pause and reflect.", "Mark Twain", "notebook (1904)"],
         ["Good friends, good books, and a sleepy conscience: this is the ideal life.", "Mark Twain", "notebook (1898)"],
-        ["Grief can take care of itself, but to get the full value of a joy you must have somebody to divide it with.", "Mark Twain", "Following the Equator (1897)"],
         ["Great works are performed not by strength but by perseverance.", "Samuel Johnson", "Rasselas (1759)"],
         ["Hope is itself a species of happiness, and, perhaps, the chief happiness which this world affords.", "Samuel Johnson", "letter to Bennet Langton (1758)"],
-        ["He who has so little knowledge of human nature as to seek happiness by changing anything but his own disposition will waste his life.", "Samuel Johnson", "The Rambler (1750)"],
         ["Curiosity is one of the permanent and certain characteristics of a vigorous mind.", "Samuel Johnson", "The Rambler (1751)"],
         ["The chains of habit are generally too small to be felt until they are too strong to be broken.", "Samuel Johnson", "The Vision of Theodore (1748)"],
         ["Few things are impossible to diligence and skill.", "Samuel Johnson", "Rasselas (1759)"],
-        ["Knowledge is of two kinds. We know a subject ourselves, or we know where we can find information upon it.", "Samuel Johnson", "Boswell's Life of Johnson (1791)"],
         ["Life is not long, and too much of it must not pass in idle deliberation how it shall be spent.", "Samuel Johnson", "Boswell's Life of Johnson (1791)"],
         ["What is written without effort is in general read without pleasure.", "Samuel Johnson", "Johnsonian Miscellanies (1897)"],
         ["To err is human, to forgive divine.", "Alexander Pope", "An Essay on Criticism (1711)"],
@@ -201,7 +196,6 @@ public enum QuotePool {
         ["He that will not apply new remedies must expect new evils; for time is the greatest innovator.", "Francis Bacon", "Of Innovations (1625)"],
         ["Prosperity is not without many fears and distastes; and adversity is not without comforts and hopes.", "Francis Bacon", "Of Adversity (1625)"],
         ["Nature is often hidden, sometimes overcome, seldom extinguished.", "Francis Bacon", "Of Nature in Men (1625)"],
-        ["If a man will begin with certainties, he shall end in doubts; but if he will be content to begin with doubts, he shall end in certainties.", "Francis Bacon", "The Advancement of Learning (1605)"],
         ["No one is useless in this world who lightens the burthen of it to any one else.", "Charles Dickens", "Doctor Marigold (1865)"],
         ["Have a heart that never hardens, and a temper that never tires, and a touch that never hurts.", "Charles Dickens", "Our Mutual Friend (1865)"],
         ["Reflect upon your present blessings, of which every man has plenty; not on your past misfortunes.", "Charles Dickens", "Sketches by Boz (1836)"],
@@ -243,7 +237,6 @@ public enum QuotePool {
         ["Do I contradict myself? Very well then I contradict myself, I am large, I contain multitudes.", "Walt Whitman", "Song of Myself (1855)"],
         ["Afoot and light-hearted I take to the open road, healthy, free, the world before me.", "Walt Whitman", "Song of the Open Road (1856)"],
         ["Re-examine all you have been told; dismiss what insults your own soul.", "Walt Whitman", "Leaves of Grass, preface (1855)"],
-        ["Now I see the secret of the making of the best persons. It is to grow in the open air and to eat and sleep with the earth.", "Walt Whitman", "Song of the Open Road (1856)"],
         ["Hope is the thing with feathers that perches in the soul.", "Emily Dickinson", "poem 254 (c. 1861)"],
         ["Forever is composed of nows.", "Emily Dickinson", "poem 690 (c. 1862)"],
         ["Tell all the truth but tell it slant.", "Emily Dickinson", "poem 1129 (c. 1872)"],
@@ -325,8 +318,6 @@ public enum QuotePool {
         ["Associate yourself with men of good quality if you esteem your own reputation.", "George Washington", "Rules of Civility (c. 1744)"],
         ["Labour to keep alive in your breast that little spark of celestial fire called conscience.", "George Washington", "Rules of Civility (c. 1744)"],
         ["If there is no struggle there is no progress.", "Frederick Douglass", "West India Emancipation speech (1857)"],
-        ["Success is to be measured not so much by the position that one has reached in life as by the obstacles which he has overcome.", "Booker T. Washington", "Up from Slavery (1901)"],
-        ["No race can prosper till it learns that there is as much dignity in tilling a field as in writing a poem.", "Booker T. Washington", "Atlanta Exposition address (1895)"],
         ["Cast down your bucket where you are.", "Booker T. Washington", "Atlanta Exposition address (1895)"],
         ["It is not the critic who counts.", "Theodore Roosevelt", "Citizenship in a Republic (1910)"],
         ["Far better is it to dare mighty things, to win glorious triumphs, even though checkered by failure.", "Theodore Roosevelt", "The Strenuous Life (1899)"],
@@ -420,7 +411,6 @@ public enum QuotePool {
         ["Learning without thought is labour lost; thought without learning is perilous.", "Confucius", "Analects II.15, tr. Legge (1861)"],
         ["The superior man is modest in his speech, but exceeds in his actions.", "Confucius", "Analects XIV.29, tr. Legge (1861)"],
         ["Is it not pleasant to learn with a constant perseverance and application?", "Confucius", "Analects I.1, tr. Legge (1861)"],
-        ["When you know a thing, to hold that you know it; and when you do not know a thing, to allow that you do not know it - this is knowledge.", "Confucius", "Analects II.17, tr. Legge (1861)"],
         ["When we see men of worth, we should think of equalling them.", "Confucius", "Analects IV.17, tr. Legge (1861)"],
         ["No man is an island, entire of itself.", "John Donne", "Devotions upon Emergent Occasions (1624)"],
         ["If I have seen further it is by standing on the shoulders of Giants.", "Isaac Newton", "letter to Robert Hooke (1676)"],

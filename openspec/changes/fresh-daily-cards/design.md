@@ -48,7 +48,7 @@ The batch is the Mac time at the set's local start of day plus one hour, so the 
 ### Quote pool and no-repeat history
 - `mac/Sources/GarminyCore/QuotePool.swift` holds `[text, author, work]` as a Swift literal. The app bundle doesn't copy SwiftPM resource bundles, so a source file avoids packaging changes.
 - The author and work give the recorded source, which is never sent.
-- The curation rule is that the author died before 1955, or the line is a traditional proverb. Non-English authors are quoted only in pre-1929 public-domain translations, never modern ones. A unit test checks every author against an allow-list of authors with their death years.
+- The curation rule is that the author died before 1955, or the line is a traditional proverb. Non-English authors are quoted only in pre-1929 public-domain translations, never modern ones. A unit test checks every author against an allow-list of authors with their death years. Quotes are at most 100 bytes: the simulator showed a 138-byte quote cut at TINY, and a cut quote loses its point.
 - `QuotePicker` (in `GarminyCore`, pure) takes the pool, a history of `[id: lastSent]` and a seeded RNG, and returns 12 ids not sent in the last 30 days.
 - History lives in `UserDefaults` and is pruned after 30 days.
 - With 400 quotes and 12 a day, the window uses 360, so it never runs dry.

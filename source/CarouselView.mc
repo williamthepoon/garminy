@@ -63,6 +63,10 @@ class CarouselView extends WatchUi.View {
         }
         _cards = cards;
         _idx = newIdx;
+        // A newly current card counts as shown, so feed cards don't repeat their first item.
+        if (cards.size() > 0 && (currentId == null || !cards[newIdx].id().equals(currentId))) {
+            cards[newIdx].shown();
+        }
         _hasNews = false;
         for (var i = 0; i < cards.size(); i++) {
             _hasNews = _hasNews || cards[i].id().equals("news");
