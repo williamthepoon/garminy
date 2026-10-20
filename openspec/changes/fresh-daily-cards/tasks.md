@@ -12,15 +12,15 @@
 
 ## 2. Mac: content and service
 
-- [ ] 2.1 Curate at least 400 quotes into `mac/Sources/GarminyCore/QuotePool.swift` as `[text, author, work]`: authors who died before 1955, or traditional proverbs, and non-English authors only in pre-1929 translations. Add an author allow-list with death years, and a test that every author is on it and every text is ≤ 140 bytes and unique
-- [ ] 2.2 Add `GarminyCompanion/DailyService.swift`:
+- [x] 2.1 Curate at least 400 quotes into `mac/Sources/GarminyCore/QuotePool.swift` as `[text, author, work]`: authors who died before 1955, or traditional proverbs, and non-English authors only in pre-1929 translations. Add an author allow-list with death years, and a test that every author is on it and every text is ≤ 140 bytes and unique
+- [x] 2.2 Add `GarminyCompanion/DailyService.swift`:
   - builds the quote, fortune and on-this-day sets per local date, and persists them in `daily.json`
   - builds at midnight, at launch, and 30 s after wake when the date is stale
   - Wikimedia retries every 30 min, capped at 4 a day; jokes capped at 20 a day
   - a User-Agent naming garminy and its repository
-- [ ] 2.3 Wire `DailyService` into `AppModel`: queue the sets on the low lane after `.snapshotEnd`, and send each set when it is built. Show the status in the menu
-- [ ] 2.4 Rename the card in the Mac table to "Fortunes & facts"
-- [ ] 2.5 Run `swift test --package-path mac` and make sure it passes
+- [x] 2.3 Wire `DailyService` into `AppModel`: queue the sets on the low lane after `.snapshotEnd`, and send each set when it is built. Show the status in the Watch settings window
+- [x] 2.4 Rename the card in the Mac table to "Fortunes & facts"
+- [x] 2.5 Run `swift test --package-path mac` and make sure it passes
 
 ## 3. Watch
 

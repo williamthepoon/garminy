@@ -23,6 +23,7 @@ final class AppModel: ObservableObject {
     let socket = SocketServer()
     let weather = WeatherService()
     let news = NewsService()
+    let daily = DailyService()
     let opener = SessionOpener()
     @Published private(set) var settings = SettingsModel(AppModel.loadSettings())
     private var tracker = SessionTracker()
@@ -60,11 +61,14 @@ final class AppModel: ObservableObject {
             self?.ble.advertise()
             self?.weather.didWake()
             self?.news.didWake()
+            self?.daily.didWake()
         }
         weather.onUpdate = { [weak self] in self?.sendWeather() }
         weather.start()
         news.onUpdate = { [weak self] in self?.sendNews() }
         news.start()
+        daily.onUpdate = { [weak self] in self?.sendDaily() }
+        daily.start()
         presence.onSleep = { Log.info("mac will sleep") }
         tick = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in self?.periodic() }
         focusTick = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
@@ -160,6 +164,18 @@ final class AppModel: ObservableObject {
         buzzOnReconnect = []
         ble.send(.snapshotEnd)
         sendNews()
+        sendDaily()
+    }
+
+    /// Queues the quote, fortune and on-this-day sets on the low-priority lane (fresh-daily-cards).
+    func sendDaily() {
+        let sets: [(FeedChannel, [FeedItem])] = [(.quote, daily.quoteItems), (.fortune, daily.fortuneItems), (.onThisDay, daily.eventItems)]
+        for (channel, list) in sets {
+            let items = Array(list.prefix(Feeds.maxItems))
+            for (i, item) in items.enumerated() {
+                ble.sendFeed(.feed(channel: channel.rawValue, batch: daily.batch, index: UInt8(i), count: UInt8(items.count), item: item))
+            }
+        }
     }
 
     /// Queues the news set on the low-priority lane (mac-content-feeds).

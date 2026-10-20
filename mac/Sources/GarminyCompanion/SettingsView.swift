@@ -6,6 +6,7 @@ struct SettingsView: View {
     @ObservedObject var model: AppModel
     @ObservedObject var weather: WeatherService
     @ObservedObject var news: NewsService
+    @ObservedObject var daily: DailyService
     @State private var customURL = ""
 
     var body: some View {
@@ -38,6 +39,11 @@ struct SettingsView: View {
                 Text(news.status).font(.caption).foregroundStyle(.secondary)
             }
             .onAppear { customURL = news.customURL }
+
+            Section("Daily cards") {
+                Text("Quotes, Wikipedia facts, jokes and on this day, fresh each day.")
+                Text(daily.status).font(.caption).foregroundStyle(.secondary)
+            }
 
             Section("Cards") {
                 ForEach(SettingsModel.cards.indices, id: \.self) { i in

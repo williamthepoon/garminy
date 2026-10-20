@@ -73,3 +73,15 @@ import Testing
         #expect(picks.count == 12 && Set(picks).count == 12)
     }
 }
+
+@Test func quotePoolIsPublicDomainAndFits() {
+    let pool = QuotePool.all
+    #expect(pool.count >= 400)
+    #expect(pool.allSatisfy { $0.count == 3 && !$0[2].isEmpty })
+    #expect(pool.allSatisfy { $0[0].utf8.count <= Feeds.maxText })
+    #expect(Set(pool.map { $0[0].lowercased() }).count == pool.count)
+    for q in pool where q[1] != "Proverb" {
+        let died = QuotePool.authorDeaths[q[1]]
+        #expect(died != nil && died! < 1955, "\(q[1]) is not on the public-domain allow-list")
+    }
+}

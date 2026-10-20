@@ -90,7 +90,7 @@ public enum WeatherMapper {
 public struct SettingsModel: Equatable, Sendable {
     /// Card toggles in display order: name, bit in `cards`, and whether a set bit means off.
     public static let cards: [(name: String, bit: Int, inverted: Bool)] = [
-        ("Agents", 0, false), ("News", 9, true), ("Fortune", 1, false), ("Motivational quote", 2, false),
+        ("Agents", 0, false), ("News", 9, true), ("Fortunes & facts", 1, false), ("Motivational quote", 2, false),
         ("Umbrella?", 3, false), ("Weather", 4, false), ("Daylight", 5, false), ("Moon phase", 6, false),
         ("World clock", 7, false), ("On this day", 8, false),
     ]

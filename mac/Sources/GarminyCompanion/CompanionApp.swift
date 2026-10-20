@@ -34,7 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func showSettings() {
         if settingsWindow == nil {
-            let w = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(model: model, weather: model.weather, news: model.news)))
+            let w = NSWindow(contentViewController: NSHostingController(rootView: SettingsView(model: model, weather: model.weather, news: model.news, daily: model.daily)))
             w.title = "garminy Watch settings"
             w.styleMask = [.titled, .closable, .miniaturizable]
             w.isReleasedWhenClosed = false
