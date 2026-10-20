@@ -96,7 +96,7 @@ Every quote, whether bundled on the watch or in the Mac app, MUST be public doma
 - **THEN** its author and work are recorded next to it in the repository
 
 ### Requirement: Quote pool on the Mac
-The companion app SHALL bundle at least 1,000 quotes and send 12 of them each day. It SHALL NOT send a quote again within 30 days of sending it. Picking quotes SHALL need no network.
+The companion app SHALL bundle at least 400 quotes and send 12 of them each day. It SHALL NOT send a quote again within 30 days of sending it. Picking quotes SHALL need no network.
 
 #### Scenario: Thirty days of quotes
 - **WHEN** the companion has sent quote sets on 30 consecutive days

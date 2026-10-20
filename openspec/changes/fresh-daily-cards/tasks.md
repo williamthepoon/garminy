@@ -2,17 +2,17 @@
 
 ## 1. Mac: parsing and picking (GarminyCore)
 
-- [ ] 1.1 Add `GarminyCore/DailyFeeds.swift`:
+- [x] 1.1 Add `GarminyCore/DailyFeeds.swift`:
   - featured-feed parsing: `dyk` → "Did you know that …?" text, and `onthisday` → year and text
   - joke parsing
   - the 140-byte word-boundary trim and the skip rule
-- [ ] 1.2 Add a `QuotePicker`: from the pool, a `[id: lastSent]` history and a seeded RNG, pick 12 ids not sent within 30 days; prune the history
-- [ ] 1.3 Save fixtures: today's Wikimedia featured response, a response with no `dyk`, and two joke responses. Add `DailyFeedsTests` for DYK rewriting, HTML and entity stripping, trimming, a year of on-this-day events (including BC), and joke dedupe
-- [ ] 1.4 Add `QuotePickerTests`: 30 days of sets never repeat, the pool never runs dry, and pruning works
+- [x] 1.2 Add a `QuotePicker`: from the pool, a `[id: lastSent]` history and a seeded RNG, pick 12 ids not sent within 30 days; prune the history
+- [x] 1.3 Save fixtures: today's Wikimedia featured response, a response with no `dyk`, and two joke responses. Add `DailyFeedsTests` for DYK rewriting, HTML and entity stripping, trimming, a year of on-this-day events (including BC), and joke dedupe
+- [x] 1.4 Add `QuotePickerTests`: 30 days of sets never repeat, the pool never runs dry, and pruning works
 
 ## 2. Mac: content and service
 
-- [ ] 2.1 Curate at least 1,000 quotes into `mac/Sources/GarminyCompanion/Resources/quotes.json` as `[text, author, work]`, public domain or original, starting from `content/quotes.json`. Add `quote-authors.txt` as an allow-list, and a test that every author is on it and every text is ≤ 140 bytes
+- [ ] 2.1 Curate at least 400 quotes into `mac/Sources/GarminyCore/QuotePool.swift` as `[text, author, work]`: authors who died before 1955, or traditional proverbs, and non-English authors only in pre-1929 translations. Add an author allow-list with death years, and a test that every author is on it and every text is ≤ 140 bytes and unique
 - [ ] 2.2 Add `GarminyCompanion/DailyService.swift`:
   - builds the quote, fortune and on-this-day sets per local date, and persists them in `daily.json`
   - builds at midnight, at launch, and 30 s after wake when the date is stale

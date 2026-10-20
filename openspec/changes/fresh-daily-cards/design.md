@@ -46,12 +46,12 @@ The batch is the Mac time at the set's local start of day plus one hour, so the 
 - Skip items that would still exceed the limit after trimming meaningfully: under 40 % of the text kept means skip.
 
 ### Quote pool and no-repeat history
-- `mac/Sources/GarminyCompanion/Resources/quotes.json` holds `[text, author, work]`.
+- `mac/Sources/GarminyCore/QuotePool.swift` holds `[text, author, work]` as a Swift literal. The app bundle doesn't copy SwiftPM resource bundles, so a source file avoids packaging changes.
 - The author and work give the recorded source, which is never sent.
-- The curation rule is that the author died before 1955 or the text is original; this is checked in a unit test against an allow-list file of authors.
+- The curation rule is that the author died before 1955, or the line is a traditional proverb. Non-English authors are quoted only in pre-1929 public-domain translations, never modern ones. A unit test checks every author against an allow-list of authors with their death years.
 - `QuotePicker` (in `GarminyCore`, pure) takes the pool, a history of `[id: lastSent]` and a seeded RNG, and returns 12 ids not sent in the last 30 days.
 - History lives in `UserDefaults` and is pruned after 30 days.
-- With 1,000 quotes and 12 a day, the window uses 360, so it never runs dry.
+- With 400 quotes and 12 a day, the window uses 360, so it never runs dry.
 
 ### Watch: `TextCard` becomes `FeedCard` with fallback
 - `FortuneCard`, `QuoteCard` and `OnThisDayCard` extend `FeedCard(channel, minFont = FONT_TINY)`.
@@ -69,7 +69,7 @@ The batch is the Mac time at the set's local start of day plus one hour, so the 
 
 - [Wikimedia changes the featured-feed shape] → Parse defensively. A missing `dyk` means a jokes-only fortune set; a missing `onthisday` means no channel-3 set, so the watch uses the bundled fact.
 - [A joke turns out offensive] → icanhazdadjoke is curated for clean jokes. Keep a small blocklist of joke ids in `GarminyCore` for reported ones.
-- [Building a 1,000-quote public-domain pool is real curation work] → Task 2.1 starts from the 120 existing watch quotes and their recorded authors, then extends from public-domain collections. The unit test enforces the author allow-list.
+- [Quotes written from memory can be misattributed] → The user chose about 400 checked quotes over 1,000 (2026-10-20). Only lines from works that can be named reliably are included, each with its work, and the unit test enforces the author allow-list.
 - [CC BY-SA attribution for Wikipedia text] → The meta line shows "Wikipedia" on every Wikipedia item, and the README credits Wikimedia.
 
 ## Migration Plan
