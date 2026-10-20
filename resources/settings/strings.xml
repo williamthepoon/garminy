@@ -109,4 +109,5 @@
     <string id="c44">Anchorage</string>
     <string id="companionTitle">Mac companion</string>
     <string id="cardAgentsTitle">Agents (needs the Mac companion)</string>
+    <string id="cardNewsTitle">News (needs the Mac companion)</string>
 </strings>

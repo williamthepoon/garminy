@@ -1,5 +1,6 @@
 <properties>
     <property id="cardAgents" type="boolean">true</property>
+    <property id="cardNews" type="boolean">true</property>
     <property id="cardFortune" type="boolean">true</property>
     <property id="cardQuote" type="boolean">true</property>
     <property id="cardUmbrella" type="boolean">true</property>

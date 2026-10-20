@@ -16,6 +16,7 @@ module Proto {
     const SNAPSHOT_END = 0x08;
     const HEARTBEAT = 0x09;
     const TEST_SIGNAL = 0x0A;
+    const FEED = 0x0B;
     const HELLO = 0x41;
     const ACK = 0x42;
     const WATCH_SETTINGS = 0x43;
@@ -253,6 +254,9 @@ module Proto {
             }
         } else if (type == SETTINGS) {
             d = decodeSettings(r);
+        } else if (type == FEED) {
+            d = { :channel => r.u8(), :batch => r.u32(), :index => r.u8(), :count => r.u8(),
+                  :stamp => r.u32(), :source => r.str(), :text => r.str() };
         } else if (type == TEST_SIGNAL) {
             d = { :kind => r.u8() };
         } else if (type == SNAPSHOT_END || type == HEARTBEAT) {

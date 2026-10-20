@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <atom:link href="https://news-api.cf.sky.com/feeds/rss/home.xml" rel="self" type="application/rss+xml"/>
+    <title>The Latest News from the UK and Around the World | Sky News</title>
+    <link>https://news.sky.com/home</link>
+    <image>
+      <title>The Latest News from the UK and Around the World | Sky News</title>
+      <url>https://e3.365dm.com/skynews/logo.png</url>
+      <link>https://news.sky.com/home</link>
+    </image>
+    <description>Sky news delivers breaking news, headlines and top stories from business, politics, entertainment and more in the UK and worldwide.</description>
+    <language>en-GB</language>
+    <copyright>Copyright 2026, Sky UK. All Rights Reserved.</copyright>
+    <lastBuildDate>Tue, 20 Oct 2026 10:11:00 +0100</lastBuildDate>
+    <category>Sky News</category>
+    <ttl>1</ttl>
+    <item>
+      <title>Man charged after Australian MP struck by vehicle</title>
+      <link>https://news.sky.com/story/man-charged-after-australian-mp-struck-by-vehicle-13601264</link>
+      <description>Police have charged a man after an Australian MP was hit by a vehicle, causing her to undergo a leg amputation.</description>
+      <pubDate>Tue, 20 Oct 2026 10:11:00 +0100</pubDate>
+      <guid>https://news.sky.com/story/man-charged-after-australian-mp-struck-by-vehicle-13601264</guid>
+      <enclosure url="https://e3.365dm.com/26/10/1920x1080/skynews-helen-haines-australia_7380471.jpg?20261019092518" length="0" type="image/jpeg"/>
+      <media:description type="html">Helen Haines MP
+Pic: Facebook</media:description>
+      <media:thumbnail url="https://e3.365dm.com/26/10/1920x1080/skynews-helen-haines-australia_7380471.jpg?20261019092518" width="1920" height="1080"/>
+      <media:content type="image/jpeg" url="https://e3.365dm.com/26/10/1920x1080/skynews-helen-haines-australia_7380471.jpg?20261019092518"/>
+    </item>
+    <item>
+      <title>Britain's first storm of the season named</title>
+      <link>https://news.sky.com/story/britains-first-storm-of-the-season-named-13601253</link>
+      <description>Britain's first named storm of the season is due to hit large parts of the country later this week.</description>
+      <pubDate>Tue, 20 Oct 2026 09:39:00 +0100</pubDate>
+      <guid>https://news.sky.com/story/britains-first-storm-of-the-season-named-13601253</guid>
+      <enclosure url="https://e3.365dm.com/26/09/1920x1080/skynews-weather-london_7347830.jpg?20260911105906" length="0" type="image/jpeg"/>
+      <media:description type="html">File picture. Pic: Reuters</media:description>
+      <media:thumbnail url="https://e3.365dm.com/26/09/1920x1080/skynews-weather-london_7347830.jpg?20260911105906" width="1920" height="1080"/>
+      <media:content type="image/jpeg" url="https://e3.365dm.com/26/09/1920x1080/skynews-weather-london_7347830.jpg?20260911105906"/>
+    </item>
+    <item>
+      <title>Man arrested after alleged assaults against three Jewish women, including mum pushing a pram</title>
+      <link>https://news.sky.com/story/man-arrested-after-alleged-assaults-against-three-jewish-women-including-mum-pushing-a-pram-13601213</link>
+      <description>A man has been arrested on suspicion of racially aggravated common assault after three Jewish women were reportedly attacked, including one who was pushing a baby in a pram.</description>
+      <pubDate>Tue, 20 Oct 2026 07:08:00 +0100</pubDate>
+      <guid>https://news.sky.com/story/man-arrested-after-alleged-assaults-against-three-jewish-women-including-mum-pushing-a-pram-13601213</guid>
+      <enclosure url="https://e3.365dm.com/26/10/1920x1080/skynews-met-police-london_7371047.jpg?20261008080127" length="0" type="image/jpeg"/>
+      <media:description type="html">File Pic: iStock</media:description>
+      <media:thumbnail url="https://e3.365dm.com/26/10/1920x1080/skynews-met-police-london_7371047.jpg?20261008080127" width="1920" height="1080"/>
+      <media:content type="image/jpeg" url="https://e3.365dm.com/26/10/1920x1080/skynews-met-police-london_7371047.jpg?20261008080127"/>
+    </item>
+    <item>
+      <title>UK unemployment rate falls to lowest level since July last year</title>
+      <link>https://news.sky.com/story/surprise-dip-in-jobless-rate-supports-interest-rate-hike-13601180</link>
+      <description>The UK's unemployment rate has fallen to 4.7%, in a set of official figures that will support the case for a Bank of England interest rate hike next month.</description>
+      <pubDate>Tue, 20 Oct 2026 05:31:00 +0100</pubDate>
+      <guid>https://news.sky.com/story/surprise-dip-in-jobless-rate-supports-interest-rate-hike-13601180</guid>
+      <enclosure url="https://e3.365dm.com/26/02/1920x1080/skynews-job-centre-unemployment_7168407.jpg?20260218161905" length="0" type="image/jpeg"/>
+      <media:description type="html">File pic: PA</media:description>
+      <media:thumbnail url="https://e3.365dm.com/26/02/1920x1080/skynews-job-centre-unemployment_7168407.jpg?20260218161905" width="1920" height="1080"/>
+      <media:content type="image/jpeg" url="https://e3.365dm.com/26/02/1920x1080/skynews-job-centre-unemployment_7168407.jpg?20260218161905"/>
+    </item>
+    <item>
+      <title>Predatory teacher who sexually abused 12 schoolboys while 'hiding in plain sight' jailed</title>
+      <link>https://news.sky.com/story/predatory-paisley-teacher-who-sexually-abused-12-pupils-jailed-for-four-years-13600903</link>
+      <description>A predatory Renfrewshire teacher who sexually abused schoolboys while "hiding in plain sight" has been jailed for four years.</description>
+      <pubDate>Tue, 20 Oct 2026 09:00:00 +0100</pubDate>
+      <guid>https://news.sky.com/story/predatory-paisley-teacher-who-sexually-abused-12-pupils-jailed-for-four-years-13600903</guid>
+      <enclosure url="https://e3.365dm.com/26/10/1920x1080/skynews-martin-gallacher-police-scotland_7380563.jpg?20261019105656" length="0" type="image/jpeg"/>
+      <media:description type="html">Martin Gallacher. Pic: Police Scotland</media:description>
+      <media:thumbnail url="https://e3.365dm.com/26/10/1920x1080/skynews-martin-gallacher-police-scotland_7380563.jpg?20261019105656" width="1920" height="1080"/>
+      <media:content type="image/jpeg" url="https://e3.365dm.com/26/10/1920x1080/skynews-martin-gallacher-police-scotland_7380563.jpg?20261019105656"/>
+    </item>
+    <item>
+      <title>Revealed: Face of man who lived in Roman Scotland almost 2,000 years ago</title>
+      <link>https://news.sky.com/story/revealed-face-of-man-who-lived-in-roman-scotland-almost-2000-years-ago-13600885</link>
+      <description>The face of a man who died on the Roman frontier in Scotland almost 2,000 years ago has been reconstructed from skeletal remains ahead of a major exhibition.</description>
+      <pubDate>Mon, 19 Oct 2026 10:04:00 +0100</pubDate>
+      <guid>https://news.sky.com/story/revealed-face-of-man-who-lived-in-roman-scotland-almost-2000-years-ago-13600885</guid>
+      <enclosure url="https://e3.365dm.com/26/10/1920x1080/skynews-empire-skull-roman_7380583.jpg?20261019112628" length="0" type="image/jpeg"/>
+      <media:description type="html">The skull of a man from Roman Scotland and the digital facial reconstruction. Pic: NMS/PA</media:description>
+      <media:thumbnail url="https://e3.365dm.com/26/10/1920x1080/skynews-empire-skull-roman_7380583.jpg?20261019112628" width="1920" height="1080"/>
+      <media:content type="image/jpeg" url="https://e3.365dm.com/26/10/1920x1080/skynews-empire-skull-roman_7380583.jpg?20261019112628"/>
+    </item>
+    <item>
+      <title>Oil-rich Alberta votes to remain part of Canada in historic referendum</title>
+      <link>https://news.sky.com/story/alberta-votes-to-remain-part-of-canada-13601218</link>
+      <description>Alberta ‌has voted to remain part of Canada in the province's first-ever referendum on separation.</description>
+      <pubDate>Tue, 20 Oct 2026 07:41:00 +0100</pubDate>
+      <guid>https://news.sky.com/story/alberta-votes-to-remain-part-of-canada-13601218</guid>
+      <enclosure url="https://e3.365dm.com/26/10/1920x1080/skynews-canada-referendum-alberta_7381330.jpg?20261020080224" length="0" type="image/jpeg"/>
+      <media:description type="html">A supporter of the Forever Canadian group. Pic: Reuters</media:description>
+      <media:thumbnail url="https://e3.365dm.com/26/10/1920x1080/skynews-canada-referendum-alberta_7381330.jpg?20261020080224" width="1920" height="1080"/>
+      <media:content type="image/jpeg" url="https://e3.365dm.com/26/10/1920x1080/skynews-canada-referendum-alberta_7381330.jpg?20261020080224"/>
+    </item>
+  </channel>
+</rss>

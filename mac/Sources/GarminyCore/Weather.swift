@@ -88,8 +88,12 @@ public enum WeatherMapper {
 
 /// garminy's watch settings as the Mac edits them (app-settings).
 public struct SettingsModel: Equatable, Sendable {
-    public static let cardNames = ["Agents", "Fortune", "Motivational quote", "Umbrella?", "Weather",
-                                   "Daylight", "Moon phase", "World clock", "On this day"]
+    /// Card toggles in display order: name, bit in `cards`, and whether a set bit means off.
+    public static let cards: [(name: String, bit: Int, inverted: Bool)] = [
+        ("Agents", 0, false), ("News", 9, true), ("Fortune", 1, false), ("Motivational quote", 2, false),
+        ("Umbrella?", 3, false), ("Weather", 4, false), ("Daylight", 5, false), ("Moon phase", 6, false),
+        ("World clock", 7, false), ("On this day", 8, false),
+    ]
     public static let intervals: [UInt8] = [5, 10, 20, 30, 60]
     /// World clock cities, in the watch's order (source/TimeZones.mc).
     public static let cities = [
@@ -123,9 +127,15 @@ public struct SettingsModel: Equatable, Sendable {
         value.changedAt = UInt32(now.timeIntervalSince1970)
     }
 
-    public func card(_ i: Int) -> Bool { value.cards & (1 << i) != 0 }
+    /// Whether the card at `i` in `cards` is on.
+    public func card(_ i: Int) -> Bool {
+        let c = Self.cards[i]
+        return (value.cards & (1 << c.bit) != 0) != c.inverted
+    }
 
     public mutating func setCard(_ i: Int, _ on: Bool, now: Date) {
-        edit(now: now) { on ? ($0.cards |= 1 << i) : ($0.cards &= ~(1 << i)) }
+        let c = Self.cards[i]
+        let set = on != c.inverted
+        edit(now: now) { set ? ($0.cards |= 1 << c.bit) : ($0.cards &= ~(1 << c.bit)) }
     }
 }

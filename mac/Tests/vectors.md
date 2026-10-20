@@ -31,6 +31,9 @@ Shared by `GarminyCoreTests` (Swift) and `tests/CompanionTests.mc` (Monkey C). E
   - `030c126f772042617368`
 - ALERTS total 1: id 2 done, openable, no buzz, label "garminy" detail "4m", msgId 14
   - `030e010101020202076761726d696e7902346d`
+- FEED channel 0 (news), batch 1760000000, item 0 of 8, stamp 1759999000, source "Sky News", text "Storm named", msgId 16
+  - `0b10020068e77800000868e7741808536b79204e`
+  - `0b10126577730b53746f726d206e616d6564`
 - SESSIONS 3 shown, 0 hidden: needs-you 0m "garminy", working 12m "api-svc", done 3m "website", msgId 13
   - `020d030300010000076761726d696e7900000c07`
   - `020d136170692d73766302000307776562736974`
@@ -50,6 +53,7 @@ Frame: `[type][msgId][part<<4 | total]` + up to 17 payload bytes. Parts are numb
 | `06` LOCATION | lat i16 ×100, lon i16 ×100 |
 | `07`/`43` SETTINGS | changedAt u32, cards u16, interval u8, city1–3 i8, units u8, backlight u8, companion u8, charger signal u8, beep sound u8, quiet hours u8, quiet start u8, quiet end u8 (the last five are optional and default to 1, 0, 1, 18, 9: an older side sends 13 or 15 bytes) |
 | `0A` TEST_SIGNAL | alert kind u8 |
+| `0B` FEED | channel u8, batch u32, index u8, count u8 (≤12), stamp u32 (0 = none), source (≤20), text (≤140). One item per message; the watch shows a set only once all `count` items of a batch have arrived |
 | `08` SNAPSHOT_END, `09` HEARTBEAT | none |
 | `41` HELLO | version u8 |
 | `42` ACK | alert id u8 |
@@ -58,5 +62,6 @@ Frame: `[type][msgId][part<<4 | total]` + up to 17 payload bytes. Parts are numb
 - **Session state:** 0 working, 1 needs you, 2 done, 3 error.
 - **Alert kind:** 0 needs you, 1 failed, 2 done.
 - **Charger signal:** 0 nothing, 1 beep, 2 light, 3 beep and light. **Beep sound:** 0 soft, 1 chime, 2 standard.
-- **Card bits:** bit 0 Agents, 1 Fortune, 2 Quote, 3 Umbrella, 4 Weather, 5 Daylight, 6 Moon, 7 World clock, 8 On this day.
+- **Card bits:** bit 0 Agents, 1 Fortune, 2 Quote, 3 Umbrella, 4 Weather, 5 Daylight, 6 Moon, 7 World clock, 8 On this day, 9 News **off** (inverted, so older senders' 0 means On).
+- **Feed channels:** 0 news. Reserved: 1 quote, 2 fortune, 3 on this day.
 - **Temperatures:** °C. **Conditions:** Garmin `Weather.CONDITION_*` values.

@@ -5,6 +5,8 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var model: AppModel
     @ObservedObject var weather: WeatherService
+    @ObservedObject var news: NewsService
+    @State private var customURL = ""
 
     var body: some View {
         Form {
@@ -19,9 +21,27 @@ struct SettingsView: View {
                 }
             }
 
+            Section("News for the watch") {
+                Picker("Feed", selection: Binding(get: { news.choice }, set: { news.choose($0) })) {
+                    ForEach(News.presets, id: \.id) { Text($0.name).tag($0.id) }
+                    Text("Custom RSS feed").tag("custom")
+                }
+                if news.choice == "custom" {
+                    HStack {
+                        TextField("https://…", text: $customURL)
+                        Button("Use") { news.setCustomURL(customURL) }
+                    }
+                    if let e = news.customError {
+                        Text(e).font(.caption).foregroundStyle(.red)
+                    }
+                }
+                Text(news.status).font(.caption).foregroundStyle(.secondary)
+            }
+            .onAppear { customURL = news.customURL }
+
             Section("Cards") {
-                ForEach(SettingsModel.cardNames.indices, id: \.self) { i in
-                    Toggle(SettingsModel.cardNames[i], isOn: Binding(get: { model.settings.card(i) },
+                ForEach(SettingsModel.cards.indices, id: \.self) { i in
+                    Toggle(SettingsModel.cards[i].name, isOn: Binding(get: { model.settings.card(i) },
                                                                     set: { model.setCard(i, $0) }))
                 }
             }

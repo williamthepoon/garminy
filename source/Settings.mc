@@ -28,12 +28,19 @@ module Settings {
         return get("cardAgents", true) == true;
     }
 
+    function newsEnabled() as Boolean {
+        return get("cardNews", true) == true;
+    }
+
     // Enabled card ids in display order. "agents" is included when its toggle and the
     // companion are on; the carousel drops it until a Mac has connected.
     function enabledIds() as Array<String> {
         var ids = [] as Array<String>;
         if (agentsEnabled() && companion()) {
             ids.add("agents");
+        }
+        if (newsEnabled() && companion()) {
+            ids.add("news");
         }
         for (var i = 0; i < CARD_IDS.size(); i++) {
             if (get(CARD_KEYS[i], true) == true) {
@@ -98,9 +105,13 @@ module Settings {
         return get("companion", true) == true;
     }
 
-    // Card toggle bits for the wire: bit 0 Agents, then CARD_KEYS in order.
+    // Card toggle bits for the wire: bit 0 Agents, then CARD_KEYS in order, then bit 9 News off
+    // (inverted, so an older sender's 0 leaves News on).
     function cardBits() as Number {
         var bits = get("cardAgents", true) == true ? 1 : 0;
+        if (!newsEnabled()) {
+            bits |= 1 << 9;
+        }
         for (var i = 0; i < CARD_KEYS.size(); i++) {
             if (get(CARD_KEYS[i], true) == true) {
                 bits |= 1 << (i + 1);
@@ -138,6 +149,7 @@ module Settings {
         }
         var bits = d[:cards] as Number;
         Application.Properties.setValue("cardAgents", (bits & 1) != 0);
+        Application.Properties.setValue("cardNews", (bits & (1 << 9)) == 0);
         for (var i = 0; i < CARD_KEYS.size(); i++) {
             Application.Properties.setValue(CARD_KEYS[i], (bits & (1 << (i + 1))) != 0);
         }
