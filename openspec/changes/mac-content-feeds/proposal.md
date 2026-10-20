@@ -12,7 +12,7 @@ The desk watch has nothing about what is happening in the world, and its text ca
   - The Mac fetches a public RSS feed about every 15 minutes over HTTPS, with no account or key, and keeps the top 8 headlines.
   - The default feed is Sky News Home (`https://feeds.skynews.com/feeds/rss/home.xml`). The other presets are Sky News World and BBC News, or the user can enter a custom HTTPS RSS URL. This choice is Mac-only.
 - **News card:**
-  - It shows one headline per showing, with a line below for the source and age ("Sky News · 25 min ago").
+  - It shows one headline per showing, with a line below for the source and age ("Sky News · 25m").
   - It moves to the next headline each time it is shown, and every interval while pinned or when it is the only card.
   - It shows "Out of date" after 12 hours without new headlines.
 - A new **News** card toggle, default On, in Garmin Connect and in the Mac's Watch settings window. The card appears only after headlines have arrived, so watches without a Mac never see it. Macs and watches that saved settings before News existed read it as On.

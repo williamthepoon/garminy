@@ -52,7 +52,7 @@ Each headline SHALL be sent as plain text: markup and entities decoded, whitespa
 - **THEN** the source shown is "Example Times"
 
 ### Requirement: News card
-The News card SHALL show one headline at a time, wrapped to fit the round screen, with one line below it giving the source and age (for example "Sky News · 25 min ago"). It SHALL follow desk-legibility: no title line and no text smaller than SMALL. Each time the card is shown, by rotation or by UP/DOWN, it SHALL show the next headline, wrapping after the last.
+The News card SHALL show one headline at a time, wrapped to fit the round screen, with one line below it giving the source and age (for example "Sky News · 25m"). It SHALL follow desk-legibility: no title line and no text smaller than SMALL. Each time the card is shown, by rotation or by UP/DOWN, it SHALL show the next headline, wrapping after the last.
 
 #### Scenario: Card comes round
 - **WHEN** the News card showed headline 3 of 8 last time and comes round again

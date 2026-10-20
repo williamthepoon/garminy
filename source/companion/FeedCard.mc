@@ -65,40 +65,57 @@ class FeedCard extends Card {
 
     // The item's text at the largest size that fits; cut at a word with "…" if even minFont is too big.
     function drawText(dc as Graphics.Dc, l as Layout, text as String, top as Number, bottom as Number) as Void {
-        var t = _cut.hasKey(text) ? _cut[text] as String : text;
-        while (!Ui.drawFitted(dc, l, t, top, bottom, Ui.FG, _minFont)) {
-            var sp = lastSpace(t.substring(0, t.length() - 1) as String);
-            if (sp <= 0) {
-                return;
-            }
-            t = (t.substring(0, sp) as String) + "…";
-            if (_cut.size() >= 4) {
+        if (!_cut.hasKey(text)) {
+            if (_cut.size() >= 8) {
                 _cut = {};
             }
-            _cut[text] = t;
+            _cut[text] = fitsAt(dc, l, text, top, bottom) ? text : cut(dc, l, text, top, bottom);
         }
+        Ui.drawFitted(dc, l, _cut[text] as String, top, bottom, Ui.FG, _minFont);
     }
 
-    function lastSpace(s as String) as Number {
-        var chars = s.toCharArray();
-        for (var i = chars.size() - 1; i > 0; i--) {
-            if (chars[i] == ' ') {
-                return i;
+    function fitsAt(dc as Graphics.Dc, l as Layout, text as String, top as Number, bottom as Number) as Boolean {
+        return Ui.wrapRound(dc, l, text, _minFont, top, bottom) != null;
+    }
+
+    // The most whole words that fit at minFont with "…", found by binary search to stay
+    // inside the watchdog's time budget.
+    function cut(dc as Graphics.Dc, l as Layout, text as String, top as Number, bottom as Number) as String {
+        var ws = Ui.words(text);
+        var lo = 1;
+        var hi = ws.size() - 1;
+        var best = ws.size() > 0 ? ws[0] + "…" : "…";
+        while (lo <= hi) {
+            var mid = (lo + hi) / 2;
+            var t = join(ws, mid) + "…";
+            if (fitsAt(dc, l, t, top, bottom)) {
+                best = t;
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
             }
         }
-        return -1;
+        return best;
+    }
+
+    function join(ws as Array<String>, n as Number) as String {
+        var s = "";
+        for (var i = 0; i < n; i++) {
+            s += (i > 0 ? " " : "") + ws[i];
+        }
+        return s;
     }
 }
 
-// Ages like "25 min ago", "3 h ago" or "2 d ago".
+// Short ages that fit the narrow bottom of the round screen: "now", "25m", "3h", "2d".
 function ageText(seconds as Number) as String {
     var m = seconds / 60;
     if (m < 1) {
-        return "just now";
+        return "now";
     } else if (m < 60) {
-        return m + " min ago";
+        return m + "m";
     } else if (m < 48 * 60) {
-        return (m / 60) + " h ago";
+        return (m / 60) + "h";
     }
-    return (m / 1440) + " d ago";
+    return (m / 1440) + "d";
 }

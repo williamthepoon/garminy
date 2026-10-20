@@ -1,4 +1,5 @@
 import Toybox.Application;
+import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.StringUtil;
 import Toybox.Test;
@@ -443,8 +444,8 @@ function testNewsCardCyclesAndMeta(logger as Test.Logger) as Boolean {
     ok &= T.check(logger, "third showing", "c".equals((card.current() as Array)[2]));
     ok &= T.check(logger, "pinned tick wraps", card.tick() && "a".equals((card.current() as Array)[2]));
     ok &= T.check(logger, "no time, source only", newsMeta("Sky News", null, 5000).equals("Sky News"));
-    ok &= T.check(logger, "age", newsMeta("Sky News", 1000, 1000 + 25 * 60).equals("Sky News · 25 min ago")
-        && ageText(3 * 3600 + 5).equals("3 h ago") && ageText(30).equals("just now"));
+    ok &= T.check(logger, "age", newsMeta("Sky News", 1000, 1000 + 25 * 60).equals("Sky News · 25m")
+        && ageText(3 * 3600 + 5).equals("3h") && ageText(30).equals("now"));
     var m = card.meta([null, "Sky News", "a"]) as Array;
     ok &= T.check(logger, "fresh meta", "Sky News".equals(m[0]) && m[1] == Ui.FG);
     var s = Feeds.get(Feeds.NEWS) as Dictionary;
@@ -452,5 +453,21 @@ function testNewsCardCyclesAndMeta(logger as Test.Logger) as Boolean {
     m = card.meta([null, "Sky News", "a"]) as Array;
     ok &= T.check(logger, "out of date", "Out of date".equals(m[0]) && m[1] == Ui.RED);
     Feeds.reset(Feeds.NEWS);
+    return ok;
+}
+
+(:test)
+function testFeedTextCutsAtWord(logger as Test.Logger) as Boolean {
+    var dc = T.dc();
+    var l = new Layout(260, 260);
+    var card = new NewsCard();
+    var long = "Government confirms sweeping changes to planning rules for new homes across England, with councils told to approve more developments faster than ever";
+    var top = l.boxY;
+    var bottom = l.boxY + l.boxH - dc.getFontHeight(Graphics.FONT_SMALL);
+    var ok = T.check(logger, "too long at SMALL", !card.fitsAt(dc, l, long, top, bottom));
+    var t = card.cut(dc, l, long, top, bottom);
+    ok &= T.check(logger, "cut fits and ends in …", card.fitsAt(dc, l, t, top, bottom) && t.find("…") == t.length() - 1
+        && long.find(t.substring(0, t.length() - 1) as String) == 0);
+    ok &= T.check(logger, "short text untouched", card.fitsAt(dc, l, "Storm named", top, bottom));
     return ok;
 }

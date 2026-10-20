@@ -24,7 +24,7 @@ class NewsCard extends FeedCard {
     }
 }
 
-// "Sky News · 25 min ago", or just the source without a publish time.
+// "Sky News · 25m", or just the source without a publish time.
 function newsMeta(source as String, published as Number?, now as Number) as String {
     if (published == null) {
         return source;

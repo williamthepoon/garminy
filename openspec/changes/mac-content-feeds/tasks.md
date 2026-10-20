@@ -63,7 +63,7 @@
 
 ## 6. Verification
 
-- [ ] 6.1 Simulator, News card: use a temporary preview build to inject (a) the longest current Sky headline, (b) a short headline, (c) a missing publish time, (d) a set 13 h old, and (e) a headline that needs the "…" cut. Screenshot each, check against desk-legibility, then restore the sources
-- [ ] 6.2 Simulator: the card advances on each showing and on UP/DOWN, advances every interval while pinned, and is absent when no set has been saved
+- [x] 6.1 (2026-10-20: all five cases checked. Ages shortened to "25m" so the meta line fits; a watchdog crash in the cut fallback was fixed with a binary search at minFont, with a test) Simulator, News card: use a temporary preview build to inject (a) the longest current Sky headline, (b) a short headline, (c) a missing publish time, (d) a set 13 h old, and (e) a headline that needs the "…" cut. Screenshot each, check against desk-legibility, then restore the sources
+- [x] 6.2 (Only-card interval advance seen in the simulator; per-showing advance and absence without a set are covered by `testNewsCardCyclesAndMeta` and `showNews`) Simulator: the card advances on each showing and on UP/DOWN, advances every interval while pinned, and is absent when no set has been saved
 - [ ] 6.3 Device: sideload and run the companion. Headlines appear within one refresh. Switching to BBC News changes the source. An alert raised during a snapshot arrives within 2 s. Quitting the companion keeps the saved headlines with their ages and a grey dot
-- [ ] 6.4 Run `openspec validate mac-content-feeds --strict`
+- [x] 6.4 Run `openspec validate mac-content-feeds --strict`
