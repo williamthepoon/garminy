@@ -24,12 +24,12 @@
 
 ## 3. Watch
 
-- [ ] 3.1 Move `FortuneCard`, `QuoteCard` and `OnThisDayCard` onto `FeedCard` (channels 2, 1 and 3, `minFont` FONT_TINY), with bundled fallback providers. Seed the Fortune and Quote fallback cursor from `days % 120` on each day's first showing. On this day keeps the year above the text, from `stamp`
-- [ ] 3.2 Make freshness rules per channel: channels 1 and 2 use the set while `receivedAt` is within 36 h; channel 3 only when the set's date (from `batch`) is today
-- [ ] 3.3 Show the meta line only for items with a source ("Wikipedia")
-- [ ] 3.4 Rename `cardFortuneTitle` to "Fortunes & facts" in `resources/settings/strings.xml`
-- [ ] 3.5 Add `(:test)` cases: the fallback advances per showing and seeds by date; channel 3 is ignored on another date; a 37 h-old set falls back; a 12-item cycle shows each item once
-- [ ] 3.6 Run `scripts/build.sh` and `scripts/test.sh` and make sure they pass
+- [x] 3.1 Move `FortuneCard`, `QuoteCard` and `OnThisDayCard` onto `FeedCard` (channels 2, 1 and 3, `minFont` FONT_TINY), with bundled fallback providers. Seed the Fortune and Quote fallback cursor from `days % 120` on each day's first showing. On this day keeps the year above the text, from `stamp`
+- [x] 3.2 Make freshness rules per channel: channels 1 and 2 use the set while `receivedAt` is within 36 h; channel 3 only when the set's date (from `batch`) is today
+- [x] 3.3 Show the meta line only for items with a source ("Wikipedia")
+- [x] 3.4 Rename `cardFortuneTitle` to "Fortunes & facts" in `resources/settings/strings.xml`
+- [x] 3.5 Add `(:test)` cases: the fallback advances per showing and seeds by date; channel 3 is ignored on another date; a 37 h-old set falls back; a 12-item cycle shows each item once
+- [x] 3.6 Run `scripts/build.sh` and `scripts/test.sh` and make sure they pass
 
 ## 4. Verification
 

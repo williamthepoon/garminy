@@ -1,5 +1,6 @@
 import Toybox.Graphics;
 import Toybox.Lang;
+import Toybox.Time;
 import Toybox.WatchUi;
 
 // Bundled daily text, loaded one small chunk at a time to stay within
@@ -48,80 +49,166 @@ module Daily {
     }
 }
 
-// Shared base: refresh when the local date changes, then draw wrapped text.
-class TextCard extends Card {
-    var _day as Number = -1;
-    var _text as String = "";
-    var _year as String? = null;
+const DAILY_FRESH = 36 * 3600;
 
-    function initialize() {
-        Card.initialize();
+// A text card fed by the Mac's daily set for its channel, falling back to the bundled
+// content when there is none from the last 36 hours. Either way it moves to the next
+// item each time it is shown (fresh-daily-cards).
+class DailyCard extends FeedCard {
+    var _seedDay as Number = -1;
+    var _cacheIdx as Number = -1;
+    var _cacheText as String = "";
+
+    function initialize(channel as Number) {
+        FeedCard.initialize(channel, Graphics.FONT_TINY);
     }
 
-    function refresh() as Void {
+    // The Mac's set when it is fresh enough, else null.
+    function macSet() as Dictionary? {
+        var s = Feeds.get(_channel);
+        if (s == null || Time.now().value() - (s["receivedAt"] as Number) > DAILY_FRESH) {
+            return null;
+        }
+        return s;
+    }
+
+    function count() as Number {
+        var s = macSet();
+        return s != null ? (s["items"] as Array).size() : fallbackCount();
+    }
+
+    function itemAt(i as Number) as Array {
+        var s = macSet();
+        if (s != null) {
+            return (s["items"] as Array)[i] as Array;
+        }
+        if (i != _cacheIdx) {
+            _cacheIdx = i;
+            _cacheText = fallbackText(i);
+        }
+        return [null, "", _cacheText];
+    }
+
+    // With bundled content, the first showing of each day starts at that day's entry.
+    function seed() as Boolean {
+        if (macSet() != null) {
+            return false;
+        }
         var today = Dates.localTodayDays();
-        if (today != _day) {
-            _day = today;
-            load(today);
+        if (today == _seedDay) {
+            return false;
+        }
+        _seedDay = today;
+        Feeds.setCursor(_channel, Daily.indexFor(today, fallbackCount()));
+        return true;
+    }
+
+    function shown() as Void {
+        if (!seed()) {
+            FeedCard.shown();
         }
     }
 
-    function load(days as Number) as Void {
+    function current() as Array? {
+        seed();
+        return FeedCard.current();
     }
 
-    function draw(dc as Graphics.Dc, l as Layout) as Void {
-        var top = l.boxY;
-        if (_year != null) {
-            dc.setColor(Ui.ACCENT, Graphics.COLOR_TRANSPARENT);
-            dc.drawText(l.cx, l.boxY + l.h / 10, Graphics.FONT_NUMBER_MILD, _year as String,
-                Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
-            top = l.boxY + l.h / 5;
-        }
-        Ui.drawFitted(dc, l, _text, top, l.boxY + l.boxH, Ui.FG, Graphics.FONT_TINY);
+    function meta(item as Array) as Array? {
+        var src = item[1] as String;
+        return src.length() > 0 ? [src, Ui.FG] : null;
+    }
+
+    function fallbackCount() as Number {
+        return 1;
+    }
+
+    function fallbackText(i as Number) as String {
+        return "";
     }
 }
 
-class FortuneCard extends TextCard {
+class FortuneCard extends DailyCard {
     function initialize() {
-        TextCard.initialize();
+        DailyCard.initialize(Feeds.FORTUNE);
     }
 
     function id() as String {
         return "fortune";
     }
 
-    function load(days as Number) as Void {
-        _text = Daily.fortune(days);
+    function fallbackCount() as Number {
+        return Daily.FORTUNE_COUNT;
+    }
+
+    function fallbackText(i as Number) as String {
+        return Daily.entry(Daily.fortuneChunks(), i) as String;
     }
 }
 
-class QuoteCard extends TextCard {
+class QuoteCard extends DailyCard {
     function initialize() {
-        TextCard.initialize();
+        DailyCard.initialize(Feeds.QUOTE);
     }
 
     function id() as String {
         return "quote";
     }
 
-    function load(days as Number) as Void {
-        _text = Daily.quote(days);
+    function fallbackCount() as Number {
+        return Daily.QUOTE_COUNT;
+    }
+
+    function fallbackText(i as Number) as String {
+        return Daily.entry(Daily.quoteChunks(), i) as String;
     }
 }
 
-class OnThisDayCard extends TextCard {
+// Wikipedia's events for today from the Mac, or the bundled fact for the date, with the year above.
+class OnThisDayCard extends DailyCard {
     function initialize() {
-        TextCard.initialize();
+        DailyCard.initialize(Feeds.ON_THIS_DAY);
     }
 
     function id() as String {
         return "onthisday";
     }
 
-    function load(days as Number) as Void {
+    // Only a set built for today's date counts.
+    function macSet() as Dictionary? {
+        var s = DailyCard.macSet();
+        if (s == null || !s.hasKey("batchAt") || Dates.localDays(s["batchAt"] as Number) != Dates.localTodayDays()) {
+            return null;
+        }
+        return s;
+    }
+
+    function itemAt(i as Number) as Array {
+        if (macSet() != null) {
+            return DailyCard.itemAt(i);
+        }
         var t = Dates.localToday();
         var e = Daily.onThisDay(t[1], t[2]);
-        _text = e[1] as String;
-        _year = (e[0] as Number).toString();
+        return [e[0], "", e[1]];
     }
+
+    function seed() as Boolean {
+        return false;
+    }
+
+    function header(dc as Graphics.Dc, l as Layout, item as Array) as Number {
+        var y = item[0];
+        if (!(y instanceof Number)) {
+            return l.boxY;
+        }
+        dc.setColor(Ui.ACCENT, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(l.cx, l.boxY + l.h / 10, Graphics.FONT_NUMBER_MILD, yearText(y),
+            Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        return l.boxY + l.h / 5;
+    }
+}
+
+// "1969", or "-44" for 44 BC: NUMBER fonts have no letters, but they do have the minus sign.
+function yearText(y as Number) as String {
+    return y.toString();
 }
