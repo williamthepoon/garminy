@@ -40,7 +40,7 @@ Toolchain (installed 2026-10-17): Homebrew `openjdk@21` and Connect IQ SDK 9.2.0
 - Build: `scripts/build.sh`. This regenerates `resources/jsonData/` from `content/*.json`, so edit content in `content/`, never in the generated files.
 - Unit tests: `scripts/test.sh`. It launches the simulator if needed. Tests are `(:test)` functions in `tests/`; put helpers inside the `(:test) module T`, because top-level `(:test)` functions run as tests.
 
-- Sideload: `scripts/sideload.sh` (macOS, needs `brew install libmtp`). It replaces `GARMIN/Apps/GARMINY.PRG` through the Swift libmtp helper in `scripts/mtp/`. macOS's `ptpcamerad` grabs the watch, so the script keeps killing it during the transfer, and the stock `mtp-sendfile` fails on this watch ("could not get storage id"). The watch installs on unplug and keeps its settings.
+- Sideload: `scripts/sideload.sh` (macOS, needs `brew install libmtp`). It replaces `GARMIN/Apps/GARMINY.PRG` through the Swift libmtp helper in `scripts/mtp/`. macOS's `ptpcamerad` grabs the watch, so the script keeps killing it during the transfer, and the stock `mtp-sendfile` fails on this watch ("could not get storage id"). The watch installs on unplug and keeps its settings. If the watch then never reconnects (no `watch subscribed` in the companion log) and restarting the companion or the watch doesn't help, turn the Mac's Bluetooth off and on (seen 2026-10-20).
 - Never commit or lose `~/.garmin/developer_key.der`. Store updates must be signed with the same key.
 
 Mac companion (`mac/`, SwiftPM, Swift 6, macOS 14+):
