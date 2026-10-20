@@ -19,7 +19,6 @@ public struct SessionTracker: Sendable {
     }
 
     public static let expiry: TimeInterval = 12 * 3600
-    public static let minWorkForDone: TimeInterval = 30
     static let questionTools: Set<String> = ["AskUserQuestion", "ExitPlanMode"]
     static let inputNotifications: Set<String> = ["elicitation_dialog", "agent_needs_input", "permission_prompt"]
 
@@ -79,10 +78,12 @@ public struct SessionTracker: Sendable {
                 effects.append(.raise(kind: .needsYou, label: s.label, detail: detail, source: src, term: s.term))
             case .working where from == .needsYou:
                 effects.append(.resolve(source: src, kinds: [.needsYou]))
-            case .done where from == .working && worked >= Self.minWorkForDone:
+            // Every turn ends with a done alert, however short (always-buzz).
+            case .done where from == .working:
                 effects.append(.raise(kind: .done, label: s.label, detail: "Done · \(Format.duration(Int(worked)))", source: src, term: s.term))
             case .done where from == .needsYou:
                 effects.append(.resolve(source: src, kinds: [.needsYou]))
+                effects.append(.raise(kind: .done, label: s.label, detail: "Done", source: src, term: s.term))
             case .error:
                 effects.append(.resolve(source: src, kinds: [.needsYou]))
                 effects.append(.raise(kind: .failed, label: s.label, detail: "Error", source: src, term: s.term))

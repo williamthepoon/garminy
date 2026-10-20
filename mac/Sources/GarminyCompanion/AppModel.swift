@@ -12,6 +12,9 @@ final class AppModel: ObservableObject {
     @Published var keepAwakeEnabled: Bool {
         didSet { UserDefaults.standard.set(keepAwakeEnabled, forKey: "keepAwake"); updateKeepAwake() }
     }
+    @Published var buzzMode: BuzzMode {
+        didSet { UserDefaults.standard.set(buzzMode.rawValue, forKey: "buzzMode") }
+    }
     @Published private(set) var launchAtLogin = SMAppService.mainApp.status == .enabled
 
     let ble = BLEPeripheral()
@@ -27,11 +30,16 @@ final class AppModel: ObservableObject {
     private var tick: Timer?
     private var focusTick: Timer?
     private var lastSessionsWire: [WireSession] = []
+    /// Host whose selected tab is being read; its alerts' delayed buzzes wait (always-buzz).
+    private var tabCheckHost: String?
+    /// Delayed buzzes that came due while the watch was disconnected, sent after the next snapshot.
+    private var buzzOnReconnect: Set<UInt8> = []
     /// Opens the Watch settings window (set by the app delegate).
     var showSettings: (() -> Void)?
 
     init() {
         keepAwakeEnabled = UserDefaults.standard.object(forKey: "keepAwake") as? Bool ?? true
+        buzzMode = BuzzMode(rawValue: UserDefaults.standard.integer(forKey: "buzzMode")) ?? .always
     }
 
     func start() {
@@ -55,7 +63,10 @@ final class AppModel: ObservableObject {
         weather.start()
         presence.onSleep = { Log.info("mac will sleep") }
         tick = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in self?.periodic() }
-        focusTick = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in self?.clearFocused() }
+        focusTick = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+            self?.sendDueBuzzes()
+            self?.clearFocused()
+        }
     }
 
     // MARK: Watch messages
@@ -138,6 +149,11 @@ final class AppModel: ObservableObject {
         publish(force: true)
         sendWeather()
         ble.send(.settings(settings.value))
+        for id in buzzOnReconnect where queue.alerts.contains(where: { $0.id == id }) {
+            ble.send(.buzz(id: id))
+            Log.info("buzz \(id) (late, after reconnect)")
+        }
+        buzzOnReconnect = []
         ble.send(.snapshotEnd)
     }
 
@@ -157,10 +173,18 @@ final class AppModel: ObservableObject {
                 var a = queue.add(kind: kind, label: label, detail: detail, source: source, term: term, now: now)
                 a.openable = tracker.location(source: source)?.app != nil
                 queue.update(a)
-                if PresencePolicy.buzzOnRaise(term: term, presence: p) {
+                let decision = PresencePolicy.buzzOnRaise(term: term, presence: p, mode: buzzMode)
+                switch decision {
+                case .now:
                     a.buzzOnShow = true; a.buzzes = 1; a.lastBuzz = now
-                    queue.update(a)
+                    Log.info("buzz \(a.id) (\(buzzMode.title): now)")
+                case let .after(d):
+                    a.buzzAt = now.addingTimeInterval(d)
+                    Log.info("buzz \(a.id) (\(buzzMode.title): in \(Int(d)) s)")
+                case .never:
+                    Log.info("buzz \(a.id) (\(buzzMode.title): silent)")
                 }
+                queue.update(a)
             case let .resolve(source, kinds):
                 queue.resolve(source: source, kinds: kinds)
             }
@@ -187,6 +211,28 @@ final class AppModel: ObservableObject {
         updateKeepAwake()
     }
 
+    /// Sends Smart buzzes whose 20 s have passed (always-buzz). Runs before the focus-clear and
+    /// ignores its activity guard, so an idle user still gets the buzz.
+    func sendDueBuzzes() {
+        let now = Date()
+        var sent = false
+        for var a in queue.alerts {
+            let checking = tabCheckHost != nil && tracker.location(source: a.source)?.app == tabCheckHost
+            guard PresencePolicy.delayedDue(a, now: now, checking: checking) else { continue }
+            a.buzzes = 1; a.lastBuzz = now
+            queue.update(a)
+            if ble.connected {
+                ble.send(.buzz(id: a.id))
+                Log.info("buzz \(a.id) (Smart: late)")
+            } else {
+                buzzOnReconnect.insert(a.id)
+                Log.info("buzz \(a.id) (Smart: late, watch offline)")
+            }
+            sent = true
+        }
+        if sent { publish() }
+    }
+
     /// Withdraws alerts of the session the user is working in (open-agent-session).
     func clearFocused() {
         let loc = { [tracker] (s: String) in tracker.location(source: s) }
@@ -201,7 +247,11 @@ final class AppModel: ObservableObject {
             self.publish()
         }
         if FocusPolicy.tabHosts.contains(host) {
-            opener.selectedTab(in: host) { resolve($0) }
+            tabCheckHost = host
+            opener.selectedTab(in: host) { [weak self] in
+                self?.tabCheckHost = nil
+                resolve($0)
+            }
         } else {
             resolve(nil)
         }
@@ -223,6 +273,13 @@ final class AppModel: ObservableObject {
         }
         let a = queue.wire()
         ble.send(.alerts(a.alerts, total: a.total))
+        // A buzz flag goes out once. The watch forgets ids that leave its list, so a resent flag would buzz again.
+        if ble.connected {
+            for var q in queue.alerts where q.buzzOnShow && a.alerts.contains(where: { $0.id == q.id }) {
+                q.buzzOnShow = false
+                queue.update(q)
+            }
+        }
     }
 
     // MARK: Menu actions
