@@ -143,6 +143,18 @@ function testCompanionSnapshotReplacesQueue(logger as Test.Logger) as Boolean {
 }
 
 (:test)
+function testReusedAlertIdBuzzesAgain(logger as Test.Logger) as Boolean {
+    var c = new Companion();
+    var ok = T.check(logger, "new alert buzzes", c.toBuzz([[2, Proto.K_DONE, true, "a", ""]]).size() == 1);
+    ok &= T.check(logger, "same alert again is silent", c.toBuzz([[2, Proto.K_DONE, true, "a", ""]]).size() == 0);
+    c.toBuzz([]);
+    // The Mac restarted and handed id 2 to a new alert.
+    ok &= T.check(logger, "returning id buzzes", c.toBuzz([[2, Proto.K_DONE, true, "b", ""]]).size() == 1);
+    ok &= T.check(logger, "no flag, no buzz", c.toBuzz([[3, Proto.K_DONE, false, "c", ""]]).size() == 0);
+    return ok;
+}
+
+(:test)
 function testCompanionOfflineAck(logger as Test.Logger) as Boolean {
     var c = new Companion();
     c.handle({ :type => Proto.ALERTS, :total => 2, :list => [[7, Proto.K_FAILED, false, "pytest", ""], [8, Proto.K_DONE, false, "cargo", ""]] });

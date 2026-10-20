@@ -145,6 +145,9 @@ struct MenuView: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
+            Picker("Buzz on Claude alerts", selection: $model.buzzMode) {
+                ForEach(BuzzMode.allCases, id: \.self) { Text($0.title).tag($0) }
+            }
             Toggle("Keep Mac awake while work runs", isOn: $model.keepAwakeEnabled)
             Toggle("Launch at login", isOn: Binding(get: { model.launchAtLogin }, set: { model.setLaunchAtLogin($0) }))
             HStack {

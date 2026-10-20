@@ -21,7 +21,7 @@ class Companion {
     var onSettings as Method? = null;  // called with a decoded SETTINGS dictionary
 
     var _link as Link? = null;
-    var _seen as Dictionary = {};      // alert ids already buzzed this run
+    var _seen as Dictionary = {};      // ids in the last ALERTS list, already buzzed
 
     function initialize() {
         everConnected = Application.Storage.getValue("everConnected") == true;
@@ -90,13 +90,26 @@ class Companion {
         }
         alerts = shown;
         alertTotal = total - (list.size() - shown.size());
-        for (var i = 0; i < alerts.size(); i++) {
-            var a = alerts[i] as Array;
-            if (a[2] == true && !_seen.hasKey(a[0])) {
-                Buzz.play(a[1] as Number);
-            }
-            _seen[a[0]] = true;
+        var kinds = toBuzz(list);
+        for (var i = 0; i < kinds.size(); i++) {
+            Buzz.play(kinds[i]);
         }
+    }
+
+    // Kinds to buzz for in this ALERTS list. Only ids still listed are remembered, because the Mac
+    // reuses ids after a restart and after 255 alerts: a returning id is a new alert.
+    function toBuzz(list as Array) as Array<Number> {
+        var out = [] as Array<Number>;
+        var seen = {};
+        for (var i = 0; i < list.size(); i++) {
+            var a = list[i] as Array;
+            if (a[2] == true && !_seen.hasKey(a[0]) && pendingAcks.indexOf(a[0]) < 0) {
+                out.add(a[1] as Number);
+            }
+            seen[a[0]] = true;
+        }
+        _seen = seen;
+        return out;
     }
 
     // The alert to show, or null.

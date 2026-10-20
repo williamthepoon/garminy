@@ -14,6 +14,8 @@ public struct Alert: Equatable, Sendable {
     public var lastBuzz: Date?
     /// Buzz when the watch first shows it.
     public var buzzOnShow: Bool = false
+    /// Smart mode: buzz at this time if it hasn't buzzed yet (always-buzz).
+    public var buzzAt: Date?
     /// Raised by a Claude session whose host app is known (open-agent-session).
     public var openable: Bool = false
 }
@@ -88,6 +90,25 @@ public struct Presence: Equatable, Sendable {
     public var away: Bool { locked || idleSeconds >= PresencePolicy.awayAfter }
 }
 
+/// The Buzz on Claude alerts setting (always-buzz).
+public enum BuzzMode: Int, CaseIterable, Sendable {
+    case always = 0, smart = 1, notAtTerminal = 2
+
+    public var title: String {
+        switch self {
+        case .always: return "Always"
+        case .smart: return "Smart"
+        case .notAtTerminal: return "Not at terminal"
+        }
+    }
+}
+
+public enum BuzzDecision: Equatable, Sendable {
+    case now
+    case after(TimeInterval)
+    case never
+}
+
 public enum PresencePolicy {
     public static let awayAfter: Double = 120
     public static let repeatEvery: TimeInterval = 300
@@ -109,9 +130,24 @@ public enum PresencePolicy {
         return ids.contains(front)
     }
 
-    /// Away: buzz. Active with the source's terminal frontmost: silent. Active elsewhere: buzz once.
-    public static func buzzOnRaise(term: String?, presence: Presence) -> Bool {
-        presence.away || !terminalIsFrontmost(term: term, presence: presence)
+    public static let smartDelay: TimeInterval = 20
+
+    /// Not at the terminal: every mode buzzes now. Active with the source's terminal frontmost:
+    /// Always buzzes now, Smart waits 20 s, Not at terminal stays silent.
+    public static func buzzOnRaise(term: String?, presence: Presence, mode: BuzzMode) -> BuzzDecision {
+        guard !presence.away && terminalIsFrontmost(term: term, presence: presence) else { return .now }
+        switch mode {
+        case .always: return .now
+        case .smart: return .after(smartDelay)
+        case .notAtTerminal: return .never
+        }
+    }
+
+    /// A Smart alert that hasn't buzzed yet buzzes once its time comes, whatever the user is doing,
+    /// unless a tab check for its session is still in flight.
+    public static func delayedDue(_ a: Alert, now: Date, checking: Bool = false) -> Bool {
+        guard let at = a.buzzAt, a.buzzes == 0, !checking else { return false }
+        return at <= now
     }
 
     /// A needs-you alert re-buzzes every 5 minutes while the user is away, at most 3 more times.

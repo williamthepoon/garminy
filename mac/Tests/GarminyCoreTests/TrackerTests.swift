@@ -18,12 +18,27 @@ func claude(_ event: String, _ session: String = "s1", cwd: String = "/Users/x/g
     #expect(fx == [.raise(kind: .done, label: "garminy", detail: "Done · 4m", source: "claude:s1", term: "iTerm.app")])
 }
 
-@Test func quickTurnNoAlert() {
+@Test func quickTurnAlerts() {
     var t = SessionTracker()
     _ = t.apply(claude("UserPromptSubmit"), now: at(0))
     let fx = t.apply(claude("Stop"), now: at(10))
     #expect(t.sessions["s1"]?.state == .done)
-    #expect(fx.isEmpty)
+    guard case let .raise(kind, _, detail, _, _)? = fx.first else { Issue.record("no alert"); return }
+    #expect(kind == .done)
+    #expect(detail.hasPrefix("Done"))
+}
+
+@Test func turnEndingAfterQuestionAlertsDone() {
+    var t = SessionTracker()
+    _ = t.apply(claude("UserPromptSubmit"), now: at(0))
+    _ = t.apply(claude("PermissionRequest", tool: "Bash"), now: at(5))
+    let fx = t.apply(claude("Stop"), now: at(20))
+    #expect(fx.count == 2)
+    guard case .resolve(_, let kinds)? = fx.first, case let .raise(kind, _, _, _, _)? = fx.last else {
+        Issue.record("expected resolve then raise"); return
+    }
+    #expect(kinds == [.needsYou])
+    #expect(kind == .done)
 }
 
 @Test func permissionAndQuestionsNeedYou() {
@@ -130,16 +145,67 @@ func claude(_ event: String, _ session: String = "s1", cwd: String = "/Users/x/g
     #expect(w.alerts.count == 5 && w.total == 7)
 }
 
-@Test func buzzByPresence() {
+@Test func buzzByModeAndPresence() {
     let typingInITerm = Presence(idleSeconds: 3, locked: false, frontmostBundle: "com.googlecode.iterm2")
     let inBrowser = Presence(idleSeconds: 3, locked: false, frontmostBundle: "com.apple.Safari")
     let locked = Presence(idleSeconds: 0, locked: true, frontmostBundle: "com.googlecode.iterm2")
     let idle = Presence(idleSeconds: 150, locked: false, frontmostBundle: "com.googlecode.iterm2")
-    #expect(!PresencePolicy.buzzOnRaise(term: "iTerm.app", presence: typingInITerm))
-    #expect(PresencePolicy.buzzOnRaise(term: "iTerm.app", presence: inBrowser))
-    #expect(PresencePolicy.buzzOnRaise(term: "iTerm.app", presence: locked))
-    #expect(PresencePolicy.buzzOnRaise(term: "iTerm.app", presence: idle))
-    #expect(PresencePolicy.buzzOnRaise(term: nil, presence: typingInITerm))
+    let typingInGhostty = Presence(idleSeconds: 1, locked: false, frontmostBundle: "com.mitchellh.ghostty")
+    // [term, presence, always, smart, notAtTerminal]
+    let rows: [(String?, Presence, BuzzDecision, BuzzDecision, BuzzDecision)] = [
+        ("iTerm.app", typingInITerm, .now, .after(20), .never),
+        ("iTerm.app", inBrowser, .now, .now, .now),
+        ("iTerm.app", locked, .now, .now, .now),
+        ("iTerm.app", idle, .now, .now, .now),
+        (nil, typingInITerm, .now, .now, .now),
+        ("ghostty", typingInGhostty, .now, .after(20), .never),
+    ]
+    for (term, p, always, smart, notAt) in rows {
+        #expect(PresencePolicy.buzzOnRaise(term: term, presence: p, mode: .always) == always)
+        #expect(PresencePolicy.buzzOnRaise(term: term, presence: p, mode: .smart) == smart)
+        #expect(PresencePolicy.buzzOnRaise(term: term, presence: p, mode: .notAtTerminal) == notAt)
+    }
+}
+
+@Test func smartBuzzComesDueAfter20s() {
+    var q = AlertQueue()
+    var a = q.add(kind: .done, label: "g", detail: "", source: "s", term: "iTerm.app", now: at(0))
+    a.buzzAt = at(20)
+    #expect(!PresencePolicy.delayedDue(a, now: at(19)))
+    #expect(PresencePolicy.delayedDue(a, now: at(20)))
+    // Skipped while a tab check for its session is in flight.
+    #expect(!PresencePolicy.delayedDue(a, now: at(20), checking: true))
+    // Fires with the user idle, where the focus-clear's 3 s guard would skip.
+    let idle = Presence(idleSeconds: 30, locked: false, frontmostBundle: "com.googlecode.iterm2")
+    #expect(FocusPolicy.hostToCheck(alerts: [a], location: { _ in SessionLocation(app: "com.googlecode.iterm2", itermSession: nil, tty: nil) },
+                                    presence: idle) == nil)
+    #expect(PresencePolicy.delayedDue(a, now: at(22)))
+    // Once only.
+    a.buzzes = 1
+    #expect(!PresencePolicy.delayedDue(a, now: at(30)))
+    // No delayed buzz without buzzAt.
+    var b = a; b.buzzAt = nil; b.buzzes = 0
+    #expect(!PresencePolicy.delayedDue(b, now: at(100)))
+}
+
+@Test func lateSmartBuzzCanRepeat() {
+    let away = Presence(idleSeconds: 0, locked: true, frontmostBundle: nil)
+    var q = AlertQueue()
+    var a = q.add(kind: .needsYou, label: "g", detail: "", source: "s", term: "iTerm.app", now: at(0))
+    a.buzzAt = at(20)
+    #expect(PresencePolicy.delayedDue(a, now: at(20)))
+    a.buzzes = 1; a.lastBuzz = at(20)
+    #expect(!PresencePolicy.repeatDue(a, presence: away, now: at(319)))
+    #expect(PresencePolicy.repeatDue(a, presence: away, now: at(320)))
+}
+
+@Test func silentAlertNeverRepeats() {
+    let away = Presence(idleSeconds: 0, locked: true, frontmostBundle: nil)
+    var q = AlertQueue()
+    let a = q.add(kind: .needsYou, label: "g", detail: "", source: "s", term: "iTerm.app", now: at(0))
+    // Raised silently in Not at terminal mode: buzzes stays 0 and no buzzAt.
+    #expect(!PresencePolicy.delayedDue(a, now: at(1000)))
+    #expect(!PresencePolicy.repeatDue(a, presence: away, now: at(1000)))
 }
 
 @Test func needsYouRepeatsWhileAway() {
